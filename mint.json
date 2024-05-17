@@ -1,31 +1,34 @@
 {
   "$schema": "https://mintlify.com/schema.json",
-  "name": "Starter Kit",
+  "name": "Stratumn",
   "logo": {
     "dark": "/logo/dark.svg",
     "light": "/logo/light.svg"
   },
   "favicon": "/favicon.svg",
   "colors": {
-    "primary": "#0D9373",
-    "light": "#07C983",
-    "dark": "#0D9373",
+    "primary": "#4B35D2",
+    "light": "#c4ccff",
+    "dark": "#3a2aa9",
     "anchors": {
-      "from": "#0D9373",
-      "to": "#07C983"
+      "from": "#635cf8",
+      "to": "#533eed"
     }
   },
   "topbarLinks": [
     {
       "name": "Support",
-      "url": "mailto:hi@mintlify.com"
+      "url": "mailto:info@stratumn.com"
     }
   ],
-  "topbarCtaButton": {
-    "name": "Dashboard",
-    "url": "https://dashboard.mintlify.com"
+  "primaryTab": {
+    "name": "Trace & Account"
   },
   "tabs": [
+    {
+      "name": "Studio",
+      "url": "studio"
+    },
     {
       "name": "API Reference",
       "url": "api-reference"
@@ -38,24 +41,20 @@
       "url": "https://mintlify.com/docs"
     },
     {
-      "name": "Community",
-      "icon": "slack",
+      "name": "Get started",
+      "icon": "rocket",
       "url": "https://mintlify.com/community"
     },
     {
-      "name": "Blog",
-      "icon": "newspaper",
+      "name": "Studio user guide",
+      "icon": "palette",
       "url": "https://mintlify.com/blog"
     }
   ],
   "navigation": [
     {
       "group": "Get Started",
-      "pages": [
-        "introduction",
-        "quickstart",
-        "development"
-      ]
+      "pages": ["introduction", "quickstart", "development"]
     },
     {
       "group": "Essentials",
@@ -69,10 +68,12 @@
       ]
     },
     {
+      "group": "Studio",
+      "pages": ["studio/introduction"]
+    },
+    {
       "group": "API Documentation",
-      "pages": [
-        "api-reference/introduction"
-      ]
+      "pages": ["api-reference/introduction"]
     },
     {
       "group": "Endpoint Examples",
@@ -84,8 +85,6 @@
     }
   ],
   "footerSocials": {
-    "x": "https://x.com/mintlify",
-    "github": "https://github.com/mintlify",
-    "linkedin": "https://www.linkedin.com/company/mintsearch"
+    "github": "https://github.com/stratumn"
   }
 }
