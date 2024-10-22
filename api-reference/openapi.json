@@ -1,72 +1,53 @@
 {
-  "openapi": "3.0.1",
+  "openapi": "3.0.3",
   "info": {
-    "title": "OpenAPI Plant Store",
-    "description": "A sample API that uses a plant store as an example to demonstrate features in the OpenAPI specification",
-    "license": {
-      "name": "MIT"
+    "title": "Stratumn API",
+    "description": "This is the API reference for Stratumn API",
+    "contact": {
+      "email": "admin@stratumn.com"
     },
-    "version": "1.0.0"
+    "version": "2.0.0"
   },
   "servers": [
     {
-      "url": "http://sandbox.mintlify.com"
+      "url": "https://api.stratumn.com/v2"
     }
   ],
-  "security": [
+  "tags": [
     {
-      "bearerAuth": []
+      "name": "Authentification",
+      "description": "Authentificate with Stratumn to interact with the APIs"
+    },
+    {
+      "name": "Trace",
+      "description": "Create traces, get their state and update them"
     }
   ],
   "paths": {
-    "/plants": {
-      "get": {
-        "description": "Returns all plants from the system that the user has access to",
-        "parameters": [
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The maximum number of results to return",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Plant response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Plant"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      },
+    "/login/credentials": {
       "post": {
-        "description": "Creates a new plant in the store",
+        "tags": [
+          "Authentification"
+        ],
+        "summary": "Get a Stratumn token from email & password",
+        "description": "Get a Stratumn token from email & password",
+        "operationId": "login_credential",
         "requestBody": {
-          "description": "Plant to add to the store",
+          "description": "The email and password of the account you want to login with",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewPlant"
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "user@test.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "secured_password123"
+                  }
+                }
               }
             }
           },
@@ -74,21 +55,17 @@
         },
         "responses": {
           "200": {
-            "description": "plant response",
+            "description": "Successful operation",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Plant"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "example": "your token here"
+                    }
+                  }
                 }
               }
             }
@@ -96,99 +73,60 @@
         }
       }
     },
-    "/plants/{id}": {
-      "delete": {
-        "description": "Deletes a single plant based on the ID supplied",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID of plant to delete",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
+    "/traces": {
+      "post": {
+        "tags": [
+          "Trace"
+        ],
+        "summary": "Create a new trace",
+        "description": "Create a new instance of your process, called a trace",
+        "operationId": "createTrace",
+        "requestBody": {
+          "description": "The body required to create a trace on an workflow. 4 keys are reserved for the creation of the trace (`traceInput`, `workflowId`, `groupLabel` and `actionKey`), all the other keys can be used to upload file to the trace.",
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "traceInput": {
+                    "type": "string",
+                    "example": {
+                      "name": "Paul"
+                    }
+                  },
+                  "workflowId": {
+                    "type": "string",
+                    "example": "99"
+                  },
+                  "groupLabel": {
+                    "type": "string"
+                  },
+                  "actionKey": {
+                    "type": "string"
+                  }
+                }
+              }
             }
           }
-        ],
+        },
         "responses": {
-          "204": {
-            "description": "Plant deleted",
-            "content": {}
-          },
-          "400": {
-            "description": "unexpected error",
+          "200": {
+            "description": "successful operation",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "type": "object",
+                  "properties": {
+                    "traceId": {
+                      "type": "string",
+                      "example": "the uuid of the created trace"
+                    }
+                  }
                 }
               }
             }
           }
         }
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "Plant": {
-        "required": [
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "description": "The name of the plant",
-            "type": "string"
-          },
-          "tag": {
-            "description": "Tag to specify the type",
-            "type": "string"
-          }
-        }
-      },
-      "NewPlant": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Plant"
-          },
-          {
-            "required": [
-              "id"
-            ],
-            "type": "object",
-            "properties": {
-              "id": {
-                "description": "Identification number of the plant",
-                "type": "integer",
-                "format": "int64"
-              }
-            }
-          }
-        ]
-      },
-      "Error": {
-        "required": [
-          "error",
-          "message"
-        ],
-        "type": "object",
-        "properties": {
-          "error": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "message": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer"
       }
     }
   }
