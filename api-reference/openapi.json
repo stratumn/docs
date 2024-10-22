@@ -26,9 +26,7 @@
   "paths": {
     "/login/credentials": {
       "post": {
-        "tags": [
-          "Authentification"
-        ],
+        "tags": ["Authentification"],
         "summary": "Get a Stratumn token from email & password",
         "description": "Get a Stratumn token from email & password",
         "operationId": "login_credential",
@@ -63,7 +61,7 @@
                   "properties": {
                     "token": {
                       "type": "string",
-                      "example": "your token here"
+                      "example": "the bearer token here"
                     }
                   }
                 }
@@ -75,9 +73,7 @@
     },
     "/traces": {
       "post": {
-        "tags": [
-          "Trace"
-        ],
+        "tags": ["Trace"],
         "summary": "Create a new trace",
         "description": "Create a new instance of your process, called a trace",
         "operationId": "createTrace",
@@ -90,9 +86,7 @@
                 "properties": {
                   "traceInput": {
                     "type": "string",
-                    "example": {
-                      "name": "Paul"
-                    }
+                    "example": "{'name':'paul'}"
                   },
                   "workflowId": {
                     "type": "string",

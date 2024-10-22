@@ -3,3 +3,19 @@ title: 'Create trace'
 openapi: 'POST /traces'
 ---
 
+## What body for the trace input
+
+The body required in the `traceInput` is dependant on the action you want to perform.
+
+Each body is different for each action. Stratumn will guide you regarding the body.
+
+## How to upload files
+
+To upload a file, add a new body parameter with the file as value. 
+The parameter must be added to the body as a key-value pair where the key file and the value is the parameter. 
+
+In the example, the file is uploaded in the userFile parameter. 
+This parameter is then used in the `traceInput` object to reference 
+the file file: `[{file: 'userFile'}]`. 
+
+If several files need to be uploaded, they can be added to the body as new parameters. The data object must then be updated to reference the files : file: `[{file: 'userFile'}, {file: 'userFile2'}]`

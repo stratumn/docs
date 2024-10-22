@@ -29,13 +29,13 @@
     {
       "name": "Get started",
       "icon": "rocket",
-      "url": "#"
+      "url": "api-reference/introduction"
     }
   ],
   "navigation": [
     {
       "group": "API Documentation",
-      "pages": ["api-reference/introduction"]
+      "pages": ["api-reference/introduction", "api-reference/create-a-trace"]
     },
     {
       "group": "Authentificate",
