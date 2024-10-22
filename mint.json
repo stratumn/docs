@@ -22,66 +22,28 @@
     }
   ],
   "primaryTab": {
-    "name": "Trace & Account"
+    "name": "API Reference"
   },
-  "tabs": [
-    {
-      "name": "Studio",
-      "url": "studio"
-    },
-    {
-      "name": "API Reference",
-      "url": "api-reference"
-    }
-  ],
+  "tabs": [],
   "anchors": [
-    {
-      "name": "Documentation",
-      "icon": "book-open-cover",
-      "url": "https://mintlify.com/docs"
-    },
     {
       "name": "Get started",
       "icon": "rocket",
-      "url": "https://mintlify.com/community"
-    },
-    {
-      "name": "Studio user guide",
-      "icon": "palette",
-      "url": "https://mintlify.com/blog"
+      "url": "#"
     }
   ],
   "navigation": [
-    {
-      "group": "Get Started",
-      "pages": ["introduction", "quickstart", "development"]
-    },
-    {
-      "group": "Essentials",
-      "pages": [
-        "essentials/markdown",
-        "essentials/code",
-        "essentials/images",
-        "essentials/settings",
-        "essentials/navigation",
-        "essentials/reusable-snippets"
-      ]
-    },
-    {
-      "group": "Studio",
-      "pages": ["studio/introduction"]
-    },
     {
       "group": "API Documentation",
       "pages": ["api-reference/introduction"]
     },
     {
-      "group": "Endpoint Examples",
-      "pages": [
-        "api-reference/endpoint/get",
-        "api-reference/endpoint/create",
-        "api-reference/endpoint/delete"
-      ]
+      "group": "Authentificate",
+      "pages": ["api-reference/login/email"]
+    },
+    {
+      "group": "Trace",
+      "pages": ["api-reference/trace/create"]
     }
   ],
   "footerSocials": {
