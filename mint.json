@@ -42,6 +42,11 @@
       "url": "api-reference/v2",
       "icon": "square-terminal",
       "version": "v2"
+    },
+    {
+      "name": "Configuration",
+      "icon": "rocket",
+      "url": "configuration"
     }
   ],
   "navigation": [
@@ -51,11 +56,13 @@
     },
     {
       "group": "Workflow configuration",
+
       "pages": ["configuration/introduction", "configuration/action"]
     }
   ],
   "versions": ["v2", "v1"],
   "footerSocials": {
-    "github": "https://github.com/stratumn"
+    "github": "https://github.com/stratumn",
+    "website": "https://trace.stratumn.com"
   }
 }
