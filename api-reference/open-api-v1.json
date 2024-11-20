@@ -1,1 +1,840 @@
-{"openapi":"3.0.0","paths":{"/trace/{traceId}/state":{"get":{"description":"Retrieves the state of a given trace by id","operationId":"TraceController_getTraceState","parameters":[{"name":"traceId","required":true,"in":"path","description":"The UUID of the trace","schema":{"type":"string"}}],"responses":{"200":{"description":"The state of the given trace","content":{"application/json":{"schema":{"$ref":"#/components/schemas/TraceStateDto"}}}}},"security":[{"bearer":[]}],"summary":"Retrieve trace state","tags":["Trace"]}},"/trace/{traceId}/details":{"post":{"description":"Retrieves the details of a given trace by id","operationId":"TraceController_getTraceDetails","parameters":[{"name":"traceId","required":true,"in":"path","description":"The UUID of the trace","schema":{"type":"string"}}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/TraceDetailsInputDto"}}}},"responses":{"200":{"description":"The details of the given trace","content":{"application/json":{"schema":{"$ref":"#/components/schemas/TraceDetailsDto"}}}}},"security":[{"bearer":[]}],"summary":"Retrieve trace details","tags":["Trace"]}},"/trace/search/{workflowId}":{"post":{"description":"Retrieves the trace ids of a given workflow id and state data","operationId":"TraceController_getTraceIdsByWorkflowIdAndStateData","parameters":[{"name":"workflowId","required":true,"in":"path","description":"The UUID of the workflow","schema":{"type":"string"}}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/TraceStateDataDto"}}}},"responses":{"200":{"description":"The trace ids of the given workflow id and state data","content":{"application/json":{"schema":{"type":"array","items":{"type":"string"}}}}}},"security":[{"bearer":[]}],"summary":"Search traces","tags":["Trace"]}},"/trace":{"post":{"description":"Creates a new trace","operationId":"TraceController_createTrace","parameters":[],"requestBody":{"required":true,"content":{"multipart/form-data":{"schema":{"type":"object","properties":{"body":{"type":"object","properties":{"data":{"type":"object","description":"This is the form data of the link"},"actionKey":{"type":"string","description":"The label of the action"},"workflowId":{"type":"string","description":"The UUID of the workflow"},"groupLabel":{"type":"string","description":"The label of the group performing the action"}}},"file_example":{"type":"string","format":"binary"},"other_file_example":{"type":"string","format":"binary"}}}}}},"responses":{"200":{"description":"The UUID of the created trace","content":{"application/json":{"schema":{"type":"string"}}}}},"security":[{"bearer":[]}],"summary":"Create a new trace","tags":["Trace"]}},"/trace/{traceId}/link":{"post":{"description":"Appends a new action to a given trace by id","operationId":"TraceController_appendLinkToTrace","parameters":[{"name":"traceId","required":true,"in":"path","description":"The UUID of the trace","schema":{"type":"string"}}],"requestBody":{"required":true,"content":{"multipart/form-data":{"schema":{"type":"object","properties":{"body":{"type":"object","properties":{"data":{"type":"object","description":"This is the form data of the link"},"actionKey":{"type":"string","description":"The label of the action"},"workflowId":{"type":"string","description":"The UUID of the workflow"},"groupLabel":{"type":"string","description":"The label of the group performing the action"}}},"file_example":{"type":"string","format":"binary"},"other_file_example":{"type":"string","format":"binary"}}}}}},"responses":{"200":{"description":"The action appended to the given trace","content":{"application/json":{"schema":{"$ref":"#/components/schemas/TraceStateDto"}}}}},"security":[{"bearer":[]}],"summary":"New action","tags":["Trace"]}},"/trace/{traceId}/file/{digest}":{"get":{"description":"Downloads a file from a given trace by id and digest","operationId":"TraceController_getFileFromTrace","parameters":[{"name":"traceId","required":true,"in":"path","description":"The UUID of the trace","schema":{"type":"string"}},{"name":"digest","required":true,"in":"path","description":"The digest","schema":{"type":"string"}}],"responses":{"200":{"description":"The file downloaded from the given trace"}},"security":[{"bearer":[]}],"summary":"Download a file","tags":["Trace"]}},"/trace/{traceId}/files":{"get":{"description":"Downloads files from a given trace by id and digests","operationId":"TraceController_getFilesFromTrace","parameters":[{"name":"traceId","required":true,"in":"path","description":"The UUID of the trace","schema":{"type":"string"}},{"name":"digests","required":true,"in":"query","description":"The list of digests of the files to download. All the files need to be in the trace","schema":{"type":"array","items":{"type":"string"}}}],"responses":{"200":{"description":"The zip archive containing the files"}},"security":[{"bearer":[]}],"summary":"Download files","tags":["Trace"]}},"/login/privateKey":{"post":{"deprecated":true,"description":"Login using a private key of a valid Stratumn user","operationId":"LoginController_loginPrivateKey","parameters":[],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/LoginPrivateKeyDto"}}}},"responses":{"200":{"description":"The jwt auth token","content":{"application/json":{"schema":{"$ref":"#/components/schemas/TokenDto"}}}}},"summary":"Login using a private key","tags":["login"]}},"/login/credential":{"post":{"description":"Login using the email and the password of a valid Stratumn user","operationId":"LoginController_loginCredential","parameters":[],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/LoginCredentialDto"}}}},"responses":{"200":{"description":"The jwt auth token","content":{"application/json":{"schema":{"$ref":"#/components/schemas/TokenDto"}}}}},"summary":"Login using email","tags":["login"]}},"/workflow/orgName/{orgName}":{"get":{"description":"Retrieves the workflows of a given organization by name","operationId":"WorkflowController_getWorkflowsByOrgName","parameters":[{"name":"orgName","required":true,"in":"path","description":"The organization name","schema":{"type":"string"}}],"responses":{"200":{"description":"The workflows of the given organization","content":{"application/json":{"schema":{"$ref":"#/components/schemas/WorkflowIdNameArrayDto"}}}}},"security":[{"bearer":[]}],"summary":"List org's workflows","tags":["Workflow"]}}},"info":{"title":"Stratumn API","description":"Interact with Stratumn using simple REST endpoints","version":"1.0.0","contact":{}},"tags":[],"servers":[{"url":"http://api.local.stratumn.com:3000","description":"Local development server"},{"url":"https://api.stratumn.com","description":"Stratumn Production Server"},{"url":"https://api.us.stratumn.com","description":"Stratumn US Production Server"},{"url":"https://api.preprod.stratumn.com","description":"Stratumn Preprod Server"},{"url":"https://api.us.preprod.stratumn.com","description":"Stratumn US Preprod Server"}],"components":{"securitySchemes":{"bearer":{"scheme":"bearer","bearerFormat":"JWT","type":"http"}},"schemas":{"TraceStateDto":{"type":"object","properties":{"state":{"description":"The state data of the trace","type":"object","properties":{}}},"required":["state"]},"TraceDetailsInputDto":{"type":"object","properties":{"input":{"description":"The input used to retrieve the links of a given trace"}},"required":["input"]},"TraceDetailsDto":{"type":"object","properties":{"links":{"description":"The links of the trace","type":"array","items":{"type":"object","properties":{}}},"totalCount":{"description":"The total count of the links","type":"integer"},"info":{"type":"object","properties":{"hasNext":{"type":"boolean"},"hasPrevious":{"type":"boolean"},"startCursor":{"type":"string"},"endCursor":{"type":"string"}},"required":["hasNext","hasPrevious"]}},"required":["links","totalCount","info"]},"TraceStateDataDto":{"type":"object","properties":{"filters":{"description":"The state data keys and values on which the Traces will be filtered on","type":"object","additionalProperties":{"oneOf":[{"type":"string"},{"type":"number"},{"type":"boolean"}]}}}},"CreateTraceV2Dto":{"type":"object","properties":{"error":{"description":"The error of the request"},"data":{"description":"The trace id","type":"string","format":"uuid"}},"required":["error"]},"GetTraceStateV2Dto":{"type":"object","properties":{"error":{"description":"The error of the request"},"data":{"description":"The data of the request","type":"object","properties":{"state":{"description":"The state data of the trace","type":"object","properties":{}}},"required":["state"]}},"required":["error"]},"TraceDetailsInputV2Dto":{"type":"object","properties":{"error":{"description":"The error of the request"},"data":{"description":"The data of the request","type":"object","properties":{"last":{"description":"The last number of links to retrieve","type":"number"},"before":{"description":"The cursor before which to retrieve links","type":"string"},"after":{"description":"The cursor after which to retrieve links","type":"string"},"first":{"description":"The first number of links to retrieve","type":"number"}}}},"required":["error"]},"GetTraceDetailsV2Dto":{"type":"object","properties":{"error":{"description":"The error of the request"},"data":{"description":"The data of the request","type":"object","properties":{"links":{"description":"The links of the trace","type":"array","items":{"type":"object","properties":{}}},"totalCount":{"description":"The total count of the links","type":"integer"},"info":{"type":"object","properties":{"hasNext":{"type":"boolean"},"hasPrevious":{"type":"boolean"},"startCursor":{"type":"string"},"endCursor":{"type":"string"}},"required":["hasNext","hasPrevious"]}},"required":["links","totalCount","info"]}},"required":["error"]},"LoginPrivateKeyDto":{"type":"object","properties":{"privateKey":{"description":"The private key used to login","type":"string"}},"required":["privateKey"]},"TokenDto":{"type":"object","properties":{"token":{"description":"The token needed (in authorization header) to authenticate requests","type":"string"}},"required":["token"]},"LoginCredentialDto":{"type":"object","properties":{"email":{"description":"The email used to login","type":"string"},"password":{"description":"The password used to login","type":"string"}},"required":["email","password"]},"TokenV2Dto":{"type":"object","properties":{"error":{"description":"The error of the request"},"data":{"description":"The data of the request","type":"object","properties":{"token":{"description":"The token needed (in authorization header) to authenticate requests","type":"string"}},"required":["token"]}},"required":["error"]},"WorkflowIdNameArrayDto":{"type":"array","items":{"type":"object","properties":{"workflowId":{"description":"The Workflow ID","type":"string"},"workflowName":{"description":"The Workflow Name","type":"string"}},"required":["workflowId","workflowName"]}},"WorkflowSearchV2Dto":{"type":"object","properties":{"error":{"description":"The error of the request"},"data":{"description":"The trace ids","type":"array","items":{"type":"string","format":"uuid"}}},"required":["error"]}}}}
+{
+    "openapi": "3.0.0",
+    "paths": {
+        "/trace/{traceId}/state": {
+            "get": {
+                "description": "Retrieves the state of a given trace by id",
+                "operationId": "TraceController_getTraceState",
+                "parameters": [
+                    {
+                        "name": "traceId",
+                        "required": true,
+                        "in": "path",
+                        "description": "The UUID of the trace",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The state of the given trace",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TraceStateDto"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Retrieve trace state",
+                "tags": [
+                    "Trace"
+                ]
+            }
+        },
+        "/trace/{traceId}/details": {
+            "post": {
+                "description": "Retrieves the details of a given trace by id",
+                "operationId": "TraceController_getTraceDetails",
+                "parameters": [
+                    {
+                        "name": "traceId",
+                        "required": true,
+                        "in": "path",
+                        "description": "The UUID of the trace",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TraceDetailsInputDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The details of the given trace",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TraceDetailsDto"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Retrieve trace details",
+                "tags": [
+                    "Trace"
+                ]
+            }
+        },
+        "/trace/search/{workflowId}": {
+            "post": {
+                "description": "Retrieves the trace ids of a given workflow id and state data",
+                "operationId": "TraceController_getTraceIdsByWorkflowIdAndStateData",
+                "parameters": [
+                    {
+                        "name": "workflowId",
+                        "required": true,
+                        "in": "path",
+                        "description": "The UUID of the workflow",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TraceStateDataDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The trace ids of the given workflow id and state data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Search traces",
+                "tags": [
+                    "Trace"
+                ]
+            }
+        },
+        "/trace": {
+            "post": {
+                "description": "Creates a new trace",
+                "operationId": "TraceController_createTrace",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "body": {
+                                        "type": "object",
+                                        "properties": {
+                                            "data": {
+                                                "type": "object",
+                                                "description": "This is the form data of the link"
+                                            },
+                                            "actionKey": {
+                                                "type": "string",
+                                                "description": "The label of the action"
+                                            },
+                                            "workflowId": {
+                                                "type": "string",
+                                                "description": "The UUID of the workflow"
+                                            },
+                                            "groupLabel": {
+                                                "type": "string",
+                                                "description": "The label of the group performing the action"
+                                            }
+                                        }
+                                    },
+                                    "file_example": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "other_file_example": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The UUID of the created trace",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Create a new trace",
+                "tags": [
+                    "Trace"
+                ]
+            }
+        },
+        "/trace/{traceId}/link": {
+            "post": {
+                "description": "Appends a new action to a given trace by id",
+                "operationId": "TraceController_appendLinkToTrace",
+                "parameters": [
+                    {
+                        "name": "traceId",
+                        "required": true,
+                        "in": "path",
+                        "description": "The UUID of the trace",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "body": {
+                                        "type": "object",
+                                        "properties": {
+                                            "data": {
+                                                "type": "object",
+                                                "description": "This is the form data of the link"
+                                            },
+                                            "actionKey": {
+                                                "type": "string",
+                                                "description": "The label of the action"
+                                            },
+                                            "workflowId": {
+                                                "type": "string",
+                                                "description": "The UUID of the workflow"
+                                            },
+                                            "groupLabel": {
+                                                "type": "string",
+                                                "description": "The label of the group performing the action"
+                                            }
+                                        }
+                                    },
+                                    "file_example": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "other_file_example": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The action appended to the given trace",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TraceStateDto"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "New action",
+                "tags": [
+                    "Trace"
+                ]
+            }
+        },
+        "/trace/{traceId}/file/{digest}": {
+            "get": {
+                "description": "Downloads a file from a given trace by id and digest",
+                "operationId": "TraceController_getFileFromTrace",
+                "parameters": [
+                    {
+                        "name": "traceId",
+                        "required": true,
+                        "in": "path",
+                        "description": "The UUID of the trace",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "digest",
+                        "required": true,
+                        "in": "path",
+                        "description": "The digest",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The file downloaded from the given trace"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Download a file",
+                "tags": [
+                    "Trace"
+                ]
+            }
+        },
+        "/trace/{traceId}/files": {
+            "get": {
+                "description": "Downloads files from a given trace by id and digests",
+                "operationId": "TraceController_getFilesFromTrace",
+                "parameters": [
+                    {
+                        "name": "traceId",
+                        "required": true,
+                        "in": "path",
+                        "description": "The UUID of the trace",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "digests",
+                        "required": true,
+                        "in": "query",
+                        "description": "The list of digests of the files to download. All the files need to be in the trace",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The zip archive containing the files"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Download files",
+                "tags": [
+                    "Trace"
+                ]
+            }
+        },
+        "/login/privateKey": {
+            "post": {
+                "deprecated": true,
+                "description": "Login using a private key of a valid Stratumn user",
+                "operationId": "LoginController_loginPrivateKey",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginPrivateKeyDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The jwt auth token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TokenDto"
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "Login using a private key",
+                "tags": [
+                    "login"
+                ]
+            }
+        },
+        "/login/credential": {
+            "post": {
+                "description": "Login using the email and the password of a valid Stratumn user",
+                "operationId": "LoginController_loginCredential",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginCredentialDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The jwt auth token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TokenDto"
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "Login using email",
+                "tags": [
+                    "login"
+                ]
+            }
+        },
+        "/workflow/orgName/{orgName}": {
+            "get": {
+                "description": "Retrieves the workflows of a given organization by name",
+                "operationId": "WorkflowController_getWorkflowsByOrgName",
+                "parameters": [
+                    {
+                        "name": "orgName",
+                        "required": true,
+                        "in": "path",
+                        "description": "The organization name",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The workflows of the given organization",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WorkflowIdNameArrayDto"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "List org's workflows",
+                "tags": [
+                    "Workflow"
+                ]
+            }
+        }
+    },
+    "info": {
+        "title": "Stratumn API",
+        "description": "Interact with Stratumn using simple REST endpoints",
+        "version": "1.0.0",
+        "contact": {}
+    },
+    "tags": [],
+    "servers": [
+        {
+            "url": "http://api.local.stratumn.com:3000",
+            "description": "Local development server"
+        },
+        {
+            "url": "https://api.stratumn.com",
+            "description": "Stratumn Production Server"
+        },
+        {
+            "url": "https://api.us.stratumn.com",
+            "description": "Stratumn US Production Server"
+        },
+        {
+            "url": "https://api.preprod.stratumn.com",
+            "description": "Stratumn Preprod Server"
+        },
+        {
+            "url": "https://api.us.preprod.stratumn.com",
+            "description": "Stratumn US Preprod Server"
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "bearer": {
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "type": "http"
+            }
+        },
+        "schemas": {
+            "TraceStateDto": {
+                "type": "object",
+                "properties": {
+                    "state": {
+                        "description": "The state data of the trace",
+                        "type": "object",
+                        "properties": {}
+                    }
+                },
+                "required": [
+                    "state"
+                ]
+            },
+            "TraceDetailsInputDto": {
+                "type": "object",
+                "properties": {
+                    "input": {
+                        "description": "The input used to retrieve the links of a given trace"
+                    }
+                },
+                "required": [
+                    "input"
+                ]
+            },
+            "TraceDetailsDto": {
+                "type": "object",
+                "properties": {
+                    "links": {
+                        "description": "The links of the trace",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {}
+                        }
+                    },
+                    "totalCount": {
+                        "description": "The total count of the links",
+                        "type": "integer"
+                    },
+                    "info": {
+                        "type": "object",
+                        "properties": {
+                            "hasNext": {
+                                "type": "boolean"
+                            },
+                            "hasPrevious": {
+                                "type": "boolean"
+                            },
+                            "startCursor": {
+                                "type": "string"
+                            },
+                            "endCursor": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "hasNext",
+                            "hasPrevious"
+                        ]
+                    }
+                },
+                "required": [
+                    "links",
+                    "totalCount",
+                    "info"
+                ]
+            },
+            "TraceStateDataDto": {
+                "type": "object",
+                "properties": {
+                    "filters": {
+                        "description": "The state data keys and values on which the Traces will be filtered on",
+                        "type": "object",
+                        "additionalProperties": {
+                            "oneOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "number"
+                                },
+                                {
+                                    "type": "boolean"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "CreateTraceV2Dto": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "description": "The error of the request"
+                    },
+                    "data": {
+                        "description": "The trace id",
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                },
+                "required": [
+                    "error"
+                ]
+            },
+            "GetTraceStateV2Dto": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "description": "The error of the request"
+                    },
+                    "data": {
+                        "description": "The data of the request",
+                        "type": "object",
+                        "properties": {
+                            "state": {
+                                "description": "The state data of the trace",
+                                "type": "object",
+                                "properties": {}
+                            }
+                        },
+                        "required": [
+                            "state"
+                        ]
+                    }
+                },
+                "required": [
+                    "error"
+                ]
+            },
+            "TraceDetailsInputV2Dto": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "description": "The error of the request"
+                    },
+                    "data": {
+                        "description": "The data of the request",
+                        "type": "object",
+                        "properties": {
+                            "last": {
+                                "description": "The last number of links to retrieve",
+                                "type": "number"
+                            },
+                            "before": {
+                                "description": "The cursor before which to retrieve links",
+                                "type": "string"
+                            },
+                            "after": {
+                                "description": "The cursor after which to retrieve links",
+                                "type": "string"
+                            },
+                            "first": {
+                                "description": "The first number of links to retrieve",
+                                "type": "number"
+                            }
+                        }
+                    }
+                },
+                "required": [
+                    "error"
+                ]
+            },
+            "GetTraceDetailsV2Dto": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "description": "The error of the request"
+                    },
+                    "data": {
+                        "description": "The data of the request",
+                        "type": "object",
+                        "properties": {
+                            "links": {
+                                "description": "The links of the trace",
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            },
+                            "totalCount": {
+                                "description": "The total count of the links",
+                                "type": "integer"
+                            },
+                            "info": {
+                                "type": "object",
+                                "properties": {
+                                    "hasNext": {
+                                        "type": "boolean"
+                                    },
+                                    "hasPrevious": {
+                                        "type": "boolean"
+                                    },
+                                    "startCursor": {
+                                        "type": "string"
+                                    },
+                                    "endCursor": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "hasNext",
+                                    "hasPrevious"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "links",
+                            "totalCount",
+                            "info"
+                        ]
+                    }
+                },
+                "required": [
+                    "error"
+                ]
+            },
+            "LoginPrivateKeyDto": {
+                "type": "object",
+                "properties": {
+                    "privateKey": {
+                        "description": "The private key used to login",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "privateKey"
+                ]
+            },
+            "TokenDto": {
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "description": "The token needed (in authorization header) to authenticate requests",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "token"
+                ]
+            },
+            "LoginCredentialDto": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "description": "The email used to login",
+                        "type": "string"
+                    },
+                    "password": {
+                        "description": "The password used to login",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "email",
+                    "password"
+                ]
+            },
+            "TokenV2Dto": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "description": "The error of the request"
+                    },
+                    "data": {
+                        "description": "The data of the request",
+                        "type": "object",
+                        "properties": {
+                            "token": {
+                                "description": "The token needed (in authorization header) to authenticate requests",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "token"
+                        ]
+                    }
+                },
+                "required": [
+                    "error"
+                ]
+            },
+            "WorkflowIdNameArrayDto": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "workflowId": {
+                            "description": "The Workflow ID",
+                            "type": "string"
+                        },
+                        "workflowName": {
+                            "description": "The Workflow Name",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "workflowId",
+                        "workflowName"
+                    ]
+                }
+            },
+            "WorkflowSearchV2Dto": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "description": "The error of the request"
+                    },
+                    "data": {
+                        "description": "The trace ids",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                },
+                "required": [
+                    "error"
+                ]
+            }
+        }
+    }
+}
