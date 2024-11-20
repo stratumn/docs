@@ -19,17 +19,29 @@
     {
       "name": "Support",
       "url": "mailto:info@stratumn.com"
+    },
+    {
+      "name": "Trace",
+      "url": "https://trace.stratumn.com"
     }
   ],
   "primaryTab": {
     "name": "API Reference"
   },
-  "tabs": [],
   "anchors": [
     {
-      "name": "Get started",
-      "icon": "rocket",
-      "url": "api-reference/introduction"
+      "name": "API Reference",
+      "openapi": "/api-reference/open-api-v1.json",
+      "url": "api-reference/v1",
+      "icon": "square-terminal",
+      "version": "v1"
+    },
+    {
+      "name": "API Reference",
+      "openapi": "/api-reference/open-api-v2.json",
+      "url": "api-reference/v2",
+      "icon": "square-terminal",
+      "version": "v2"
     }
   ],
   "navigation": [
@@ -38,14 +50,11 @@
       "pages": ["api-reference/introduction", "api-reference/create-a-trace"]
     },
     {
-      "group": "Authentificate",
-      "pages": ["api-reference/login/email"]
-    },
-    {
-      "group": "Trace",
-      "pages": ["api-reference/trace/create"]
+      "group": "Workflow configuration",
+      "pages": ["configuration/introduction", "configuration/action"]
     }
   ],
+  "versions": ["v2", "v1"],
   "footerSocials": {
     "github": "https://github.com/stratumn"
   }
