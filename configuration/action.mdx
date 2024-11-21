@@ -8,14 +8,72 @@ There's multiple type of actions, with the most common type being the form actio
 # Basic action definition
 
 ```ts
+const form: BetterFormDef = {...};
+const effects: [...],
 
+export const createClaimAction: IActionDef = {
+  key: 'createClaim',
+  title: 'Create a claim',
+  icon: 'lucide_BadgePlus',
+  form,
+  effects,
+  answerableComments: ['comment']
+};
+```
 
 # Form action
 
 The form of the action is defined in the action's configuration using [react-jsonschema-form](https://rjsf-team.github.io/react-jsonschema-form/docs/), 
 a package that makes it easy to create dynamic forms with a JSON Schema, as well as handle dependencies between fields.
 
-{/* <CardGroup cols={2}>
+```ts
+const form: BetterFormDef = {
+  schema: {
+    title: 'A registration form',
+    type: 'object',
+    properties: {
+      password: {
+        type: 'string',
+        title: 'Password'
+      },
+      lastName: {
+        type: 'string',
+        title: 'Last name'
+      },
+      bio: {
+        type: 'string',
+        title: 'Bio'
+      },
+      firstName: {
+        type: 'string',
+        title: 'First name'
+      },
+      age: {
+        type: 'integer',
+        title: 'Age'
+      },
+      required: ['firstName', 'lastName'],
+    }
+  },
+  uiSchema: {
+    'ui:order': ['firstName', 'lastName', '*', 'password'],
+    age: {
+      'ui:widget': 'updown'
+    },
+    bio: {
+      'ui:widget': 'textarea'
+    },
+    password: {
+      'ui:widget': 'password'
+    }
+  }
+};
+```
+
+
+# Effects
+
+<CardGroup cols={2}>
   <Card
     title="Create your first process"
     icon="pen-to-square"
@@ -37,4 +95,4 @@ a package that makes it easy to create dynamic forms with a JSON Schema, as well
   >
     Customize the look and feel of your process
   </Card>
-</CardGroup> */}
+</CardGroup>
