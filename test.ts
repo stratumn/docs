@@ -1,4 +1,5 @@
 const form = {
+  é
   schema: {
     title: 'A registration form',
     type: 'object',
