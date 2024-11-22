@@ -1,0 +1,325 @@
+---
+title: 'Widgets'
+description: ''
+icon: 'paintbrush'
+---
+
+A Widget is a term used to represent an atomic User Interface element associated with specific data.
+It serves as a versatile tool that generates context based on the trace state.
+The primary objective is to deliver meaningful insights to end users, offering a clear understanding of the progress made in the process.
+
+Since users may have varying preferences for the information displayed,
+it is essential to create a configuration file aligned with the principles used for the overview table configuration.
+
+# Views
+A View is a keyword we use to define an atomic display of a piece of data. We provide core views which are fundamental to displaying correctly various natures of data.
+
+All the views have the common property:
+
+<ParamField path="type" type="string" required>
+  The type of view to display.
+</ParamField>
+
+Widget views can be used in the [workflow overview](/configuration/ui/overview.mdx) and the [trace infos](/configuration/ui/infos.mdx) via their dedicated configuration files.
+
+## Text
+
+The `text` view enables to display a piece of data as plain text. This is the default view used if a view **type** is invalid.
+
+<Tabs>
+  <Tab title="Screenshot">
+    ☝️ Welcome to the content that you can only see inside the first Tab.
+  </Tab>
+  <Tab title="API">
+    <ParamField path="type" type="literal">
+      The type of the view, must be equal to `text`, or undefined.
+    </ParamField>
+    <ParamField path="path" type="JMESPath" required>
+      The path to the data to be displayed.
+    </ParamField>
+    <ParamField path="isRichText" type="boolean" default="false">
+      If the provided path resolves to a [SlateJS](https://docs.slatejs.org/) object, this option will enable the display the data as a rich text.
+    </ParamField>
+    <ParamField path="default" type="JMESPath">
+      The default value to display if the data found at path is empty.
+    </ParamField>
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+    type TextView = {
+      type?: 'text';
+      path: string;
+      default?: string;
+      isRichText?: boolean;
+    }
+    ```
+  </Tab>
+  <Tab title="Example">
+    ```json Simple usage
+    {
+      "type": "text",
+      "path": "data.order.name"
+    }
+    ```
+    <Note>
+      The [JMESPath](https://jmespath.org/specification.html) syntax is very powerful and can be used to build complex expressions.
+      For example, the path `"['Hello ',userName,', how are you?'].join('',@)"` will produce `"Hello ${userName}, how are you?"`.
+    </Note>
+  </Tab>
+</Tabs>
+
+## Number
+
+The `number` view displays a piece of data as formatted number.
+
+<Tabs>
+  <Tab title="Screenshot">
+    ☝️ Welcome to the content that you can only see inside the first Tab.
+  </Tab>
+  <Tab title="API">
+    <ParamField path="type" type="literal" required>
+      The type of the view, must be equal to `number`.
+    </ParamField>
+
+    <ParamField path="path" type="JMESPath" required>
+      A JMESPath that resolves to a number.
+    </ParamField>
+
+    <ParamField path="format" type="object">
+      Settings to format the displayed number using the [Number toLocaleString()](https://www.w3schools.com/jsref/jsref_tolocalestring_number.asp) method.
+      <Expandable title="properties" defaultOpen={true}>
+        <ParamField path="format.local" type="string or string[]" default="navigator.language or 'en-US'">
+          A locale string or array of locale strings that contain one or more language or locale tags. 
+          If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. 
+        </ParamField>
+        <ParamField path="format.options" type="object">
+          An object that contains one or more properties that specify comparison options.
+          See [Number toLocaleString()](https://www.w3schools.com/jsref/jsref_tolocalestring_number.asp) for the list of options.
+        </ParamField>
+      </Expandable>
+    </ParamField>
+
+    <ParamField path="denominatorPath" type="JMESPath">
+      A JMESPath that resolves to a number. This feature allows adding context to the displayed number by appending a " / denominator" to it. 
+      This is useful, for instance, when showing the number of steps completed out of a total expected. 
+      The same format is applied to the denominator.    
+    </ParamField>
+
+    <ParamField path="tabRight" type="boolean" default="false">
+      If enabled, the number will appear on the right side of the tab.
+    </ParamField>
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+    type NumberView = {
+      type: 'number';
+      path: string;
+      denominatorPath?: string;
+      tabRight?: boolean;
+      format?: {
+        options?: Intl.NumberFormatOptions;
+        local?: string | string[];
+      };
+    };
+    ```
+  </Tab>
+  <Tab title="Example">
+    ```json Simple usage
+    {
+      "type": "number",
+      "path": "data.amount",
+      "tabRight": true,
+      "format": { "options": { "minimumFractionDigits": 2 } }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Date
+Date
+The date view displays a formatted date and supports a deadline warning feature. This feature displays the date in red with a warning icon if it's past or too close to today.
+
+<Tabs>
+  <Tab title="Screenshot">
+    ☝️ View an example of how the `date` view appears here.
+  </Tab>
+  <Tab title="API">
+    <ParamField path="type" type="literal" required>
+      The type of the view, must be equal to `date`.
+    </ParamField>
+    <ParamField path="path" type="JMESPath" required>
+      A JMESPath that resolves to a date string.
+    </ParamField>
+
+    <ParamField path="format" type="string" default="DD/MM/YYYY">
+      The format to apply to the date when displaying. Uses the [moment.js formats](https://momentjs.com/docs/#/displaying/format/).
+    </ParamField>
+
+    <ParamField path="isDeadline" type="boolean" default="false">
+      Enables the deadline warning feature if set to `true`.
+    </ParamField>
+
+    <ParamField path="deadlineWarningBuffer" type="number" default="0">
+      The number of days before the deadline to start showing the warning. For example, `5` means the warning appears 5 days before the deadline.
+    </ParamField>
+
+    <ParamField path="donePath" type="JMESPath">
+      A path to a value that disables the warning feature if it evaluates to `true` (e.g., when the task is flagged as "Done").
+    </ParamField>
+
+    <ParamField path="deadlineWarningIcon" type="string" default="Clock">
+      The icon ID to use for the warning. Default is `'Clock'`.
+    </ParamField>
+
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+    type DateView = {
+      type: 'date';
+      path: string;
+      format?: string;
+    } & (
+      | {
+          isDeadline?: false;
+        }
+      | {
+          isDeadline: true;
+          deadlineWarningBuffer?: number;
+          donePath?: string;
+          deadlineWarningIcon?: string;
+        }
+    );
+    ```
+  </Tab>
+  <Tab title="Example">
+    ```json Simple usage
+    {
+      "type": "date",
+      "path": "data.dueDate",
+      "isDeadline": true,
+      "deadlineWarningBuffer": 7,
+      "donePath": "data.isTraceClosed",
+      "format": "MM/DD/YYYY",
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Progress bar
+The progress bar view displays a percentage value in a classic progress bar 
+which changes color based on predefined ranges of progress.
+
+<Tabs>
+  <Tab title="Screenshot">
+    ☝️ View an example of how the `date` view appears here.
+  </Tab>
+  <Tab title="API">
+    <ParamField path="type" type="literal" required>
+      The type of the view, must be equal to `progress`.
+    </ParamField>
+    <ParamField path="path" type="JMESPath" required>
+      A JMESPath that resolves to a number, usually between 0 and 1.
+    </ParamField>
+
+    <ParamField path="denominatorPath" type="JMESPath">
+      Allows scaling the number resolved using the `path`, 
+      allowing it to not necessarily be between 0 and 1.
+    </ParamField>
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+    type ProgressView = {
+      type: 'progress';
+      path: string;
+      denominatorPath?: string;
+    }
+    ```
+  </Tab>
+  <Tab title="Example">
+    ```json Simple usage
+    {
+      "type": "progress",
+      "path": "data.status.progress",
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Labels
+The `labels` view displays a list of strings as a set of labels.
+
+<Tabs>
+  <Tab title="Screenshot">
+    ☝️ View an example of how the `date` view appears here.
+  </Tab>
+  <Tab title="API">
+    <ParamField path="type" type="literal" required>
+      The type of the view, must be equal to `progress`.
+    </ParamField>
+    <ParamField path="path" type="JMESPath" required>
+      A JMESPath that resolves to a list of strings to be displayed.
+    </ParamField>
+
+    <ParamField path="denominatorPath" type="JMESPath">
+      Allows scaling the number resolved using the `path`, 
+      allowing it to not necessarily be between 0 and 1.
+    </ParamField>
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+    type LabelsView = {
+      type: 'labels';
+      path: string;
+    }
+    ```
+  </Tab>
+  <Tab title="Example">
+    ```json Simple usage
+    {
+      "type": "labels",
+      "path": "data.tags",
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Status
+
+The `status` displays a progress as well as the name of the status at the same time.
+
+<Tabs>
+  <Tab title="Screenshot">
+    ☝️ View an example of how the `date` view appears here.
+  </Tab>
+  <Tab title="API">
+    <ParamField path="type" type="literal" required>
+      The type of the view, must be equal to `status`.
+    </ParamField>
+    <ParamField path="path" type="JMESPath" required>
+    The path to the date string to be displayed.
+    </ParamField>
+
+    <ParamField path="denominatorPath" type="JMESPath">
+      Allows scaling the number resolved using the `path`, 
+      allowing it to not necessarily be between 0 and 1.
+    </ParamField>
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+    type ProgressWidget = {
+      type: 'progress';
+      path: string;
+      denominatorPath?: string;
+    }
+    ```
+  </Tab>
+  <Tab title="Example">
+    ```json Simple usage
+    {
+      "type": "progress",
+      "path": "data.status.progress",
+    }
+    ```
+  </Tab>
+</Tabs>
+
