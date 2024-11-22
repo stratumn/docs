@@ -296,7 +296,7 @@ The `status` displays a progress as well as the name of the status at the same t
       The type of the view, must be equal to `status`.
     </ParamField>
     <ParamField path="path" type="JMESPath" required>
-    The path to the date string to be displayed.
+      The path to the date string to be displayed.
     </ParamField>
 
     <ParamField path="denominatorPath" type="JMESPath">
@@ -318,6 +318,190 @@ The `status` displays a progress as well as the name of the status at the same t
     {
       "type": "progress",
       "path": "data.status.progress",
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Key-value
+
+The `keyValue` view displays any widget (usually a text) nested under a label. 
+This widget is usually used to display relevant data in the [trace infos](/configuration/ui/infos.mdx).
+
+<Tabs>
+  <Tab title="Screenshot">
+    ☝️ View an example of how the `keyValue` view appears here.
+  </Tab>
+  <Tab title="API">
+    <ParamField path="type" type="literal" required>
+      The type of the view, must be equal to `keyvalue`.
+    </ParamField>
+    <ParamField path="key" type="string" required>
+      The label as plain text, describing the pair.
+    </ParamField>
+
+    <ParamField path="value.view" type="WidgetView" required>
+      Any valid widget view.
+    </ParamField>
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+    type KeyValueWidget = {
+      type: 'keyValue';
+      key: string;
+      value: WidgetView;
+    }
+    ```
+  </Tab>
+  <Tab title="Example">
+    ```json Simple usage
+    {
+      "type": "keyValue",
+      "key": "Progress",
+      "value": {
+        "view": {
+          "path": "data.status.progress",
+          "type": "number",
+          "format": {
+            "options": { "style": "percent", "maximumFractionDigits": 0 }
+          }
+        }
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Icon
+
+The `icon` view displays an icon, which can be static or resolved dynamically from a path.
+A label can be displayed next to the icon.
+
+<Tabs>
+  <Tab title="Screenshot">
+    ☝️ View an example of how the `icon` view appears here.
+  </Tab>
+  <Tab title="API">
+    <ParamField path="type" type="literal" required>
+      The type of the view, must be equal to `icon`.
+    </ParamField>
+    <ParamField path="icon" type="string">
+      A static icon id to be displayed if the `iconPath` does not resolve to a truthy value.
+    </ParamField>
+    <ParamField path="iconPath" type="JMESPath">
+      A JMESPath that resolves to an icon id. 
+      Renders the *Document* icon if the resolved value is falsy, or the icon defined in `icon` (see above) if it's set.
+    </ParamField>
+    <ParamField path="labelPath" type="JMESPath">
+      A JMESPath that resolves to a string displayed as a label next to the icon.
+    </ParamField>
+    <ParamField path="path" type="JMESPath">
+      A JMESPath that if resolves to a truthy value will trigger the display of the icon. 
+      By default, the icon is displayed if the path is not set.
+    </ParamField>
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+    type IconWidget = {
+      type: 'icon';
+      iconPath?: string;
+      icon?: string;
+      labelPath?: string;
+      path?: string;
+    }
+    ```
+  </Tab>
+  <Tab title="Example">
+    ```json Simple usage
+    {
+      "type": "icon",
+      "iconPath": "meta.head.action.icon",
+      "labelPath": "meta.head.action.title"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Boolean
+
+The `boolean` view displays a checkmark if the path resolves to a truthy value.\
+It is similar to the [icon view](/configuration/ui/widgets#icon) but with a simpler configuration.
+
+<Tabs>
+  <Tab title="Screenshot">
+    ☝️ View an example of how the `boolean` view appears here.
+  </Tab>
+  <Tab title="API">
+    <ParamField path="type" type="literal" required>
+      The type of the view, must be equal to `boolean`.
+    </ParamField>
+    <ParamField path="path" type="JMESPath" required>
+      A JMESPath that resolves to a boolean value which, if truthy, will display the checkmark.
+    </ParamField>
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+    type BooleanWidget = {
+      type: 'boolean';
+      path: string;
+    }
+    ```
+  </Tab>
+  <Tab title="Example">
+    ```json Simple usage
+    {
+      "type": "boolean",
+      "path": "data.isValid"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Link
+
+The `link` view displays an HTML link. It has the same configuration as the [Link Wrapper](/configuration/ui/widgets#link-wrapper) view.
+
+<Tabs>
+  <Tab title="Screenshot">
+    ☝️ View an example of how the `link` view appears here.
+  </Tab>
+  <Tab title="API">
+    <ParamField path="type" type="literal" required>
+      The type of the view, must be equal to `link`.
+    </ParamField>
+    <ParamField path="path" type="JMESPath" required>
+      A JMESPath that resolves to a string. This text will be displayed as the link content.
+      If no `urlPath` is provided or its resolved value is falsy, the resolved value of the path will also act as the link url.
+    </ParamField>
+    <ParamField path="rootUrl" type="string">
+      The root of the url, as plain text.
+    </ParamField>
+    <ParamField path="urlPath" type="JMESPath">
+      A JMESPath that resolves to a string, which will be used as the url suffix.
+    </ParamField>
+    <ParamField path="openInNewTab" type="boolean" default="false">
+      Whether to open the link in a new browser tab or in the current one.
+    </ParamField>
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+    type LinkWidget = {
+      type: 'link';
+      path: string;
+      rootUrl?: string;
+      urlPath?: string;
+      openInNewTab?: boolean;
+    }
+    ```
+  </Tab>
+  <Tab title="Example">
+    ```json Simple usage
+    {
+      "type": "link",
+      "path": "'The documentation'",
+      "rootUrl": "https://",
+      "urlPath": "data.documentationUrl",
+      "openInNewTab": false
     }
     ```
   </Tab>

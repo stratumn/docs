@@ -71,8 +71,6 @@ Widget views can be configured on the [Trace Info](https://wiki.sia.partners/doc
 
 The 'activity' view is a good first example of a 'packaged' view, ie a view that provides standard configurable display functionality that responds to a specific need, here being able to see in the same view who did something and when.
 
-
-
 The configuration of the activity view is:
 
 - **who**: configuration of the information to display on the first line, related to 'who' did something. _Object_:
@@ -100,8 +98,6 @@ The configuration of the array view is:
 - **itemsPath**: the path to the data to be displayed. _String_
 - **itemsWidget**: it takes a view to display. _Object_
 - **searchBar**: (ONLY WORKING ON COMMENTS FOR NOW) an object describing a search bar config on how to search within the items of the array. _Object_
-
-
 
 Config json:
 
@@ -140,8 +136,6 @@ The configuration of the avatar view is:
 - **isGroup**: whether we want to display an avatar designed for groups (hexagonal), instead of users (circle). _Boolean - Default: false - Optional._
 - **useContext**: for groups only. Treat the data found at **path** as an id and ask trace to provide the current group name. _Boolean - Default: false - Optional._
 
-
-
 Config json
 
 ![](attachments/42a10998-5f28-41ba-b698-8cd87153a1ea.png ' =582x122')
@@ -149,28 +143,6 @@ Config json
 Widget screenshot
 
 ![](attachments/21e2bd2c-6f16-4b90-80d0-dc7adbb2815f.png ' =250x359')
-
-## Boolean 
-
-The 'boolean' view works like the 'icon' view but with a more straightforward configuration and less options. If the value of the path is truthy, a check mark will be displayed.
-
-The configuration of the boolean view is:
-
-- **path**: a path to a data value that has to be truthy to trigger the effective rendering of the check mark. Example : "path": "data.finalized"
-- The path provided could be a JMESPath like "data.count > \`1\`" that would display the check mark as expected in the cell, but this type of configuration would not allow the column sorting to work since the backend would not recognise a JMESPath.
-- Therefore the best way is to provide a real boolean field in each trace data.
-
-
-
-Config json
-
-![](attachments/c897203b-9c28-4ed6-a2ba-248ec03bf407.png ' =499x98')
-
-Widget screenshot
-
-![](attachments/3b3f81e6-c16d-48fb-9f46-46c2c4b1c7ef.png ' =166x318')
-
-\
 
 ## Box
 
@@ -192,8 +164,6 @@ The 'code' view (mainly for Stratumn team for visualization / debugging) enables
 
 - **path**: the path to the object to be displayed. _String_
 - **codemirrorOptions: all the options for the codemirror editors as listed **[here](https://codemirror.net/doc/manual.html#config)**. Object - _Optional._**
-
-
 
 Config json \n\n ![](attachments/f31da5ef-cb54-42c6-b111-632e02ee4101.png ' =416x68')
 
@@ -244,30 +214,6 @@ Widget screenshot
 
 ![](attachments/9dea5fd0-371f-4c5b-8524-c85684ffbe98.png ' =582x67')
 
-## Date 
-
-The 'date' view enables to display a formatted date. It also handles a deadline warning feature, that enables to display as red text with a warning icon if the date is in the past (or too close to today).
-
-The configuration of the date view is:
-
-- **path**: the path to the date string. _String._
-- **format**: the format to apply to the date when displaying. _String - Default: 'DD.MM.YY'._
-- **isDeadline**: whether to add the deadline feature. _Boolean - Default: false._
-- **deadlineWarningBuffer**: display warning if the date is closer to today than this number of days. Eg 5 means start warning 5 days before deadline*. Number - Default: 0.*
-- **donePath**: a path to a value that removes the warning feature if it is truthy (eg when something is already flagged as 'Done'). _String - Optional._
-- **deadlineWarningIcon**: an icon id to use in the warning.
-- _Default: 'Clock'._
-
-
-
-Config json
-
-![](attachments/0e706f9d-1ff0-41b1-85c5-8df63b8b1e76.png ' =416x89')
-
-Widget screenshot
-
-![](attachments/bdfb2b20-c100-49de-a4ff-c76c2f5784b2.png ' =166x78')
-
 ## File
 
 The 'file' view.
@@ -287,8 +233,6 @@ The configuration of the fileCompact view is:
 
   `` ex:"fileName == `file.txt`" ``. _String - Optional_.
 
-
-
 Fais Config json
 
 ![](attachments/00bdfa5f-798b-466e-9dd3-62702907a429.png ' =499x89')
@@ -304,63 +248,13 @@ The configuration of the html view is:
 - **path**: the path to the data to be displayed. _String._
 - **default**: the default value to display if the data found at path is empty. _String - Optional._
 
-
-
 Config json
 
 ![](attachments/0d96a881-5e63-4721-86b8-f224856a6e92.png ' =416x67')
 
-## Icon 
-
-The 'icon' view enables to display an icon either defined statically for all the rows or by reading a path and interpreting the string found as a DynamicIcon id (from the Icons library). It is also possible to display a (text) label next to it.
-
-The configuration of the icon view is:
-
-- **path**: a path to a data value that has to be truthy to trigger the effective rendering of the icon. _String -_ _Optional._
-- **iconPath**: the path to a data field interpreted as an icon id. Renders 'Document' if the icon id is undefined or not recognized, or the icon defined in 'icon' (see below) if it is set. _String - Optional._
-- **labelPath**: path to the label value. *String -* *Optional.*
-- **icon**: an icon id to apply to all the rows. *String -* *Optional.*
-
-When using this view, if none of **iconPath** or **icon** is set, but **path** yields a truthy value, a 'Document' icon will be displayed.
-
-
-
-Config json
-
-![](attachments/1ae51b12-8da8-4130-b436-0d6509f3c633.png ' =416x69')
-
-Widget screenshot
-
-![](attachments/6114c616-3631-40a1-8980-955675702222.png ' =250x155')
-
-## KeyValue
-
-The 'keyValue' view can display a piece of data using the overview table already existing views.
-
-The configuration of the keyValue view is:
-
-- **key**:  the visible label describing the pair. _String_
-- **value**: it takes a view to display. _Object_
-
-```javascript
-{
-  y;
-}
-```
-
-Widget screenshot  ![](https://lh3.googleusercontent.com/pgZAlnNHuttljv3-jodAcfrst1vnad2tFSvFNCvCnoJkv2iVTNRHtS_ZrBb9sL4sIQCNd-GUSWt-FCBwxLrIhXv8uFsn-79hJXgwJRSjlrhpvLekjJwOWjlc0zVAMbIwFmrnPATtzzRd78xDU6c2_w ' =290x240')
-
-## Labels
-
-The 'labels' view enables to display a list of strings as a set of labels, and is very simply configured:
-
-- **path**: the path to the list of labels to be displayed.\n
-
 ## Link
 
 The _Link_ view enables to display a classical HTML link. It holds the same configuration data as the **[Link Wrapper](https://docs.google.com/document/d/1BCnGLQ5yv1IErevhn99mMQNOpk_4n5VO/edit#heading=h.3whwml4)**. Note that the difference is that the link wrapper can display any view, while making the cell clickable and behave like a link, while the link view is a classical link. Hence the wrapper is more 'powerful'.
-
-
 
 ![Config json](attachments/d6602a4c-6974-4462-8298-7c1a1e36315a.png ' =416x105')\n\n ![Widget screenshot](attachments/590098a5-89b4-4aa9-989d-9f7887a8b3dc.png ' =499x63')
 
@@ -377,8 +271,6 @@ The configuration of the list view is:
 - **small**: whether to use a smaller (standard) font size. _Boolean - Default: false._
 - **light**: whether to use a lighter (standard) font color. _Boolean - Default: false._
 
-
-
 ![Config json](attachments/49970dc2-d5db-4e99-bd46-d1690077975e.png ' =582x91')
 
 ![Widget screenshot](attachments/aa44d6e3-7f48-48e8-a2bc-39fbce32fdad.png ' =333x100')
@@ -392,8 +284,6 @@ The configuration of the List Compact view is:
 - **path**: path to the array of data. If non array data is found an array with this single element is used. If only one element is found in the array it is displayed normally in the view. _String._
 - `ordered`: display numbers in the list content (tool-tip) instead of bullet points. _Boolean_ -_Optional_.
 - `itemName`: customize item name, eg "document" displays "n documents" instead of "n items". _String._
-
-
 
 Config json
 
@@ -450,8 +340,6 @@ Example:
 
 ![Widget screenshot](attachments/70688af3-6b01-4349-a233-476dc84209f6.png ' =666x171')
 
-
-
 Note that the view 'default' parameter behavior could be replicated using [JMESPath](https://jmespath.org/)'s embedded 'default' feature, so that:
 
 - **path** = "traceName" with **default** = "Some default text"
@@ -461,8 +349,6 @@ Also note that using the [JMESPath](https://jmespath.org/)'s powerful 'join' fea
 
 - **path** = `"['Hello ',userName,', how are you?'].join('',@)"`
 - will effectively produce: `"Hello ${userName}, how are you?"`
-
-
 
 ![Config json](attachments/a649dd42-ce68-4d24-aef8-9aada196b9f4.png ' =499x103')
 
@@ -661,8 +547,6 @@ This will produce a large modal with title `'${traceId} Trace State'` and conten
 The widget becomes hoverable and a small 'tool-tip' window is displayed next to it to provide additional information. It is possible to specify where the tool-tip will appear with respect to the widget.
 
 This tool-tip disappears when the mouse leaves the widget.
-
-
 
 The Tool-tip wrapper configuration is:
 
