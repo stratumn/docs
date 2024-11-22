@@ -1,92 +1,41 @@
 ---
 title: 'Action'
 description: ''
+icon: 'pen-to-square'
 ---
 
-There's multiple type of actions, with the most common type being the form action. After submission, a business logic called *effects* is usually executed.
+There's multiple type of actions, with the most common type being the form action. After submission, a business logic called _effects_ is usually executed.
 
-# Basic action definition
+## Basic action definition
 
 ```ts
 const form: BetterFormDef = {...};
-const effects: [...],
+const effects = [...],
 
-export const createClaimAction: IActionDef = {
-  key: 'createClaim',
-  title: 'Create a claim',
+export const placeOrder: IActionDef = {
+  key: 'placeOrder',
+  title: 'Place order',
   icon: 'lucide_BadgePlus',
-  form,
-  effects,
+  form: form,
+  effects: effects,
   answerableComments: ['comment']
 };
 ```
 
-# Form action
+## Form action
 
-The form of the action is defined in the action's configuration using [react-jsonschema-form](https://rjsf-team.github.io/react-jsonschema-form/docs/), 
-a package that makes it easy to create dynamic forms with a JSON Schema, as well as handle dependencies between fields.
-
-```ts
-const form: BetterFormDef = {
-  schema: {
-    title: 'A registration form',
-    type: 'object',
-    properties: {
-      password: {
-        type: 'string',
-        title: 'Password'
-      },
-      lastName: {
-        type: 'string',
-        title: 'Last name'
-      },
-      bio: {
-        type: 'string',
-        title: 'Bio'
-      },
-      firstName: {
-        type: 'string',
-        title: 'First name'
-      },
-      age: {
-        type: 'integer',
-        title: 'Age'
-      },
-      required: ['firstName', 'lastName'],
-    }
-  },
-  uiSchema: {
-    'ui:order': ['firstName', 'lastName', '*', 'password'],
-    age: {
-      'ui:widget': 'updown'
-    },
-    bio: {
-      'ui:widget': 'textarea'
-    },
-    password: {
-      'ui:widget': 'password'
-    }
-  }
-};
-```
-
-
-# Effects
+## Effects
 
 <CardGroup cols={2}>
-  <Card
-    title="Create your first process"
-    icon="pen-to-square"
-    href="https://mintlify.com/docs/quickstart"
-  >
-    Use studio to imagine and bring life to your business process in a few clicks
+  <Card title="Form" icon="table" href="/configuration/action/form">
+    The most common type of action
   </Card>
   <Card
     title="Analyze your process"
     icon="chart-simple"
     href="https://mintlify.com/docs/development"
   >
-    Use our analytics software to understand your data and act on it 
+    Use our analytics software to understand your data and act on it
   </Card>
   <Card
     title="Widget library"

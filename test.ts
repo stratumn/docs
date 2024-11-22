@@ -1,42 +1,15 @@
-const form = {
-  é
-  schema: {
-    title: 'A registration form',
-    type: 'object',
-    required: ['firstName', 'lastName'],
-    properties: {
-      password: {
-        type: 'string',
-        title: 'Password'
-      },
-      lastName: {
-        type: 'string',
-        title: 'Last name'
-      },
-      bio: {
-        type: 'string',
-        title: 'Bio'
-      },
-      firstName: {
-        type: 'string',
-        title: 'First name'
-      },
-      age: {
-        type: 'integer',
-        title: 'Age'
+const state = {
+  tasks: {
+    deadlines: [
+      {
+        date: '2025-11-20'
       }
-    }
-  },
-  uiSchema: {
-    'ui:order': ['firstName', 'lastName', '*', 'password'],
-    age: {
-      'ui:widget': 'updown'
-    },
-    bio: {
-      'ui:widget': 'textarea'
-    },
-    password: {
-      'ui:widget': 'password'
+    ],
+    groups: {
+      cook: {
+        responsibility: 1,
+        todo: ['cookOrder']
+      }
     }
   }
 };

@@ -1,0 +1,104 @@
+---
+title: 'Trace'
+description: 'A trace is an instance of a workflow.'
+icon: 'arrow-progress'
+---
+
+## State
+
+Each trace has a `state` object which contains the business data but also metadata about the trace's lifecycle.
+
+The state object can be accessed in the [effects](/configuration/effects) via `dsl.$variables.state` and has the following properties:
+
+- `data`: the business data of the trace.
+- `tasks`: the state of each task of the workflow.
+- `nextActions`: a mapping between a group label and it's next possible actions.
+- `notifications`: the notifications that will be sent to the user.
+
+### Data
+
+The data property is an object that holds the business data for the trace,
+structured according to the workflow's specifications.
+This object is updated by the effects of each action and is usually used to display
+the trace's data in the overview table and trace details.
+
+### Next actions
+
+The `nextActions` property defines which actions are available for each group.
+It is defined as a map between a group label and a list of actions keys.
+
+### Tasks
+
+The `tasks` property, also referred to as _priorities_, defines which next actions are the most relevant for a group.
+When a group has a next priority action defined, it will be displayed in the Trace UI homepage.
+
+<Frame>
+  <img src="/images/configuration/tasks.png" style={{ borderRadius: '1rem' }} />
+</Frame>
+
+```ts
+{
+  ...
+  tasks: {
+    groups: {
+      cook: { // the group label
+        responsibility: 1,
+        todo: ['cookOrder'] // the next priority
+      }
+    },
+    deadlines: [
+      {
+        date: '2025-11-20' // optional deadline
+      }
+    ]
+  }
+  ...
+};
+```
+
+<Tip>A deadline can be optionally defined for a task.</Tip>
+
+{/* ### Notifications */}
+
+## Meta
+
+The `meta` object contains metadata about the trace, as well as the last performed action.
+It is automatically generated before effects are applied and can not be modified.
+
+Usually, it's used to get context about the trace in the effects.
+
+<RequestExample>
+
+```json State example
+{
+  "data": {
+    "order": {
+      "name": "Pineapple pizza",
+      "date": "2024-04-24T09:16:56.316Z",
+      "price": 10
+    },
+    "isPaid": true,
+    "status": {
+      "progress": 0.5,
+      "value": "Pizza is being prepared"
+    },
+    "isTraceClosed": false,
+    "comments": [...],
+  },
+  "nextActions": {
+    "cook": ["prepareOrder", "comment"],
+    "client": ["comment"]
+  },
+  "tasks": {
+    "groups": {
+      "cook": {
+        "responsibility": 1,
+        "todo": ["prepareOrder"]
+      }
+    }
+  },
+  "notifications": {...}
+}
+```
+
+</RequestExample>

@@ -61,9 +61,11 @@
       "group": "Workflow configuration",
       "pages": [
         "configuration/introduction",
-        "configuration/action",
+        "configuration/trace",
         "configuration/state",
-        "configuration/effects"
+        "configuration/effects",
+        "essentials/markdown",
+        "configuration/action"
       ]
     }
   ],

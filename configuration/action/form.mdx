@@ -1,0 +1,41 @@
+---
+title: 'Form action'
+description: 'The most common type of action'
+---
+
+The form of the action is defined in the action's configuration using [react-jsonschema-form](https://rjsf-team.github.io/react-jsonschema-form/docs/),
+a package that makes it easy to create dynamic forms with a JSON Schema, as well as handle dependencies between fields.
+
+```ts
+const form: BetterFormDef = {
+  schema: {
+    title: 'A registration form',
+    type: 'object',
+    properties: {
+      meal: {
+        type: 'string',
+        title: 'Meal'
+      },
+      quantity: {
+        type: 'number',
+        title: 'Quantity',
+        default: 1
+      },
+      takeaway: {
+        type: 'boolean',
+        title: 'Takeaway',
+        default: false
+      },
+      comment: {
+        type: 'string',
+        title: 'Comment',
+        format: 'draft'
+      },
+      required: ['meal', 'quantity', 'takeaway']
+    }
+  },
+  uiSchema: {
+    'ui:order': ['meal', 'quantity', 'takeaway', 'comment']
+  }
+};
+```
