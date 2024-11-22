@@ -8,12 +8,12 @@ icon: 'arrow-progress'
 
 Each trace has a `state` object which contains the business data but also metadata about the trace's lifecycle.
 
-The state object can be accessed in the [effects](/configuration/effects) via `dsl.$variables.state` and has the following properties:
+The state object can be accessed in the [effects](/configuration/action/effects) via `dsl.$variables.state` and has the following properties:
 
-- `data`: the business data of the trace.
-- `tasks`: the state of each task of the workflow.
-- `nextActions`: a mapping between a group label and it's next possible actions.
-- `notifications`: the notifications that will be sent to the user.
+- `data` the business data of the trace.
+- `tasks` the state of each task of the workflow.
+- `nextActions` a mapping between a group label and it's next possible actions.
+- `notifications` the notifications that will be sent to the user.
 
 ### Data
 
@@ -69,7 +69,7 @@ Usually, it's used to get context about the trace in the effects.
 
 <RequestExample>
 
-```json State example
+```json Trace state example
 {
   "data": {
     "order": {

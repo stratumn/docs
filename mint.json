@@ -5,6 +5,13 @@
     "dark": "/logo/dark.svg",
     "light": "/logo/light.svg"
   },
+  "layout": "sidenav",
+  "sidebar": {
+    "items": "container"
+  },
+  "background": {
+    "style": "windows"
+  },
   "favicon": "/favicon.svg",
   "colors": {
     "primary": "#4B35D2",
@@ -19,12 +26,15 @@
     {
       "name": "Support",
       "url": "mailto:info@stratumn.com"
-    },
-    {
-      "name": "Trace",
-      "url": "https://trace.stratumn.com"
     }
   ],
+  "topbarCtaButton": {
+    "name": "Go to Trace",
+    "url": "https://trace.stratumn.com",
+    "type": "link",
+    "arrow": true,
+    "style": "pill"
+  },
   "primaryTab": {
     "name": "API Reference"
   },
@@ -62,10 +72,16 @@
       "pages": [
         "configuration/introduction",
         "configuration/trace",
-        "configuration/state",
-        "configuration/effects",
         "essentials/markdown",
-        "configuration/action"
+        {
+          "group": "Action",
+          "icon": "pen-to-square",
+          "pages": [
+            "configuration/action/definition",
+            "configuration/action/form",
+            "configuration/action/effects"
+          ]
+        }
       ]
     }
   ],
