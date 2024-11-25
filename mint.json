@@ -92,8 +92,6 @@
           "icon": "sparkles",
           "pages": [
             "configuration/ui/introduction",
-            "configuration/ui/overview",
-            "configuration/ui/infos",
             "configuration/ui/widgets"
           ]
         }

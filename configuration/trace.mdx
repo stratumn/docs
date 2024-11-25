@@ -10,10 +10,18 @@ Each trace has a `state` object which contains the business data but also metada
 
 The state object can be accessed in the [effects](/configuration/action/effects) via `dsl.$variables.state` and has the following properties:
 
-- `data` the business data of the trace.
-- `tasks` the state of each task of the workflow.
-- `nextActions` a mapping between a group label and it's next possible actions.
-- `notifications` the notifications that will be sent to the user.
+<ParamField path="data" type="object">
+  The business data of the trace.
+</ParamField>
+<ParamField path="nextActions" type="object">
+  A mapping between a group label and it's next possible actions.
+</ParamField>
+<ParamField path="tasks" type="object">
+  The most relevant next actions for each group.
+</ParamField>
+<ParamField path="notifications" type="object" >
+  The notifications that will be sent to the user.
+</ParamField>
 
 ### Data
 
@@ -62,10 +70,201 @@ When a group has a next priority action defined, it will be displayed in the Tra
 
 ## Meta
 
-The `meta` object contains metadata about the trace, as well as the last performed action.
-It is automatically generated before effects are applied and can not be modified.
+<Tabs>
+  <Tab title="Description">
+    The read-only `dsl.$variables.meta` object contains metadata about the trace, as well as the last performed action.
+    It is automatically generated before effects are applied and can not be modified.
 
-Usually, it's used to get context about the trace in the effects.
+    It's usually used to get context about the trace in the [effects](/configuration/action/effects) or to display information using [widgets](/configuration/ui/widgets).
+  </Tab>
+  <Tab title="Documentation">
+    <ParamField path="createdAt" type="string datetime">
+      The date of creation of the last or current link.
+    </ParamField>
+    <ParamField path="action" type="object">
+      Informations about the last performed action.
+      <Expandable title="action's properties" defaultOpen={false}>
+        <ParamField path="action.key" type="string">
+          The key of the action.
+        </ParamField>
+        <ParamField path="action.title" type="string">
+          The title of the action.
+        </ParamField>
+        <ParamField path="action.icon" type="string">
+          The name of the icon of the action.
+        </ParamField>
+      </Expandable>
+    </ParamField>
+    <ParamField path="createdBy" type="object">
+      Informations about the user who submitted the last link.
+      <Expandable title="createdBy's properties" defaultOpen={false}>
+        <ParamField path="createdBy.id" type="string">
+          The id of the user.
+        </ParamField>
+        <ParamField path="createdBy.email" type="email" required>
+          The email of the user, it also acts as an user identifier.
+        </ParamField>
+        <ParamField path="createdBy.avatar" type="URL | null">
+          The avatar's url of the user.
+        </ParamField>
+        <ParamField path="createdBy.name" type="string" required>
+          The full name of the user.
+        </ParamField>
+        <ParamField path="createdBy.firstName" type="string">
+          The first name of the user.
+        </ParamField>        
+        <ParamField path="createdBy.lastName" type="string">
+          The last name of the user.
+        </ParamField>
+        <ParamField path="createdBy.type" type="literal" required>
+          The type of the user.
+        </ParamField>       
+      </Expandable>
+    </ParamField>
+    <ParamField path="group" type="object">
+      Informations about the group of the user that submitted the last link.
+      <Expandable title="group's properties" defaultOpen={false}>
+        <ParamField path="group.id" type="string" required>
+          The id of the group.
+        </ParamField>
+        <ParamField path="group.label" type="string" required>
+          The label of the group, it also acts as a group identifier.
+        </ParamField>
+        <ParamField path="group.name" type="string" required>
+          The name of the group.
+        </ParamField>
+        <ParamField path="group.avatar" type="URL | null" >
+          The avatar's url of the group.
+        </ParamField>
+      </Expandable>
+    </ParamField>
+    <ParamField path="process" type="object">
+      Informations about the workflow.
+      <Expandable title="process's properties" defaultOpen={false}>
+        <ParamField path="group.name" type="string" required>
+          The id of the workflow. For example: `"12"`.
+        </ParamField>
+        <ParamField path="process.state" type="'FREE' | 'DRAFT'" required>
+          The state of the workflow.
+        </ParamField>
+      </Expandable>
+    </ParamField>
+    <ParamField path="traceCreatedAt" type="string datetime">
+      The date of creation of the trace.
+    </ParamField>
+    <ParamField path="traceName" type="string">
+      The name of the trace. Automatically generated using the workflow's name and the index of the trace in the workflow.
+      Example: `ORDER-21`
+    </ParamField>
+    <ParamField path="traceId" type="UUID">
+      The id of the trace.
+    </ParamField>
+    <ParamField path="traceShortId" type="string">
+      The first 6 characters of the trace id.
+    </ParamField>
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+    type LinkMetaData = {
+      createdAt: string;
+      action: {
+        key: string;
+        title: string;
+        icon: string;
+      };
+      createdBy: {
+        type?: string;
+        accountId?: string;
+        name: string;
+        firstName?: string;
+        lastName?: string;
+        avatar: string | null;
+        email?: string;
+        id?: string;
+      };
+      group: {
+        label: string;
+        id: string;
+        name: string;
+        avatar: string | null;
+      };
+
+      traceCreatedAt: string;
+      traceName: string;
+      traceId: string;
+      traceShortId: string;
+      process: {
+        name: string;
+        state: string;
+      };
+      /** @deprecated */
+      owner: {
+        id: string;
+        name: string;
+        avatar: string | null;
+      };
+
+      /** @deprecated */
+      inputs: string[];
+    };
+    ```
+  </Tab>
+  <Tab title="Example">
+    ```json Example
+   {
+    "head": {
+      "action": {
+        "icon": "lucide_CookingPot",
+        "key": "prepareOrder",
+        "title": "Prepare order"
+      },
+      "createdAt": "2024-10-09T15:14:42.973Z",
+      "createdBy": {
+        "avatar": "https://media-api.stratumn.com/files/111439687e669296785751469eeece665882021e1ea6",
+        "email": "jane.doe@example.com",
+        "firstName": "Jane",
+        "id": "888",
+        "lastName": "Doe",
+        "name": "Jane Doe",
+        "type": "User"
+      },
+      "group": {
+        "avatar": "https://media-api.stratumn.com/files/111439687e669296785751469eeece665882021e1ea6",
+        "id": "999",
+        "label": "cooks",
+        "name": "The cooks"
+      },
+      "inputs": [],
+      "owner": {
+        "avatar": "https://media-api.stratumn.com/files/111439687e669296785751469eeece665882021e1ea6",
+        "id": "999",
+        "name": "The cooks"
+      },
+      "process": {
+        "name": "12",
+        "state": "FREE"
+      }
+    },
+    "links": {
+      "totalCount": 9
+    },
+    "traceCreatedAt": "2024-05-03T08:33:58.533Z",
+    "traceId": "1f242572-3eb9-4341-986b-9cccf4121dc1",
+    "traceName": "ORDER-20",
+    "traceShortId": "1f2425"
+  },
+    ```
+  </Tab>
+</Tabs>
+
+<Note>
+  If the query context is a widget, properties related to the last link are nested under the `head` property.
+</Note>
+
+
+## Formdata
+
+The `dsl.$variables.formData` object is the data submitted by the user in the current action. 
 
 <RequestExample>
 

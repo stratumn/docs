@@ -21,7 +21,7 @@ All the views have the common property:
   The type of view to display.
 </ParamField>
 
-Widget views can be used in the [workflow overview](/configuration/ui/overview.mdx) and the [trace infos](/configuration/ui/infos.mdx) via their dedicated configuration files.
+Widget views can be used in the [workflow overview](/configuration/ui/introduction#workflow-overview) and the [trace infos](/configuration/ui/introduction#trace-infos) via their dedicated configuration files.
 
 ## Text
 
@@ -42,7 +42,7 @@ This is the default view used if a view **type** is invalid.
       The path to the data to be displayed.
     </ParamField>
     <ParamField path="isRichText" type="boolean" default="false">
-      If the provided path resolves to a [SlateJS](https://docs.slatejs.org/) object, this option will enable the display the data as a rich text.
+      If the provided path resolves to a [SlateJS](https://docs.slatejs.org/) object, this option will display the data as a rich text.
     </ParamField>
     <ParamField path="default" type="JMESPath">
       The default value to display if the data found at path is empty.
@@ -336,7 +336,7 @@ The `status` displays a progress as well as the name of the status at the same t
 ## Key-value
 
 The `keyValue` view displays any widget (usually a text) nested under a label.
-This widget is usually used to display relevant data in the [trace infos](/configuration/ui/infos.mdx).
+This widget is usually used to display relevant data in the [trace infos](/configuration/ui/introduction#trace-infos).
 
 <Tabs>
   <Tab title="Screenshot">
