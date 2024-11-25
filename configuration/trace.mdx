@@ -25,19 +25,42 @@ The state object can be accessed in the [effects](/configuration/action/effects)
 
 ### Data
 
-The data property is an object that holds the business data for the trace,
+The `dsl.$variables.state.data` property is an object that holds the business data for the trace,
 structured according to the workflow's specifications.
-This object is updated by the effects of each action and is usually used to display
-the trace's data in the overview table and trace details.
+
+The data are updated by the effects of each action and is usually used to display
+the trace's data in the [workflow overview](/configuration/ui/introduction#workflow-overview) table and [trace infos](/configuration/ui/introduction#trace-infos).
 
 ### Next actions
 
-The `nextActions` property defines which actions are available for each group.
-It is defined as a map between a group label and a list of actions keys.
+<Tabs>
+  <Tab title="Description">
+    The `dsl.$variables.state.nextActions` property defines which actions are available for each group.
+    It is defined as a map between a group label and a list of actions keys.
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+    type NextActions<
+      GroupLabel extends string, 
+      ActionKey extends string
+    > = {
+      [key in GroupLabel]?: ActionKey[];
+    };
+    ```
+  </Tab>
+  <Tab title="Example">
+    ```json Example
+    {
+      "cook": ["prepareOrder", "comment"],
+      "client": ["comment"]
+    }
+    ```
+  </Tab>
+</Tabs>
 
 ### Tasks
 
-The `tasks` property, also referred to as _priorities_, defines which next actions are the most relevant for a group.
+The `dsl.$variables.state.tasks` property, also referred to as _priorities_, defines which next actions are the most relevant for a group.
 When a group has a next priority action defined, it will be displayed in the Trace UI homepage.
 
 <Frame>

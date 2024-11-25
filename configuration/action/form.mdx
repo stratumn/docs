@@ -17,26 +17,16 @@ const form: BetterFormDef = {
         type: 'string',
         title: 'Meal'
       },
-      quantity: {
-        type: 'number',
-        title: 'Quantity',
-        default: 1
-      },
-      takeaway: {
-        type: 'boolean',
-        title: 'Takeaway',
-        default: false
-      },
       comment: {
         type: 'string',
         title: 'Comment',
         format: 'draft'
       },
-      required: ['meal', 'quantity', 'takeaway']
+      required: ['meal']
     }
   },
   uiSchema: {
-    'ui:order': ['meal', 'quantity', 'takeaway', 'comment']
+    'ui:order': ['meal', 'comment']
   }
 };
 ```

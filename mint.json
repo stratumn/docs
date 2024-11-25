@@ -10,7 +10,7 @@
     "items": "container"
   },
   "background": {
-    "style": "grid"
+    "style": "windows"
   },
   "favicon": "/favicon.svg",
   "colors": {
