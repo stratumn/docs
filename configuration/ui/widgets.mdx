@@ -4,15 +4,16 @@ description: ''
 icon: 'paintbrush'
 ---
 
-A Widget is a term used to represent an atomic User Interface element associated with specific data.
-It serves as a versatile tool that generates context based on the trace state.
-The primary objective is to deliver meaningful insights to end users, offering a clear understanding of the progress made in the process.
+A _widget_ is a term used to represent an atomic UI element associated with specific data.
+It serves as a versatile tool that adds context based on the trace state.
+Its primary objective is to deliver meaningful insights to end users, offering a clear understanding of the progress made in the process.
 
 Since users may have varying preferences for the information displayed,
 it is essential to create a configuration file aligned with the principles used for the overview table configuration.
 
 # Views
-A View is a keyword we use to define an atomic display of a piece of data. We provide core views which are fundamental to displaying correctly various natures of data.
+
+A _view_ is a keyword we use to define an atomic display of a piece of data. We provide core views which are fundamental to displaying correctly various natures of data.
 
 All the views have the common property:
 
@@ -24,11 +25,14 @@ Widget views can be used in the [workflow overview](/configuration/ui/overview.m
 
 ## Text
 
-The `text` view enables to display a piece of data as plain text. This is the default view used if a view **type** is invalid.
+The `text` view enables to display a piece of data as plain text. If the text is too long, an ellipses will be displayed. \
+This is the default view used if a view **type** is invalid.
 
 <Tabs>
   <Tab title="Screenshot">
-    ☝️ Welcome to the content that you can only see inside the first Tab.
+    <Frame>
+      <img src="/images/configuration/ui/widgets/text.png" />
+    </Frame>
   </Tab>
   <Tab title="API">
     <ParamField path="type" type="literal">
@@ -89,8 +93,8 @@ The `number` view displays a piece of data as formatted number.
       Settings to format the displayed number using the [Number toLocaleString()](https://www.w3schools.com/jsref/jsref_tolocalestring_number.asp) method.
       <Expandable title="properties" defaultOpen={true}>
         <ParamField path="format.local" type="string or string[]" default="navigator.language or 'en-US'">
-          A locale string or array of locale strings that contain one or more language or locale tags. 
-          If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. 
+          A locale string or array of locale strings that contain one or more language or locale tags.
+          If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale.
         </ParamField>
         <ParamField path="format.options" type="object">
           An object that contains one or more properties that specify comparison options.
@@ -100,14 +104,15 @@ The `number` view displays a piece of data as formatted number.
     </ParamField>
 
     <ParamField path="denominatorPath" type="JMESPath">
-      A JMESPath that resolves to a number. This feature allows adding context to the displayed number by appending a " / denominator" to it. 
-      This is useful, for instance, when showing the number of steps completed out of a total expected. 
-      The same format is applied to the denominator.    
+      A JMESPath that resolves to a number. This feature allows adding context to the displayed number by appending a " / denominator" to it.
+      This is useful, for instance, when showing the number of steps completed out of a total expected.
+      The same format is applied to the denominator.
     </ParamField>
 
     <ParamField path="tabRight" type="boolean" default="false">
       If enabled, the number will appear on the right side of the tab.
     </ParamField>
+
   </Tab>
   <Tab title="Type">
     ```ts Typescript
@@ -136,12 +141,14 @@ The `number` view displays a piece of data as formatted number.
 </Tabs>
 
 ## Date
-Date
-The date view displays a formatted date and supports a deadline warning feature. This feature displays the date in red with a warning icon if it's past or too close to today.
+
+The `date` view displays a formatted date and supports a deadline warning feature. This feature displays the date in red with a warning icon if it's past or too close to today.
 
 <Tabs>
   <Tab title="Screenshot">
-    ☝️ View an example of how the `date` view appears here.
+    <Frame caption="A date view with a deadline warning">
+      <img src="/images/configuration/ui/widgets/date.png" />
+    </Frame>
   </Tab>
   <Tab title="API">
     <ParamField path="type" type="literal" required>
@@ -206,12 +213,15 @@ The date view displays a formatted date and supports a deadline warning feature.
 </Tabs>
 
 ## Progress bar
-The progress bar view displays a percentage value in a classic progress bar 
+
+The progress bar view displays a percentage value in a classic progress bar
 which changes color based on predefined ranges of progress.
 
 <Tabs>
   <Tab title="Screenshot">
-    ☝️ View an example of how the `date` view appears here.
+    <Frame >
+      <img src="/images/configuration/ui/widgets/progress.png"  />
+    </Frame>
   </Tab>
   <Tab title="API">
     <ParamField path="type" type="literal" required>
@@ -222,9 +232,10 @@ which changes color based on predefined ranges of progress.
     </ParamField>
 
     <ParamField path="denominatorPath" type="JMESPath">
-      Allows scaling the number resolved using the `path`, 
+      Allows scaling the number resolved using the `path`,
       allowing it to not necessarily be between 0 and 1.
     </ParamField>
+
   </Tab>
   <Tab title="Type">
     ```ts Typescript
@@ -246,11 +257,14 @@ which changes color based on predefined ranges of progress.
 </Tabs>
 
 ## Labels
+
 The `labels` view displays a list of strings as a set of labels.
 
 <Tabs>
   <Tab title="Screenshot">
-    ☝️ View an example of how the `date` view appears here.
+    <Frame>
+      <img src="/images/configuration/ui/widgets/labels.png" />
+    </Frame>
   </Tab>
   <Tab title="API">
     <ParamField path="type" type="literal" required>
@@ -258,11 +272,6 @@ The `labels` view displays a list of strings as a set of labels.
     </ParamField>
     <ParamField path="path" type="JMESPath" required>
       A JMESPath that resolves to a list of strings to be displayed.
-    </ParamField>
-
-    <ParamField path="denominatorPath" type="JMESPath">
-      Allows scaling the number resolved using the `path`, 
-      allowing it to not necessarily be between 0 and 1.
     </ParamField>
   </Tab>
   <Tab title="Type">
@@ -277,7 +286,7 @@ The `labels` view displays a list of strings as a set of labels.
     ```json Simple usage
     {
       "type": "labels",
-      "path": "data.tags",
+      "path": "data.favoriteMeals",
     }
     ```
   </Tab>
@@ -300,9 +309,10 @@ The `status` displays a progress as well as the name of the status at the same t
     </ParamField>
 
     <ParamField path="denominatorPath" type="JMESPath">
-      Allows scaling the number resolved using the `path`, 
+      Allows scaling the number resolved using the `path`,
       allowing it to not necessarily be between 0 and 1.
     </ParamField>
+
   </Tab>
   <Tab title="Type">
     ```ts Typescript
@@ -325,7 +335,7 @@ The `status` displays a progress as well as the name of the status at the same t
 
 ## Key-value
 
-The `keyValue` view displays any widget (usually a text) nested under a label. 
+The `keyValue` view displays any widget (usually a text) nested under a label.
 This widget is usually used to display relevant data in the [trace infos](/configuration/ui/infos.mdx).
 
 <Tabs>
@@ -343,6 +353,7 @@ This widget is usually used to display relevant data in the [trace infos](/confi
     <ParamField path="value.view" type="WidgetView" required>
       Any valid widget view.
     </ParamField>
+
   </Tab>
   <Tab title="Type">
     ```ts Typescript
@@ -386,7 +397,7 @@ A label can be displayed next to the icon.
       The type of the view, must be equal to `icon`.
     </ParamField>
     <ParamField path="icon" type="string">
-      A static icon id to be displayed if the `iconPath` does not resolve to a truthy value.
+      A static icon id to be displayed if the `iconPath` does not resolve to a _truthy_ value.
     </ParamField>
     <ParamField path="iconPath" type="JMESPath">
       A JMESPath that resolves to an icon id. 
@@ -396,7 +407,7 @@ A label can be displayed next to the icon.
       A JMESPath that resolves to a string displayed as a label next to the icon.
     </ParamField>
     <ParamField path="path" type="JMESPath">
-      A JMESPath that if resolves to a truthy value will trigger the display of the icon. 
+      A JMESPath that if resolves to a _truthy_ value will trigger the display of the icon. 
       By default, the icon is displayed if the path is not set.
     </ParamField>
   </Tab>
@@ -424,7 +435,7 @@ A label can be displayed next to the icon.
 
 ## Boolean
 
-The `boolean` view displays a checkmark if the path resolves to a truthy value.\
+The `boolean` view displays a checkmark if the path resolves to a _truthy_ value.\
 It is similar to the [icon view](/configuration/ui/widgets#icon) but with a simpler configuration.
 
 <Tabs>
@@ -506,4 +517,3 @@ The `link` view displays an HTML link. It has the same configuration as the [Lin
     ```
   </Tab>
 </Tabs>
-

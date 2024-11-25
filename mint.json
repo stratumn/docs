@@ -10,7 +10,7 @@
     "items": "container"
   },
   "background": {
-    "style": "windows"
+    "style": "grid"
   },
   "favicon": "/favicon.svg",
   "colors": {
@@ -39,6 +39,10 @@
     "name": "API Reference"
   },
   "openapi": "/api-reference/open-api-v1.json",
+  "modeToggle": {
+    "default": "dark",
+    "isHidden": false
+  },
   "anchors": [
     {
       "name": "API Reference",
@@ -87,7 +91,7 @@
           "group": "UI configuration",
           "icon": "sparkles",
           "pages": [
-            "configuration/ui/definition",
+            "configuration/ui/introduction",
             "configuration/ui/overview",
             "configuration/ui/infos",
             "configuration/ui/widgets"
