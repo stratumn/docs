@@ -1,0 +1,245 @@
+---
+title: 'UI Configuration'
+sidebarTitle: 'Introduction'
+description: ''
+icon: 'book-open'
+iconType: 'duotone'
+---
+
+Each workflow has a set of customizable views that are used 
+to display informations about the workflow and its traces. 
+
+## Workflow overview
+
+The worfklow overview is a table that displays informations about the workflow's traces.\
+Each row represents a trace and its columns are composed of [widgets](/configuration/ui/widgets).
+
+<Frame>
+  <img src="/images/configuration/ui/overview.webp" loading="lazy"/>
+</Frame>
+
+<Expandable title="code example" defaultOpen={false}>
+  ```ts Example based on the above screenshot
+  const overview = {
+    tableWidthBuffer: 15,
+    minColumnsWidth: 'small',
+    minRowsHeight: 30,
+    selectBoxWidth: 34,
+    overscanRowCount: 1,
+    rowsHeight: 42,
+    columnsWidth: 'medium',
+    dataSelectorPath: 'meta.traceId',
+    defaultDisplay: {
+      columns: [
+        'name',
+        'clientName',
+        'dueDate',
+        'status',
+        'progress',
+        'order'
+      ]
+    },
+    fixedColumns: [
+      {
+        key: 'name',
+        header: 'Trace',
+        width: 'small',
+        cell: {
+          view: {
+            type: 'text',
+            path: 'meta.traceName'
+          },
+          link: {
+            rootUrl: '/trace/',
+            urlPath: 'meta.traceId',
+            openInNewTab: true
+          }
+        },
+        sort: { type: 'text', path: 'meta.traceCreatedAt' }
+      }
+    ],
+    columns: [
+      {
+        key: 'clientName',
+        header: 'Client name',
+        width: 'medium',
+        cell: {
+          view: {
+            type: 'text',
+            path: `data.clientName`
+          }
+        }
+      },
+      {
+        key: 'dueDate',
+        header: 'Due Date',
+        width: 125,
+        cell: {
+          view: {
+            type: 'date',
+            path: `data.dueDate`,
+            isDeadline: true,
+            deadlineWarningBuffer: 10,
+            donePath: `data.isPrepared`
+          }
+        }
+      },
+      {
+        key: 'status',
+        header: 'Status',
+        width: 'medium',
+        cell: {
+          view: {
+            type: 'status',
+            path: `data.status.value`,
+            progressPath: `data.status.progress`
+          }
+        }
+      },
+      {
+        key: 'progress',
+        header: 'Progress',
+        width: 'medium',
+        cell: {
+          view: {
+            type: 'progress',
+            path: `data.status.progress`
+          }
+        }
+      },
+      {
+        key: 'order',
+        header: 'Order',
+        width: 'medium',
+        cell: {
+          view: {
+            type: 'labels',
+            path: `data.order`
+          },
+          tooltip: {
+            conditionPath: `data.order`,
+            delay: 200,
+            body: {
+              view: {
+                key: 'Order',
+                type: 'keyValue',
+                value: {
+                  view: {
+                    path: `data.order`,
+                    type: 'list'
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  };
+  ```
+</Expandable>
+
+## Trace infos
+
+
+The trace infos is displayed within the trace and consist of multiple expandable and configurable blocks. 
+These blocks are composed of [widgets](/configuration/ui/widgets) that showcase relevant details about the current state of the trace.
+
+<Frame>
+  <img src="/images/configuration/ui/trace-infos.webp" loading="lazy"/>
+</Frame>
+<Note>
+  A _Comments_ window is usually placed at the bottom of the trace infos.
+</Note>
+
+<Expandable title="code example" defaultOpen={false}>
+  ```ts Example based on the above screenshot
+  const traceInfos = {
+    view: {
+      type: 'box',
+      sections: [
+        {
+          view: {
+            title: 'Order details',
+            type: 'window',
+            collapsable: true,
+            displayItemCount: false,
+            items: [
+              {
+                view: {
+                  type: 'keyValue',
+                  key: 'Order',
+                  value: {
+                    view: {
+                      type: 'text',
+                      path: `data.order`
+                    }
+                  }
+                }
+              },
+              {
+                view: {
+                  key: 'Sauce',
+                  type: 'keyValue',
+                  value: {
+                    view: {
+                      path: `data.sauce`,
+                      type: 'text'
+                    }
+                  }
+                }
+              },
+              {
+                view: {
+                  key: 'Status',
+                  type: 'keyValue',
+                  value: {
+                    view: {
+                      type: 'text',
+                      path: `data.status.value`
+                    }
+                  }
+                }
+              },
+              {
+                view: {
+                  key: 'Progress',
+                  type: 'keyValue',
+                  value: {
+                    view: {
+                      path: `data.status.progress`,
+                      type: 'number',
+                      format: {
+                        options: { style: 'percent', maximumFractionDigits: 0 }
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          view: {
+            type: 'window',
+            title: 'comments',
+            collapsable: true,
+            displayItemCount: true,
+            items: [
+              {
+                view: {
+                  type: 'array',
+                  itemsPath: 'data.comments',
+                  itemsWidget: { view: { type: 'comment' } },
+                  defaultSort: { direction: 'desc' }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  };
+  ```
+</Expandable>
+

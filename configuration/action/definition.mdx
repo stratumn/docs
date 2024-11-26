@@ -1,0 +1,49 @@
+---
+title: 'Action definition'
+sidebarTitle: 'Definition'
+description: ''
+icon: 'book-open'
+iconType: 'duotone'
+---
+
+There's multiple type of actions, with the most common type being the form action. After submission, a business logic called [_effects_](/configuration/action/effects) is usually executed.
+
+## Basic action definition
+
+```ts
+const form: BetterFormDef = {...};
+const effects = [...],
+
+export const placeOrder: IActionDef = {
+  key: 'placeOrder',
+  title: 'Place order',
+  icon: 'lucide_BadgePlus',
+  form: form,
+  effects: effects,
+  answerableComments: ['comment']
+};
+```
+
+## Form action
+
+## Effects
+
+<CardGroup cols={2}>
+  <Card title="Form" icon="table" href="/configuration/action/form">
+    The most common type of action
+  </Card>
+  <Card
+    title="Analyze your process"
+    icon="chart-simple"
+    href="https://mintlify.com/docs/development"
+  >
+    Use our analytics software to understand your data and act on it
+  </Card>
+  <Card
+    title="Widget library"
+    icon="palette"
+    href="https://mintlify.com/docs/settings/global"
+  >
+    Customize the look and feel of your process
+  </Card>
+</CardGroup>

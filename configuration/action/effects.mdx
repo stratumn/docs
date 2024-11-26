@@ -1,0 +1,298 @@
+---
+title: 'Effects'
+description: ''
+icon: 'bolt'
+---
+
+## What are the effects?
+
+Effects are the business logic written in TypeScript that is executed by Trace API 
+after an [action](/configuration/action) is submitted.
+
+The effects declared in the configuration project are stringified functions that are stored in the database,
+so they can be interpreted at runtime by Trace API.
+
+<Info>
+  No external constants or functions can be used in the effects.
+</Info>
+
+### Workflow definitions
+
+The `dsl.$definitions` object is the read-only storage of the workflow. It can be used to store either constants, or stringified functions that will be accessible in the effects.
+The definitions can be of any shape, but by convention, it's shape is the following:
+<Tabs>
+  <Tab title="Documentation">
+    <ParamField path="repo" type="object">
+      The repository of the workflow were workflow constants are stored.
+    </ParamField>
+    <ParamField path="functions" type="object">
+      An object where each key is the name of the function and the value is the stringified function.
+    </ParamField>
+    <ParamField path="wfIds" type="object" >
+      A map between the workflow label and its id.
+    </ParamField>
+    <ParamField path="env" type="object" >
+      A map between the environment variable name and its value.
+    </ParamField>
+  </Tab>
+  <Tab title="Example">
+    ```ts Example of a workflow definitions
+    {
+      repo: {
+        prices: {
+          pizza: 10,
+          salad: 5,
+        }
+      },
+      functions: {
+        clone: 'function clone(value) { return JSON.parse(JSON.stringify(value)); }',
+      },
+      wfIds: {
+        restaurant: '10'
+      },
+      env: {
+        STRATUMN_API_URL: 'https://api.stratum.com',
+        STAGE: 'release',
+        ...
+      },
+    }
+    ```
+  </Tab>
+   <Tab title="Usage">
+    ```ts Usage in effects
+    const { repo, functions, wfIds, env } = dsl.$definitions;
+    const { clone } = functions;
+    
+    const pizzaPrice = repo.prices.pizza;
+    const clonedPrices = clone(repo.prices);
+    ```
+  </Tab>
+</Tabs>
+
+
+### External functions
+
+Some functions are declared directly in Trace API, and can be accessed direcly in the effects under `dsl.$modules`.
+
+<AccordionGroup>
+  <Accordion title="createLink" icon="link">
+    An asynchronous function designed to create a new link, 
+    enabling Trace to automatically perform an action. 
+    This action can be executed within any workflow, 
+    either by creating a new trace or targeting an existing one.
+    <Tabs>
+      <Tab title="Body">
+        <ParamField path="workflowId" type="string" required>
+          The id of the target workflow.
+        </ParamField>
+        <ParamField path="traceId" type="string">
+          The id of the target trace.\
+          If not provided, the link will be created in a new trace.
+        </ParamField>
+        <ParamField path="action" type="string" required>
+          The action that will be done.
+        </ParamField>
+        <ParamField path="formData" type="object" required>
+          The form data to be used in the action.
+        </ParamField>
+        <ParamField path="groupLabel" type="string" required>
+          The label of the group that will do the automatic action.\ 
+          Since `createLink` makes an automated action, the group label is usually the `'traceBot'`.
+        </ParamField>
+        <ParamField path="createdAt" type="string" required>
+          The date of creation of the link.
+        </ParamField>
+      </Tab>
+      <Tab title="Example">
+        ```typescript 
+        const newLink = await dsl.$modules.createLink({
+          action: 'orderMeal',
+          workflowId: dsl.$definitions.wfIds.restaurant,
+          formData: {
+            meal: 'Pizza'
+          },
+          groupLabel: 'traceBot',
+        });
+        ```
+      </Tab>
+    </Tabs>
+  </Accordion>
+
+  <Accordion title="searchTraces" icon="magnifying-glass">
+    An asynchronous function that searches for traces, allowing optional filters to be applied based on the traces' data.
+    <Tabs>
+      <Tab title="Body">
+        <ParamField path="workflowId" type="string" required>
+          The id of the workflow to search traces in.
+        </ParamField>
+        <ParamField path="filters" type="JSONDeepFilterValue[]">
+          The filters to apply to the search. 
+          <Expandable title="JSONDeepFilterValue type" defaultOpen={false}>
+            <Tabs> 
+              <Tab title="TextFilterValue">
+                <ParamField path="type" type="literal" required>
+                  The type of the filter, must be equal to `'text'`.
+                </ParamField>
+                <ParamField path="path" type="JMESPath" required>
+                  The JMESPath to apply to the filter.
+                </ParamField>
+                <ParamField path="value" type="string" required>
+                  The value to filter on.
+                </ParamField>
+                <ParamField path="exact" type="boolean">
+                  Whether the filter should be an exact match.
+                </ParamField>
+                <ParamField path="not" type="boolean">
+                  Whether the filter should be a negative match.
+                </ParamField>
+              </Tab>
+              <Tab title="NumberFilterValue">
+                <ParamField path="type" type="literal" required>
+                  The type of the filter, must be equal to `'number'`.
+                </ParamField>
+                <ParamField path="path" type="JMESPath" required>
+                  The JMESPath to apply to the filter.
+                </ParamField>
+                <ParamField path="value" type="string" required>
+                  The value to filter on.
+                </ParamField>
+              </Tab>
+              <Tab title="DateFilterValue">
+                <ParamField path="type" type="literal" required>
+                  The type of the filter, must be equal to `'date'`.
+                </ParamField>
+                <ParamField path="path" type="JMESPath" required>
+                  The JMESPath to apply to the filter.
+                </ParamField>
+                <ParamField path="value" type="string" required>
+                  The value to filter on.
+                </ParamField>
+                <ParamField path="format" type="string">
+                  The format of the stored date to filter on.
+                </ParamField>
+                <ParamField path="inputFormat" type="string">
+                  The format of the provided date value.
+                </ParamField>
+              </Tab>
+            </Tabs>
+          </Expandable>
+        </ParamField>
+      </Tab>  
+      <Tab title="Example">
+        ```typescript Get all traces where the meal is 'Pizza'
+       const res = await dsl.$modules.searchTraces({
+          workflowId: dsl.$definitions.wfIds.restaurant,
+          filters: [
+            {
+              type: 'text',
+              path: 'data.meal',
+              value: 'Pizza'
+            }
+          ]
+        });
+        ```
+      </Tab>
+    </Tabs>
+  </Accordion>
+
+  <Accordion title="createScheduler" icon="timer">
+    An asynchronous function used to create a new scheduler.\
+    The scheduler can be for example used to create links at a specific interval.
+    <Tabs>
+      <Tab title="Body">
+        <ParamField path="name" type="string" required>
+          The unique name of the scheduler.
+        </ParamField>
+        <ParamField path="data" type="object">
+          The data that will be used by the scheduler.
+        </ParamField>
+        <ParamField path="cron_expression" type="string" required>
+          The [cron expression](https://crontab.guru/) that defines the schedule.
+        </ParamField>
+        <ParamField path="created_by" type="string" required>
+          Any string to identify the creator of the scheduler.
+        </ParamField>
+      </Tab>
+      <Tab title="Example">
+        ```typescript Creates a link in the current trace every day
+        const scheduler = await dsl.$modules.createScheduler({
+          name: `restaurant-${meta.traceName}`,
+          data: {
+            webhook_url: `${STRATUMN_API_URL}/v2/traces/${meta.traceId}/links`,
+            webhook_payload: {
+              groupLabel: 'traceBot',
+              actionKey: 'orderMeal',
+              traceInput: {
+                meal: 'Pizza'
+              },
+              workflowId: dsl.$definitions.wfIds.restaurant
+            }
+          },
+          cron_expression: '0 0 * * *',
+          created_by: `restaurant` satisfies WorkflowLabel
+        });
+        // We store the scheduler infos in the state to be able to stop it later
+        state.data.scheduler = scheduler;
+        ```
+      </Tab>
+    </Tabs>
+  </Accordion>
+  <Accordion title="stopScheduler" icon="stop">
+    An asynchronous function that stops a scheduler using its id.
+    <Tabs>
+      <Tab title="Body">
+        <ParamField path="id" type="string" required>
+          The id of the scheduler to stop.
+        </ParamField>
+      </Tab>
+      <Tab title="Example">
+        ```typescript stopScheduler example
+        await dsl.$modules.stopScheduler({
+          id: data.scheduler.infos.id
+        });
+        ```
+      </Tab>
+    </Tabs>
+  </Accordion>
+</AccordionGroup>
+
+### Example - _Order a meal_
+
+Let's imagine a restaurant workflow where a client can order a meal.
+
+The workflow has two groups: `cook` and `client`. 
+In the first action, the client will select a meal to order and submit the form.
+The goal of the effect is to:
+- store the selected meal in the trace's data, 
+- add the `'Order received'` status to the trace with a progress of `20%`,
+- and update the next available actions for each group:
+  - the `cook` group should be able to do the `prepareOrder` action and `comment`,
+  - the `client` group should only be able to do the `comment` action.
+
+```ts orderMealEffect
+async function orderMealEffect(
+  dsl: RestaurantWorkflowContext<FormData>
+) {
+  // We destructure the DSL variables for readability
+  const { state, formData } = dsl.$variables;
+  const { data, nextActions } = state;
+
+  // The chosen meal is retrieved from the form data and stored in the data
+  data.meal = formData.meal;
+
+  data.status = {
+    status: 'Order received',
+    progress: 0.20
+  };
+
+  // Now, we update the next actions
+  nextActions = {
+    cook: ['prepareOrder', 'comment'],
+    client: ['comment']
+  }
+}
+
+const effects: Statement[] = [execJs(orderMealEffect)];
+```
+
+

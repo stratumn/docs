@@ -1,0 +1,530 @@
+---
+title: 'Widgets'
+description: ''
+icon: 'cube'
+iconType: 'duotone'
+---
+
+A _widget_ is a term used to represent an atomic UI element associated with specific data.
+It serves as a versatile tool that adds context based on the trace state.
+Its primary objective is to deliver meaningful insights to end users, offering a clear understanding of the progress made in the process.
+
+Since users may have varying preferences for the information displayed,
+it is essential to create a configuration file aligned with the principles used for the overview table configuration.
+
+# Views
+
+A _view_ is a keyword we use to define an atomic display of a piece of data. We provide core views which are fundamental to displaying correctly various natures of data.
+
+All the views have the common property:
+
+<ParamField path="type" type="string" required>
+  The type of view to display.
+</ParamField>
+
+Widget views can be used in the [workflow overview](/configuration/ui/introduction#workflow-overview) and the [trace infos](/configuration/ui/introduction#trace-infos) via their dedicated configuration files.
+
+## Text
+
+The `text` view enables to display a piece of data as plain text. If the text is too long, an ellipses will be displayed. \
+This is the default view used if a view **type** is invalid.
+
+<Tabs>
+  <Tab title="Screenshot">
+    <Frame>
+      <img src="/images/configuration/ui/widgets/text.png" />
+    </Frame>
+  </Tab>
+  <Tab title="API">
+    <ParamField path="type" type="literal">
+      The type of the view, must be equal to `text`, or undefined.
+    </ParamField>
+    <ParamField path="path" type="JMESPath" required>
+      The path to the data to be displayed.
+    </ParamField>
+    <ParamField path="isRichText" type="boolean" default="false">
+      If the provided path resolves to a [SlateJS](https://docs.slatejs.org/) object, this option will display the data as a rich text.
+    </ParamField>
+    <ParamField path="default" type="JMESPath">
+      The default value to display if the data found at path is empty.
+    </ParamField>
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+    type TextView = {
+      type?: 'text';
+      path: string;
+      default?: string;
+      isRichText?: boolean;
+    }
+    ```
+  </Tab>
+  <Tab title="Example">
+    ```json Simple usage
+    {
+      "type": "text",
+      "path": "data.order.name"
+    }
+    ```
+    <Note>
+      The [JMESPath](https://jmespath.org/specification.html) syntax is very powerful and can be used to build complex expressions.
+      For example, the path `"['Hello ',userName,', how are you?'].join('',@)"` will produce `"Hello ${userName}, how are you?"`.
+    </Note>
+  </Tab>
+</Tabs>
+
+## Number
+
+The `number` view displays a piece of data as formatted number.
+
+<Tabs>
+  <Tab title="Screenshot">
+    ☝️ Welcome to the content that you can only see inside the first Tab.
+  </Tab>
+  <Tab title="API">
+    <ParamField path="type" type="literal" required>
+      The type of the view, must be equal to `number`.
+    </ParamField>
+
+    <ParamField path="path" type="JMESPath" required>
+      A JMESPath that resolves to a number.
+    </ParamField>
+
+    <ParamField path="format" type="object">
+      Settings to format the displayed number using the [Number toLocaleString()](https://www.w3schools.com/jsref/jsref_tolocalestring_number.asp) method.
+      <Expandable title="properties" defaultOpen={true}>
+        <ParamField path="format.local" type="string or string[]" default="navigator.language or 'en-US'">
+          A locale string or array of locale strings that contain one or more language or locale tags.
+          If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale.
+        </ParamField>
+        <ParamField path="format.options" type="object">
+          An object that contains one or more properties that specify comparison options.
+          See [Number toLocaleString()](https://www.w3schools.com/jsref/jsref_tolocalestring_number.asp) for the list of options.
+        </ParamField>
+      </Expandable>
+    </ParamField>
+
+    <ParamField path="denominatorPath" type="JMESPath">
+      A JMESPath that resolves to a number. This feature allows adding context to the displayed number by appending a " / denominator" to it.
+      This is useful, for instance, when showing the number of steps completed out of a total expected.
+      The same format is applied to the denominator.
+    </ParamField>
+
+    <ParamField path="tabRight" type="boolean" default="false">
+      If enabled, the number will appear on the right side of the tab.
+    </ParamField>
+
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+    type NumberView = {
+      type: 'number';
+      path: string;
+      denominatorPath?: string;
+      tabRight?: boolean;
+      format?: {
+        options?: Intl.NumberFormatOptions;
+        local?: string | string[];
+      };
+    };
+    ```
+  </Tab>
+  <Tab title="Example">
+    ```json Simple usage
+    {
+      "type": "number",
+      "path": "data.amount",
+      "tabRight": true,
+      "format": { "options": { "minimumFractionDigits": 2 } }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Date
+
+The `date` view displays a formatted date and supports a deadline warning feature. This feature displays the date in red with a warning icon if it's past or too close to today.
+
+<Tabs>
+  <Tab title="Screenshot">
+    <Frame caption="A date view with a deadline warning">
+      <img src="/images/configuration/ui/widgets/date.png" />
+    </Frame>
+  </Tab>
+  <Tab title="API">
+    <ParamField path="type" type="literal" required>
+      The type of the view, must be equal to `date`.
+    </ParamField>
+    <ParamField path="path" type="JMESPath" required>
+      A JMESPath that resolves to a date string.
+    </ParamField>
+
+    <ParamField path="format" type="string" default="DD/MM/YYYY">
+      The format to apply to the date when displaying. Uses the [moment.js formats](https://momentjs.com/docs/#/displaying/format/).
+    </ParamField>
+
+    <ParamField path="isDeadline" type="boolean" default="false">
+      Enables the deadline warning feature if set to `true`.
+    </ParamField>
+
+    <ParamField path="deadlineWarningBuffer" type="number" default="0">
+      The number of days before the deadline to start showing the warning. For example, `5` means the warning appears 5 days before the deadline.
+    </ParamField>
+
+    <ParamField path="donePath" type="JMESPath">
+      A path to a value that disables the warning feature if it evaluates to `true` (e.g., when the task is flagged as "Done").
+    </ParamField>
+
+    <ParamField path="deadlineWarningIcon" type="string" default="Clock">
+      The icon ID to use for the warning. Default is `'Clock'`.
+    </ParamField>
+
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+    type DateView = {
+      type: 'date';
+      path: string;
+      format?: string;
+    } & (
+      | {
+          isDeadline?: false;
+        }
+      | {
+          isDeadline: true;
+          deadlineWarningBuffer?: number;
+          donePath?: string;
+          deadlineWarningIcon?: string;
+        }
+    );
+    ```
+  </Tab>
+  <Tab title="Example">
+    ```json Simple usage
+    {
+      "type": "date",
+      "path": "data.dueDate",
+      "isDeadline": true,
+      "deadlineWarningBuffer": 7,
+      "donePath": "data.isTraceClosed",
+      "format": "MM/DD/YYYY",
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Progress bar
+
+The progress bar view displays a percentage value in a classic progress bar
+which changes color based on predefined ranges of progress.
+
+<Tabs>
+  <Tab title="Screenshot">
+    <Frame >
+      <img src="/images/configuration/ui/widgets/progress.png"  />
+    </Frame>
+  </Tab>
+  <Tab title="API">
+    <ParamField path="type" type="literal" required>
+      The type of the view, must be equal to `progress`.
+    </ParamField>
+    <ParamField path="path" type="JMESPath" required>
+      A JMESPath that resolves to a number, usually between 0 and 1.
+    </ParamField>
+
+    <ParamField path="denominatorPath" type="JMESPath">
+      Allows scaling the number resolved using the `path`,
+      allowing it to not necessarily be between 0 and 1.
+    </ParamField>
+
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+    type ProgressView = {
+      type: 'progress';
+      path: string;
+      denominatorPath?: string;
+    }
+    ```
+  </Tab>
+  <Tab title="Example">
+    ```json Simple usage
+    {
+      "type": "progress",
+      "path": "data.status.progress",
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Labels
+
+The `labels` view displays a list of strings as a set of labels.
+
+<Tabs>
+  <Tab title="Screenshot">
+    <Frame>
+      <img src="/images/configuration/ui/widgets/labels.png" />
+    </Frame>
+  </Tab>
+  <Tab title="API">
+    <ParamField path="type" type="literal" required>
+      The type of the view, must be equal to `progress`.
+    </ParamField>
+    <ParamField path="path" type="JMESPath" required>
+      A JMESPath that resolves to a list of strings to be displayed.
+    </ParamField>
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+    type LabelsView = {
+      type: 'labels';
+      path: string;
+    }
+    ```
+  </Tab>
+  <Tab title="Example">
+    ```json Simple usage
+    {
+      "type": "labels",
+      "path": "data.favoriteMeals",
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Status
+
+The `status` displays a progress as well as the name of the status at the same time.
+
+<Tabs>
+  <Tab title="Screenshot">
+    ☝️ View an example of how the `date` view appears here.
+  </Tab>
+  <Tab title="API">
+    <ParamField path="type" type="literal" required>
+      The type of the view, must be equal to `status`.
+    </ParamField>
+    <ParamField path="path" type="JMESPath" required>
+      The path to the date string to be displayed.
+    </ParamField>
+
+    <ParamField path="denominatorPath" type="JMESPath">
+      Allows scaling the number resolved using the `path`,
+      allowing it to not necessarily be between 0 and 1.
+    </ParamField>
+
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+    type ProgressWidget = {
+      type: 'progress';
+      path: string;
+      denominatorPath?: string;
+    }
+    ```
+  </Tab>
+  <Tab title="Example">
+    ```json Simple usage
+    {
+      "type": "progress",
+      "path": "data.status.progress",
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Key-value
+
+The `keyValue` view displays any widget (usually a text) nested under a label.
+This widget is usually used to display relevant data in the [trace infos](/configuration/ui/introduction#trace-infos).
+
+<Tabs>
+  <Tab title="Screenshot">
+    ☝️ View an example of how the `keyValue` view appears here.
+  </Tab>
+  <Tab title="API">
+    <ParamField path="type" type="literal" required>
+      The type of the view, must be equal to `keyvalue`.
+    </ParamField>
+    <ParamField path="key" type="string" required>
+      The label as plain text, describing the pair.
+    </ParamField>
+
+    <ParamField path="value.view" type="WidgetView" required>
+      Any valid widget view.
+    </ParamField>
+
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+    type KeyValueWidget = {
+      type: 'keyValue';
+      key: string;
+      value: WidgetView;
+    }
+    ```
+  </Tab>
+  <Tab title="Example">
+    ```json Simple usage
+    {
+      "type": "keyValue",
+      "key": "Progress",
+      "value": {
+        "view": {
+          "path": "data.status.progress",
+          "type": "number",
+          "format": {
+            "options": { "style": "percent", "maximumFractionDigits": 0 }
+          }
+        }
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Icon
+
+The `icon` view displays an icon, which can be static or resolved dynamically from a path.
+A label can be displayed next to the icon.
+
+<Tabs>
+  <Tab title="Screenshot">
+    ☝️ View an example of how the `icon` view appears here.
+  </Tab>
+  <Tab title="API">
+    <ParamField path="type" type="literal" required>
+      The type of the view, must be equal to `icon`.
+    </ParamField>
+    <ParamField path="icon" type="string">
+      A static icon id to be displayed if the `iconPath` does not resolve to a _truthy_ value.
+    </ParamField>
+    <ParamField path="iconPath" type="JMESPath">
+      A JMESPath that resolves to an icon id. 
+      Renders the *Document* icon if the resolved value is falsy, or the icon defined in `icon` (see above) if it's set.
+    </ParamField>
+    <ParamField path="labelPath" type="JMESPath">
+      A JMESPath that resolves to a string displayed as a label next to the icon.
+    </ParamField>
+    <ParamField path="path" type="JMESPath">
+      A JMESPath that if resolves to a _truthy_ value will trigger the display of the icon. 
+      By default, the icon is displayed if the path is not set.
+    </ParamField>
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+    type IconWidget = {
+      type: 'icon';
+      iconPath?: string;
+      icon?: string;
+      labelPath?: string;
+      path?: string;
+    }
+    ```
+  </Tab>
+  <Tab title="Example">
+    ```json Simple usage
+    {
+      "type": "icon",
+      "iconPath": "meta.head.action.icon",
+      "labelPath": "meta.head.action.title"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Boolean
+
+The `boolean` view displays a checkmark if the path resolves to a _truthy_ value.\
+It is similar to the [icon view](/configuration/ui/widgets#icon) but with a simpler configuration.
+
+<Tabs>
+  <Tab title="Screenshot">
+    ☝️ View an example of how the `boolean` view appears here.
+  </Tab>
+  <Tab title="API">
+    <ParamField path="type" type="literal" required>
+      The type of the view, must be equal to `boolean`.
+    </ParamField>
+    <ParamField path="path" type="JMESPath" required>
+      A JMESPath that resolves to a boolean value which, if truthy, will display the checkmark.
+    </ParamField>
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+    type BooleanWidget = {
+      type: 'boolean';
+      path: string;
+    }
+    ```
+  </Tab>
+  <Tab title="Example">
+    ```json Simple usage
+    {
+      "type": "boolean",
+      "path": "data.isValid"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Link
+
+The `link` view displays an HTML link. It has the same configuration as the [Link Wrapper](/configuration/ui/widgets#link-wrapper) view.
+
+<Tabs>
+  <Tab title="Screenshot">
+    ☝️ View an example of how the `link` view appears here.
+  </Tab>
+  <Tab title="API">
+    <ParamField path="type" type="literal" required>
+      The type of the view, must be equal to `link`.
+    </ParamField>
+    <ParamField path="path" type="JMESPath" required>
+      A JMESPath that resolves to a string. This text will be displayed as the link content.
+      If no `urlPath` is provided or its resolved value is falsy, the resolved value of the path will also act as the link url.
+    </ParamField>
+    <ParamField path="rootUrl" type="string">
+      The root of the url, as plain text.
+    </ParamField>
+    <ParamField path="urlPath" type="JMESPath">
+      A JMESPath that resolves to a string, which will be used as the url suffix.
+    </ParamField>
+    <ParamField path="openInNewTab" type="boolean" default="false">
+      Whether to open the link in a new browser tab or in the current one.
+    </ParamField>
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+    type LinkWidget = {
+      type: 'link';
+      path: string;
+      rootUrl?: string;
+      urlPath?: string;
+      openInNewTab?: boolean;
+    }
+    ```
+  </Tab>
+  <Tab title="Example">
+    ```json Simple usage
+    {
+      "type": "link",
+      "path": "'The documentation'",
+      "rootUrl": "https://",
+      "urlPath": "data.documentationUrl",
+      "openInNewTab": false
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Wrappers
+
+Wrappers are components that wrap other widgets.
+
+### Link Wrapper
+
+### Window Wrapper
+
+### Tooltip Wrapper

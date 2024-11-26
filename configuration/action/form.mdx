@@ -1,0 +1,32 @@
+---
+title: 'Form action'
+icon: 'text-size'
+description: 'The most common type of action'
+---
+
+Since no business related code is hardcoded in Stratumn, the form of the action is defined in the action's configuration using [react-jsonschema-form](https://rjsf-team.github.io/react-jsonschema-form/docs/),
+a package that makes it easy to create dynamic forms with a JSON Schema, as well as handle dependencies between fields.
+
+```ts
+const form: BetterFormDef = {
+  schema: {
+    title: 'A registration form',
+    type: 'object',
+    properties: {
+      meal: {
+        type: 'string',
+        title: 'Meal'
+      },
+      comment: {
+        type: 'string',
+        title: 'Comment',
+        format: 'draft'
+      },
+      required: ['meal']
+    }
+  },
+  uiSchema: {
+    'ui:order': ['meal', 'comment']
+  }
+};
+```

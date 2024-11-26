@@ -5,6 +5,13 @@
     "dark": "/logo/dark.svg",
     "light": "/logo/light.svg"
   },
+  "layout": "sidenav",
+  "sidebar": {
+    "items": "container"
+  },
+  "background": {
+    "style": "windows"
+  },
   "favicon": "/favicon.svg",
   "colors": {
     "primary": "#4B35D2",
@@ -19,14 +26,22 @@
     {
       "name": "Support",
       "url": "mailto:info@stratumn.com"
-    },
-    {
-      "name": "Trace",
-      "url": "https://trace.stratumn.com"
     }
   ],
+  "topbarCtaButton": {
+    "name": "Go to Trace",
+    "url": "https://trace.stratumn.com",
+    "type": "link",
+    "arrow": true,
+    "style": "pill"
+  },
   "primaryTab": {
     "name": "API Reference"
+  },
+  "openapi": "/api-reference/open-api-v1.json",
+  "modeToggle": {
+    "default": "dark",
+    "isHidden": false
   },
   "anchors": [
     {
@@ -42,20 +57,53 @@
       "url": "api-reference/v2",
       "icon": "square-terminal",
       "version": "v2"
+    },
+    {
+      "name": "Configuration",
+      "icon": "rocket",
+      "url": "configuration"
     }
   ],
   "navigation": [
     {
       "group": "API Documentation",
-      "pages": ["api-reference/introduction", "api-reference/create-a-trace"]
+      "pages": [
+        "api-reference/introduction",
+        "api-reference/create-a-trace"
+      ]
     },
     {
       "group": "Workflow configuration",
-      "pages": ["configuration/introduction", "configuration/action"]
+      "pages": [
+        "configuration/introduction",
+        "configuration/trace",
+        {
+          "group": "Action",
+          "icon": "pen-to-square",
+          "pages": [
+            "configuration/action/definition",
+            "configuration/action/form",
+            "configuration/action/effects"
+          ]
+        },
+        {
+          "group": "UI configuration",
+          "icon": "sparkles",
+          "pages": [
+            "configuration/ui/introduction",
+            "configuration/ui/widgets"
+          ]
+        }
+      ]
     }
   ],
-  "versions": ["v2", "v1"],
+  "versions": [
+    "v2",
+    "v1"
+  ],
+  "theme": "venus",
   "footerSocials": {
-    "github": "https://github.com/stratumn"
+    "github": "https://github.com/stratumn",
+    "website": "https://trace.stratumn.com"
   }
 }

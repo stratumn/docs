@@ -1,0 +1,38 @@
+---
+title: 'Trace state'
+description: "Each trace has a state, which is an object that contains business data but also metadata about the trace's lifecycle."
+icon: 'brackets-curly'
+---
+
+## State definition
+
+The state object is defined as follows, with `data` being the business data of the trace.
+
+```ts
+type State = {
+  data: Record<string, any>;
+  tasks: Record<string, TaskState>;
+  nextActions: Record<string, NextActionState>;
+  notifications: Record<string, Notification>;
+};
+```
+
+### State Data
+
+The `data` property is an object that contains the business data of the trace,
+it's shape varies depending on the workflow and is mostly defined by the workflow specs.
+
+The data are the result of the execution of the effects.
+
+### Next actions
+
+When an action is submitted, the `nextActions` property is set by the effects to define which actions will next be available to a group.
+
+```ts
+state.nextActions = {
+  assigner: ['comment'],
+  entity: ['validateClaim', 'comment'],
+  admin: ['closeTrace', 'comment']
+  [global.assignedOwner?.label]: ['comment'],
+}
+```

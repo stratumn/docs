@@ -1,0 +1,27 @@
+---
+title: 'Introduction'
+description: 'Learn how to configure a Stratumn workflow'
+icon: 'pen-to-square'
+---
+
+## Workflow
+
+In Stratumn, a workflow corresponds to a business process.
+It defines a set of [actions](/configuration/action) that are done in a specific order, automatically or manually by users.
+
+<Frame caption="A restaurant workflow">
+  <img
+    src="/images/configuration/restaurant.svg"
+    style={{ borderRadius: '1rem' }}
+  />
+</Frame>
+
+### Trace
+
+A [trace](/configuration/trace) is an instance of a workflow.
+It is created when the first action of the workflow is made, and contains all data related to the execution of the workflow.
+
+<Info>
+  In the above workflow, a new trace is created every time a customer orders
+  ameal.
+</Info>
