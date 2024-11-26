@@ -77,7 +77,6 @@
       "pages": [
         "configuration/introduction",
         "configuration/trace",
-        "essentials/markdown",
         {
           "group": "Action",
           "icon": "pen-to-square",
