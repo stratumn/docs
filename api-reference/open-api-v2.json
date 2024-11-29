@@ -61,7 +61,7 @@
                 ],
                 "summary": "Create a new trace",
                 "tags": [
-                    "trace"
+                    "Trace"
                 ]
             }
         },
@@ -134,7 +134,7 @@
                 ],
                 "summary": "New action",
                 "tags": [
-                    "trace"
+                    "Trace"
                 ]
             }
         },
@@ -172,7 +172,7 @@
                 ],
                 "summary": "Retrieve trace state",
                 "tags": [
-                    "trace"
+                    "Trace"
                 ]
             }
         },
@@ -220,7 +220,7 @@
                 ],
                 "summary": "Retrieve trace details",
                 "tags": [
-                    "trace"
+                    "Trace"
                 ]
             }
         },
@@ -260,7 +260,7 @@
                 ],
                 "summary": "Download a file",
                 "tags": [
-                    "trace"
+                    "Trace"
                 ]
             }
         },
@@ -303,7 +303,7 @@
                 ],
                 "summary": "Download files",
                 "tags": [
-                    "trace"
+                    "Trace"
                 ]
             }
         },
@@ -336,7 +336,7 @@
                 },
                 "summary": "Login using a private key",
                 "tags": [
-                    "login"
+                    "Login"
                 ]
             }
         },
@@ -370,7 +370,7 @@
                 },
                 "summary": "Login using email/password",
                 "tags": [
-                    "login"
+                    "Login"
                 ]
             }
         },
@@ -486,7 +486,7 @@
             "description": "Stratumn Preprod Server"
         },
         {
-            "url": "https://api.us.preprod.stratumn.com",
+            "url": "https://api.preprod.us.stratumn.com",
             "description": "Stratumn US Preprod Server"
         }
     ],

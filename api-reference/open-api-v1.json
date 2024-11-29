@@ -399,7 +399,7 @@
                 },
                 "summary": "Login using a private key",
                 "tags": [
-                    "login"
+                    "Login"
                 ]
             }
         },
@@ -432,7 +432,7 @@
                 },
                 "summary": "Login using email",
                 "tags": [
-                    "login"
+                    "Login"
                 ]
             }
         },
@@ -500,7 +500,7 @@
             "description": "Stratumn Preprod Server"
         },
         {
-            "url": "https://api.us.preprod.stratumn.com",
+            "url": "https://api.preprod.us.stratumn.com",
             "description": "Stratumn US Preprod Server"
         }
     ],
