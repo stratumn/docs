@@ -306,29 +306,40 @@ The `status` displays a progress as well as the name of the status at the same t
       The type of the view, must be equal to `status`.
     </ParamField>
     <ParamField path="path" type="JMESPath" required>
-      The path to the date string to be displayed.
+      A path that resolves to a string representing the status name.
     </ParamField>
 
-    <ParamField path="denominatorPath" type="JMESPath">
-      Allows scaling the number resolved using the `path`,
-      allowing it to not necessarily be between 0 and 1.
+    <ParamField path="progressPath" type="JMESPath" required  >
+      A path that resolves to a number between 0 and 1, representing the progress of the status.
+    </ParamField>
+
+    <ParamField path="progressSize" type="number" default="16">
+      The diameter of the progress circle, in pixels.
+    </ParamField>
+
+    <ParamField path="cancelValue" type="number">
+      The value that represents the status as cancelled.
+      In some workflows 0% is not cancel, so we need to specify a cancel value to prevent 0% override.
     </ParamField>
 
   </Tab>
   <Tab title="Type">
     ```ts Typescript
-    type ProgressWidget = {
-      type: 'progress';
+    type StatusWidget = {
+      type: 'status';
       path: string;
-      denominatorPath?: string;
+      progressPath: string;
+      progressSize?: number;
+      cancelValue?: number;
     }
     ```
   </Tab>
   <Tab title="Example">
     ```json Simple usage
     {
-      "type": "progress",
-      "path": "data.status.progress",
+      "type": "status",
+      "path": "data.status.name",
+      "progressPath": "data.status.progress"
     }
     ```
   </Tab>
@@ -369,14 +380,12 @@ This widget is usually used to display relevant data in the [trace infos](/confi
     ```json Simple usage
     {
       "type": "keyValue",
-      "key": "Progress",
+      "key": "Status",
       "value": {
         "view": {
-          "path": "data.status.progress",
-          "type": "number",
-          "format": {
-            "options": { "style": "percent", "maximumFractionDigits": 0 }
-          }
+          "type": "status",
+          "path": "data.status.name",
+          "progressPath": "data.status.progress"
         }
       }
     }
