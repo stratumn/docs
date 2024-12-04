@@ -18,12 +18,12 @@ so they can be interpreted at runtime by Trace API.
 
 ### Workflow definitions
 
-The `dsl.$definitions` object is the read-only storage of the workflow. It can be used to store either constants, or stringified functions that will be accessible in the effects.
+The `dsl.$definitions` object is the read-only storage of the workflow. It can be used to store constants, environment variables, workflow ids and stringified functions that will be accessible in the effects.
 The definitions can be of any shape, but by convention, it's shape is the following:
 <Tabs>
   <Tab title="Documentation">
     <ParamField path="repo" type="object">
-      The repository of the workflow were workflow constants are stored.
+      The repository of the workflow where workflow constants are stored.
     </ParamField>
     <ParamField path="functions" type="object">
       An object where each key is the name of the function and the value is the stringified function.
