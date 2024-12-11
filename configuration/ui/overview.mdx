@@ -1,0 +1,666 @@
+---
+title: 'Overview table'
+sidebarTitle: 'Overview'
+description: ''
+icon: 'table'
+---
+
+This document introduces the **Workflow Overview Table** feature in Trace-UI, outlining its functionalities and configuration. It is intended for developers, workflow administrators, and integrators familiar with JSON data representation.
+
+---
+
+# Introduction to the Table Component
+
+The table component in Trace-UI is a versatile tool for displaying lists of data objects. In the context of Trace-UI, it is specifically utilized to display, filter, and sort traces within a workflow. Each trace corresponds to a row in the table, with cells representing distinct aspects of the trace state.
+
+The goal is to provide users with actionable insights into the workflow, including completed steps and pending tasks. Given the variability of workflows, the table is designed as a highly configurable framework to accommodate a wide range of use cases.
+
+## Example Table
+
+Below is an example of a table produced using the Workflow Overview Table:
+
+<img
+  src="/images/configuration/ui/overview/overview.png"
+  style={{ borderRadius: '0.5rem' }}
+/>
+
+The table is built using a **display configuration document** that defines how data is read and displayed for each column. The display adapts to the structure of the trace state defined in the workflow.
+
+> **Note**: To optimize performance and responsiveness, Trace-UI employs the React-Window library for virtualization. This ensures only visible rows (plus a buffer) are rendered, with additional rows dynamically loaded during scrolling.
+
+---
+
+## Configuration Overview
+
+The Workflow Overview Table is configured through a JSON document. Below is an example structure:
+
+```json
+{
+  "fixedColumns": [...],
+  "columns": [...],
+  "defaultDisplay": {...},
+  "templates": [...],
+  "aggregation": {...},
+  "tableWidthBuffer": 15,
+  "selectBoxWidth": 34,
+  "minColumnsWidth": "small",
+  "minRowsHeight": 30,
+  "dataSelectorPath": "rowId",
+  "overscanRowCount": 1
+}
+```
+
+### Key Configuration Sections
+
+- **Core Definition**
+
+  - `fixedColumns`: Defines non-scrollable columns.
+  - `columns`: Defines scrollable columns.
+
+- **Display Options**
+
+  - `defaultDisplay`: Specifies default visual configurations.
+  - `templates`: Enables templating for specific display requirements.
+  - `aggregation`: Configures data aggregation.
+
+- **Static Parameters**
+  - `tableWidthBuffer`: Buffer for scroll bar (default: `15px`).
+  - `selectBoxWidth`: Width for selection box column (default: `34px`).
+  - `minColumnsWidth`: Minimum column width (default: `small`).
+  - `minRowsHeight`: Minimum row height (default: `30px`).
+  - `dataSelectorPath`: Primary key for rows (default: `rowId`).
+  - `overscanRowCount`: Number of rows pre-rendered beyond visible area (default: `1`).
+
+<Warning>
+  Note that over-scanning too much can negatively impact performance. Default:
+  1.
+</Warning>
+
+### Column Width Keywords
+
+| **Keyword** | **Width** |
+| ----------- | --------- |
+| `xsmall`    | 50px      |
+| `small`     | 100px     |
+| `medium`    | 200px     |
+| `large`     | 300px     |
+| `xlarge`    | 500px     |
+
+---
+
+## Column Definitions
+
+Columns are configured using the `fixedColumns` and `columns` fields, with each column specified as follows:
+
+```json
+{
+  "key": "traceName",
+  "header": "Name",
+  "width": "medium",
+  "cell": {...},
+  "sort": {...},
+  "filter": {...},
+  "aggregation": {...}
+}
+```
+
+---
+
+## Advanced Rendering with React-Window
+
+The Workflow Overview Table leverages React-Window to enhance performance:
+
+- **Overscanning Rows**: Configured with `overscanRowCount` to render additional rows for smoother navigation and improved responsiveness.
+- **Dynamic Rendering**: Only visible rows are actively rendered, reducing resource usage.
+
+---
+
+# Views
+
+A View is a keyword we use to define an atomic display of a piece of data. Trace-UI provides core views which are fundamental to displaying correctly various natures of data, and also ‘packaged’ views which are more presentational.
+
+## Common Properties
+
+- **type**: Defines the type of view to display.
+
+All views are configured using a certain number of ‘paths’-inputs which enable to localise in the data object the information we want to display, or the conditions we want to check to decide on the actual shape of the display. We use **JMESPath** to fetch the data given a path, which means in particular that deep paths into objects using ‘dot’-notation are allowed, as well as fancy indexing and filtering.
+Paths defined as `“”` will be pointing at the data (traces state) root (stringified for text-type views).
+
+All `text` views, when falling on a data to display that is actually still an object, will **stringify** it in a classical json-friendly way.Paths pointing at nothing will usually result in empty views.
+
+So far the available view types are: `text`, `html`, `prose`, `list`, `labels`, `code`, `icon`, `date`, `activity`, `number`, `progress`.
+
+All views is a widget, you can know more about it [here](/configuration/ui/widgets)
+
+---
+
+## Wrappers
+
+Wrappers add interaction behaviors to views. They are implemented as higher-order components that "wrap" the view components.
+
+### Common Properties
+
+- **conditionPath**: Path to a data value. The wrapper is applied only if the value is truthy (i.e., not false, empty, or null).
+
+### Available Wrappers
+
+- **[Link](/configuration/ui/widgets#link-wrapper)**: Wraps the view as a clickable link.
+- **[Modal](/configuration/ui/widgets#modal-wrapper)**: Wraps the view with modal-trigger behavior.
+- **[Tooltip](/configuration/ui/widgets#tooltip-wrapper)**: Wraps the view with hover-triggered tooltips.
+
+---
+
+# Sorting the Table
+
+Table sorting is initiated by clicking the sort icon next to a column header. The sorting cycle is:
+
+1. **Not Sorted** → **Ascending** → **Descending** → **Not Sorted**
+
+Sorting one column disables sorting on other columns (multi-sort is not supported).
+
+<img
+  src="/images/configuration/ui/overview/sorting.png"
+  style={{ borderRadius: '0.5rem' }}
+/>
+
+## Sorting Configuration
+
+Sorting behavior is determined by the column configuration:
+
+```json
+{
+  "type": "text",
+  "path": "name"
+}
+```
+
+- **type**: Specifies the sorting logic.
+- **path**: Specifies the data path to sort on.
+
+Each widget view provides a default sorting configuration, but this can be overridden at the column level (in the `sort` field of the column configuration). For example, when sorting involves nested data such as data in a modal or tooltip, the column-level override ensures sorting works correctly.
+
+When encountering `undefined` values, they are placed first in ascending order.
+
+Sorting execution is client-side by default, which is useful when there are no pagination constraints or when all rows fit within the page size. This approach reduces server-side load while maintaining responsiveness.
+
+## Sort Types
+
+The following sorting types are supported:
+
+- **binary**: Groups truthy and falsy values.
+- **text**: Alphabetical sorting using the `localeCompare()` function. This also works well for ISO date strings.
+- **number**: Sorts numeric values.
+- **date**: Parses strings into date objects and compares them.
+  - **inputFormat**: Optional. Specifies how date strings should be parsed.
+- **length**: Sorts lists or strings by the number of items.
+- **occurrence**: Sorts by the occurrence of a specific string within a data field.
+  - **searchPath**: A dynamic query for the string to search.
+  - **search**: A static string to search for occurrences.
+
+---
+
+## Views Sorting Configuration
+
+The following are the default sorting configurations for each view type:
+
+### Text, HTML, Prose, Code, Date
+```json
+{
+  "type": "text",
+  "path": "name"
+}
+```
+
+### List, Labels
+```json
+{
+  "type": "length",
+  "path": view.path
+}
+```
+
+### Number, Progress
+```json
+{
+  "type": "number",
+  "path": view.path
+}
+```
+
+### Icon
+If labelPath or iconPath set:
+```json
+{
+  "type": "text",
+  "path": view.labelPath || view.iconPath
+}
+```
+Otherwise:
+
+```json
+{
+  "type": "binary",
+  "path": view.path
+}
+```
+
+### Activity
+```json
+{
+  "type": "text",
+  "path": view.when.path
+}
+```
+
+# Filtering the Table
+
+Filtering functionality in the table allows users to narrow down data by specifying conditions on column values. Clicking on the **Filter** icon in a table header reveals the filtering interface for that column. Each column has a filter input directly below its header.
+
+<img
+  src="/images/configuration/ui/overview/filtering.png"
+  style={{ borderRadius: '0.5rem' }}
+/>
+
+Filtering configuration determines both the interface and the logic for executing filters. It defines what filtering means for each column and how users interact with the filtering interface.
+
+## Filtering Configuration Example
+```json
+{
+  "type": "text",
+  "path": "name",
+  "interpreter": {
+    "type": "search"
+  }
+}
+```
+
+## Configuration Fields
+- **type**: Specifies the type of filtering interface provided.
+- **path**: Defines the data path to search within. If the path points to an object, it is stringified to enable "global" searches across multiple data fields.
+- **interpreter**: Configures the filtering logic. Default: `{"type": "search"}`.
+
+Each widget view comes with a default filtering configuration. However, this can be overridden at the column level using the `filter` field in the column configuration. This is particularly useful for filtering nested information, such as data displayed in a modal or tooltip, while the view itself shows an icon.
+
+When encountering `undefined` values during filtering, those rows are excluded.
+
+Filtering is implemented client-side by default, which is efficient when there is no pagination (e.g., the number of rows is smaller than the page size). This approach is also beneficial for use cases where all data is preloaded, such as when the table is used within a form reader.
+
+---
+
+## Filtering Interface
+
+Currently, only one type of filtering interface is supported:
+
+#### Text Filtering
+A simple text input that updates the filter with a debounce of 250ms (i.e., filtering is triggered only if the input remains unchanged for 250ms). Multiple filter values can be specified by separating them with a comma (`,`).  
+
+**Additional Parameters:**
+- **placeholder**: Text displayed in the filter input when it is empty. Default: `'Search'`.
+
+---
+
+## Filtering Interpreter Configuration
+
+The filtering interpreter determines how filters are applied to data. A set of predefined filters is available, all of which operate on values specified by the `path`. If the `path` points to objects, these values are stringified for filtering.
+
+If no interpreter is configured, the default is `search`.
+
+#### Search Filter
+Filters based on the occurrence of a filter string in a text value specified by the `path`.  
+- **Behavior**: Case-insensitive.  
+- **Example**: Searching for "status" matches any rows containing "status" in the specified path.
+
+#### Regex Filter
+Filters using regular expression matching.  
+- **Behavior**: Allows complex matching logic, such as filtering out rows that do not contain a specific string.  
+- **Additional Parameters:**
+  - **flags**: Options passed to the regular expression (e.g., `i` for case-insensitivity). Optional.
+
+#### Number Filter
+Filters rows based on numeric comparisons. The following operators are supported:
+- `"n"`: Matches numbers equal to `n`.
+- `"<n"`: Matches numbers strictly less than `n`.
+- `">n"`: Matches numbers strictly greater than `n`.
+- `"n<<m"`: Matches numbers strictly between `n` and `m`.
+
+**Inclusive Boundaries:**  
+Supports inclusive comparisons with `=`:
+- `"<="` for less than or equal.
+- `">="` for greater than or equal.
+- `"n=<<m"` for inclusive ranges between `n` and `m`.
+- `"n=<<=m"` for fully inclusive ranges.
+
+
+## View Filtering Configuration
+
+### Text, HTML, Prose, Code, Date, List, Labels
+
+<Tabs>
+  <Tab title="API">
+    <ParamField path="type" type="literal" required>
+     The type of the view, must be equal to `text`, or undefined.
+    </ParamField>
+
+    <ParamField path="path" type="JMESPath" required>
+       The path to the data to be displayed.
+    </ParamField>
+
+  </Tab>
+  <Tab title="Example">
+    ```json
+    {
+        "type": "text",
+        "path": "name"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+### Number
+
+<Tabs>
+  <Tab title="API">
+    <ParamField path="type" type="literal" required>
+      The type of the view, must be equal to `number`.
+    </ParamField>
+
+    <ParamField path="path" type="JMESPath" required>
+       A JMESPath that resolves to a number.
+    </ParamField>
+
+    <ParamField path="placeholder" type="literal">
+       A placeholder to display.
+    </ParamField>
+    <ParamField path="interpreter" type="object" required>
+      Allows you to define how the data should be processed
+      <Expandable title="properties" defaultOpen={true}>
+        <ParamField path="interpreter.type" type="string" >
+          The type of data to be interpreted
+        </ParamField>
+        </Expandable>
+    </ParamField>
+
+  </Tab>
+  <Tab title="Example">
+    ```json
+    {
+          "type": "text",
+          "path": view.path,
+          "placeholder": "Eg >20, 10<<15"
+          "interpreter": {
+            "type": "number"
+        }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+### Progress
+
+<Tabs>
+    <Tab title="API">
+        <ParamField path="type" type="literal" required>
+
+            The type of the view, must be equal to `text`.
+
+        </ParamField>
+
+        <ParamField path="path" type="JMESPath" required>
+
+        The path to the data to be displayed.
+
+        </ParamField>
+
+        <ParamField path="placeholder" type="literal">
+
+        A placeholder to display. Example: "Eg >0.5, 0.25 < 0.75".
+
+        </ParamField>
+
+        <ParamField path="interpreter" type="object" required>
+
+        Allows you to define how the data should be processed.
+
+            <Expandable title="properties" defaultOpen={true}>
+
+                <ParamField path="interpreter.type" type="string">
+
+                The type of data to be interpreted, must be `number`.
+
+                </ParamField>
+
+            </Expandable>
+
+        </ParamField>
+    </Tab>
+    <Tab title="Example">
+        ```json
+        {
+            "type": "text",
+            "path": "view.path",
+            "placeholder": "Eg > 0.5, 0.25 < 0.75",
+            "interpreter": {
+                "type": "number"
+            }
+        }
+        ```
+    </Tab>
+
+</Tabs>
+
+### Icon
+
+<Tabs> 
+    <Tab title="API">
+        <ParamField path="type" type="literal" required>
+
+        The type of the view, must be equal to `text`.
+
+        </ParamField>
+
+        <ParamField path="path" type="JMESPath" required>
+
+        The path to the data to be displayed. This should point to either `view.labelPath` or `view.iconPath`.
+
+        </ParamField>
+    </Tab>
+
+    <Tab title="Example">
+
+        ```json
+        {
+        "type": "text",
+        "path": "view.labelPath || view.iconPath"
+        }
+        ```
+    </Tab>
+
+</Tabs>
+
+### Activity
+
+<Tabs> 
+    <Tab title="API">
+        <ParamField path="type" type="literal" required>
+
+        The type of the view, must be equal to `text`.
+
+        </ParamField>
+
+        <ParamField path="path" type="JMESPath" required>
+
+        The path to the data to be displayed. This should point to `view.who.path`.
+
+        </ParamField>
+    </Tab>
+
+    <Tab title="Example">
+        ```json
+        {
+        "type": "text",
+        "path": "view.who.path"
+        }
+        ```
+
+    </Tab>
+
+</Tabs>
+
+---
+
+## Multiselect Filtering
+
+The **Multiselect** feature allows you to filter columns by selecting multiple predefined values.
+
+<img
+  src="/images/configuration/ui/overview/multiselect.png"
+  style={{ borderRadius: '0.5rem' }}
+/>
+
+#### Activating Multiselect
+
+To enable Multiselect, add `select` on `type` field and configure the `filter` field in the column definition with the following:
+
+- **enum**: An array of objects representing the possible filter values.
+- **interpreter** *(Optional)*: Used for `Progress` and `Number` types to define how the values are interpreted.
+
+
+<Tabs>
+  <Tab title="Date multiselect">
+    ```json
+    {
+        "cell": {
+            "view": {
+            "format": "DD/MM/YYYY",
+            "path": "data.weekStartDate",
+            "type": "date"
+            }
+        },
+        "filter": {
+            "enum": [
+            {
+                "label": "10/05/2021",
+                "value": "2021-05-10"
+            },
+            {
+                "label": "05/10/2022",
+                "value": "2022-10-05"
+            },
+            {
+                "label": "12/11/2023",
+                "value": "2023-11-12"
+            }
+            ],
+            "path": "data.weekStartDate",
+            "type": "select"
+        }
+    }
+    ```
+  </Tab>
+  <Tab title="Number multiselect">
+    ```json 
+    {
+        "filter": {
+            "enum": [
+            {
+                "label": "10%",
+                "value": "0.1"
+            },
+            {
+                "label": "50%",
+                "value": "0.5"
+            },
+            {
+                "label": "100%",
+                "value": "1"
+            }
+            ],
+            "path": "data.progressValue",
+            "type": "select",
+            "interpreter": {
+            "type": "number"
+            }
+        }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+Multiselect filtering provides a user-friendly way to narrow down rows based on predefined values while supporting flexible customization for various data types.
+
+---
+
+# Aggregating
+
+For tables that are locally stored (not partially served by a server), it is possible to compute operations on the entire dataset. When the aggregation switch is toggled, a new row appears at the bottom of the table. At the global table definition level, the aggregation switch label can be customized:
+
+```json
+"aggregation": {
+  "label": "My custom switch label"
+}
+```
+
+## Column Aggregation Configuration
+
+Aggregation for each column is defined as a widget configuration. Instead of individual row data, the widget receives the entire dataset in the following format:
+
+```json
+{
+  "data": [ {...rowData} ]
+}
+```
+
+**Example**: Computing the Average of a Column
+
+To calculate the average of numerical values in the amount column:
+
+```json
+{
+  "view": {
+    "path": "data[].amount | avg(@)",
+    "type": "number"
+  }
+}
+```
+
+#### Advanced Aggregation
+
+You can implement more complex aggregations, such as a clickable cell that opens a modal with multiple aggregation data points and statistics.
+
+Default Aggregation Configuration
+
+By default, numerical columns provide a summation of all values. Other views do not have predefined aggregations.
+
+---
+
+# Customization
+
+Once the table structure is defined by the workflow administrator, users can customize the display to fit their needs. These customizations are stored in the browser's local storage, ensuring persistence unless manually or programmatically cleared.
+
+## Local Storage Structure
+
+Customizations are stored in the following format:
+
+```json
+{
+  "rowsHeight": 42,
+  "columns": [
+    { "key": "name", "width": 75, "filter": "claire, paul" },
+    { "key": "age", "filter": "<=40" },
+    ...
+  ],
+  "sortSetup": { "key": "age", "direction": "d" }
+}
+```
+
+This document stores:
+
+- Selected columns to display
+- Column order and width
+- Row height
+- Sort configuration
+- Column filters
+
+## Persistence
+
+These configurations do not store confidential information; they only handle display preferences. When users revisit the same URL (workflow overview with a specific ID), their layout will be restored.
