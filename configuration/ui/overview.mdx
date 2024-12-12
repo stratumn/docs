@@ -204,6 +204,7 @@ The following sorting types are supported:
 The following are the default sorting configurations for each view type:
 
 ### Text, HTML, Prose, Code, Date
+
 ```json
 {
   "type": "text",
@@ -212,6 +213,7 @@ The following are the default sorting configurations for each view type:
 ```
 
 ### List, Labels
+
 ```json
 {
   "type": "length",
@@ -220,6 +222,7 @@ The following are the default sorting configurations for each view type:
 ```
 
 ### Number, Progress
+
 ```json
 {
   "type": "number",
@@ -228,13 +231,16 @@ The following are the default sorting configurations for each view type:
 ```
 
 ### Icon
+
 If labelPath or iconPath set:
+
 ```json
 {
   "type": "text",
   "path": view.labelPath || view.iconPath
 }
 ```
+
 Otherwise:
 
 ```json
@@ -245,6 +251,7 @@ Otherwise:
 ```
 
 ### Activity
+
 ```json
 {
   "type": "text",
@@ -264,6 +271,7 @@ Filtering functionality in the table allows users to narrow down data by specify
 Filtering configuration determines both the interface and the logic for executing filters. It defines what filtering means for each column and how users interact with the filtering interface.
 
 ## Filtering Configuration Example
+
 ```json
 {
   "type": "text",
@@ -275,6 +283,7 @@ Filtering configuration determines both the interface and the logic for executin
 ```
 
 ## Configuration Fields
+
 - **type**: Specifies the type of filtering interface provided.
 - **path**: Defines the data path to search within. If the path points to an object, it is stringified to enable "global" searches across multiple data fields.
 - **interpreter**: Configures the filtering logic. Default: `{"type": "search"}`.
@@ -291,47 +300,53 @@ Filtering is implemented client-side by default, which is efficient when there i
 
 Currently, only one type of filtering interface is supported:
 
-#### Text Filtering
-A simple text input that updates the filter with a debounce of 250ms (i.e., filtering is triggered only if the input remains unchanged for 250ms). Multiple filter values can be specified by separating them with a comma (`,`).  
+### Text Filtering
+
+A simple text input that updates the filter with a debounce of 250ms (i.e., filtering is triggered only if the input remains unchanged for 250ms). Multiple filter values can be specified by separating them with a comma (`,`).
 
 **Additional Parameters:**
-- **placeholder**: Text displayed in the filter input when it is empty. Default: `'Search'`.
+
+- **placeholder**: Text displayed in the filter input when it is empty. Default: `search`.
 
 ---
 
-## Filtering Interpreter Configuration
+## Filtering Interpreter
 
 The filtering interpreter determines how filters are applied to data. A set of predefined filters is available, all of which operate on values specified by the `path`. If the `path` points to objects, these values are stringified for filtering.
 
 If no interpreter is configured, the default is `search`.
 
-#### Search Filter
-Filters based on the occurrence of a filter string in a text value specified by the `path`.  
-- **Behavior**: Case-insensitive.  
+### Search Filter
+
+Filters based on the occurrence of a filter string in a text value specified by the `path`.
+
+- **Behavior**: Case-insensitive.
 - **Example**: Searching for "status" matches any rows containing "status" in the specified path.
 
-#### Regex Filter
-Filters using regular expression matching.  
-- **Behavior**: Allows complex matching logic, such as filtering out rows that do not contain a specific string.  
+### Regex Filter
+
+Filters using regular expression matching.
+
+- **Behavior**: Allows complex matching logic, such as filtering out rows that do not contain a specific string.
 - **Additional Parameters:**
   - **flags**: Options passed to the regular expression (e.g., `i` for case-insensitivity). Optional.
 
-#### Number Filter
+### Number Filter
+
 Filters rows based on numeric comparisons. The following operators are supported:
-- `"n"`: Matches numbers equal to `n`.
-- `"<n"`: Matches numbers strictly less than `n`.
-- `">n"`: Matches numbers strictly greater than `n`.
-- `"n<<m"`: Matches numbers strictly between `n` and `m`.
+`n`: Matches numbers equal to `n`.
+`<n`: Matches numbers strictly less than `n`.
+`>n`: Matches numbers strictly greater than `n`.
+`n<<m`: Matches numbers strictly between `n` and `m`.
 
 **Inclusive Boundaries:**  
 Supports inclusive comparisons with `=`:
-- `"<="` for less than or equal.
-- `">="` for greater than or equal.
-- `"n=<<m"` for inclusive ranges between `n` and `m`.
-- `"n=<<=m"` for fully inclusive ranges.
+`<=` for less than or equal.
+`>=` for greater than or equal.
+`n=<<m` for inclusive ranges between `n` and `m`.
+`n=<<=m` for fully inclusive ranges.
 
-
-## View Filtering Configuration
+## View Filtering
 
 ### Text, HTML, Prose, Code, Date, List, Labels
 
@@ -522,8 +537,7 @@ The **Multiselect** feature allows you to filter columns by selecting multiple p
 To enable Multiselect, add `select` on `type` field and configure the `filter` field in the column definition with the following:
 
 - **enum**: An array of objects representing the possible filter values.
-- **interpreter** *(Optional)*: Used for `Progress` and `Number` types to define how the values are interpreted.
-
+- **interpreter** _(Optional)_: Used for `Progress` and `Number` types to define how the values are interpreted.
 
 <Tabs>
   <Tab title="Date multiselect">
@@ -623,7 +637,7 @@ To calculate the average of numerical values in the amount column:
 }
 ```
 
-#### Advanced Aggregation
+### Advanced Aggregation
 
 You can implement more complex aggregations, such as a clickable cell that opens a modal with multiple aggregation data points and statistics.
 
@@ -661,6 +675,104 @@ This document stores:
 - Sort configuration
 - Column filters
 
-## Persistence
+### Persistence
 
-These configurations do not store confidential information; they only handle display preferences. When users revisit the same URL (workflow overview with a specific ID), their layout will be restored.
+These configurations do not store confidential information; they only handle display preferences. When users revisit the same URL (workflow overview with a specific ID), hey will retrieve exactly the same layout.
+
+## Display Menu
+
+The Display Menu available on the top right of the table enables to select the columns that users want to see.
+
+<img
+  src="/images/configuration/ui/overview/display-menu.png"
+  style={{ borderRadius: '0.5rem', height: '400px' }}
+/>
+
+Selecting a column will add an object with its key at the end of the ‘columns’ field of the user display configuration document. Deselecting one will simply remove the object with the corresponding key from it.
+
+Hence note that deselecting then reselecting a column will result in the column being pushed at the end of the table.
+
+## Layout customization
+
+The **Customize layout** mode lets the user reorder the columns by drag-n-dropping the headers and resize their width, as well as resize the rows height (only the first row is resizable and this will update all the rows height).
+
+<Frame caption="Reordering columns">
+  <img
+    src="/images/configuration/ui/overview/reordering.png"
+    style={{ borderRadius: '0.5rem' }}
+  />
+</Frame>
+
+Reordering the columns will result in changing the order elements in the columns field of the user display configuration document, while resizing their width will change the width field of the corresponding column. Resizing the first row will result in modifying the rowsHeight field at the root of this document.
+
+<Frame caption="Resizing columns">
+  <img
+    src="/images/configuration/ui/overview/resizing.png"
+    style={{ borderRadius: '0.5rem' }}
+  />
+</Frame>
+
+> **Note**: to improve reactivity of the page when customizing the layout, as long as the mouse is held down, the drag-n-drop and resizing only dynamically affects the column headers. The table itself is re-rendered only once the mouse is released. (An intermediary feature could be a debounced update of the table, i.e. as long as the mouse has not moved for at least 250 ms for example).
+
+# Exporting the table
+
+It is possible to export the data by clicking on the Export icon of the table headers, as a csv file.
+All the table display configuration currently setup will apply when exporting: sorting, filtering and columns selection. The headers of the csv columns will be the names of the table columns.
+Each view configured in the columns defines its own export mechanism, mostly to replicate what is displayed in the table UI.
+
+## Export Configuration
+
+So far, a small amount of things are configurable for export, mainly at the root of the config, under “exportCsv”:
+
+`filename`: the name of the exported .csv file. Actual file name will be: date-filename.csv.
+_Example: 2021-07-20-tabel_export.csv_
+
+`delimiter`: the delimiter string used to build the .csv file. Default: ‘;’.
+
+```json
+{
+  "exportCsv": { "filename": "My Export", "delimiter": "," }
+}
+```
+
+# Templating
+
+Templating means pre-packaging a set of display configurations that users can toggle from the Display Menu. When a user selects a template from the Display Menu, his current local storage cached display configuration will be replaced by the template’s definition. Templates also have labels displayed in the menu to let the user know what they are about.
+
+<img
+  src="/images/configuration/ui/overview/templating.png"
+  style={{ borderRadius: '0.5rem', height: '400px' }}
+/>
+
+It corresponds to the following elements of the table global configuration:
+
+```json
+{
+  // default display
+  "defaultDisplay": {
+    "columns": [
+      { "key": "name"},
+      { "key": "age"},
+      { "key": "address"},
+      ...
+    ]
+  },
+  // labelled templates
+  "templates": [
+    {
+      "label": "Advanced",
+      "displayConfig": {
+        "columns": [
+          { "key": "name", "width": 75, "filter": "claire, paul" },
+          { "key": "age", "filter": "<=40" },
+          ...
+        ],
+        "sortSetup": { "key": "age", "direction": "d" }
+      }
+    },
+    ...
+  ]
+}
+```
+
+The `default` label is reserved to the field `defaultDisplay` of the table configuration.
