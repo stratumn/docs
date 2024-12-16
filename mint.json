@@ -93,7 +93,8 @@
             "configuration/ui/introduction",
             "configuration/ui/widgets"
           ]
-        }
+        },
+        "configuration/project-structure"
       ]
     }
   ],

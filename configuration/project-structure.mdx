@@ -1,0 +1,127 @@
+---
+title: 'Project structure'
+sidebarTitle: 'Project structure'
+icon: 'folder-open'
+iconType: 'duotone'
+---
+{/* 
+
+  Go here to modify the folder structure. (Don't forget to update the url if you make any change!)
+  https://tree.nathanfriend.com/?s=(%27op6s!(%27fYcy!true~fullPZh!false~trailTgSlash!true~rootDot!false)~L(%27L%27CProcUs2.K2.K.%3CKName%3E2tUtB2dumpB2src2*account-3fileB-teams0orgV2*K%2F2*wAs-3mYagIWA%2F-CWA-*3*ac6zcYcelR_ZeRomment0HzdZaM*EiUGfqsM*mySupIFqG*3*4MbusTUsXdslXpZhsXJte.40*uiM9M*9.filtIsG*9GTfos0*80*migra60Q-HB-*85*Jte5*45*utils.type58.global0Ey0script04Vj%27)~vIsion!%271%27)*%20%20-270V-2j*3Tdex04typU5.Q06tion7**8conJnts9ovIviewAorkflowBs%2FC_JurYtE_positorG07H*defTi6IerJstaKenvLsource!M-7Qsha_dROrdIGcTinUesV.tsX.4GYanZat_rej%5Cnqunc6zsM37%01zqj_ZYXVUTRQMLKJIHGECBA987654320-*
+
+*/}
+
+In this section, we'll go through the folder structure of a typical process configuration project and explain each folder and file's purpose.
+
+### Accounts
+
+The `src/accounts/` folder is where the process's organization, its teams and its users are declared.\
+By convention, each type of account is declared in a separate file, and all are exported in the `index.ts`.
+To be generated, the accounts must be used in the workflow's definition.
+
+The `files/` folder is used to store the account's avatar images.
+
+### Environment variables
+
+The process' environment variables are declared in the `.env` file and in the `.env.<envName>` files depending on the generation environment.\
+The `src/env/index.ts` file is used to parse with a [Zod](https://zod.dev/) schema and export the environment variables.\
+Additionnally, the environment variables are added to the [workflow's definition](/configuration/action/effects#workflow-definitions) so that they can be used inside the actions' effects.
+
+### Workflows
+
+The process' workflows are defined in subfolders of the `src/workflows/` folder, as well as a shared folder which is used to declare shared constants, types and functions.\
+All worklows are exported in the `index.ts` file.
+
+### Workflow structure
+
+Each workflow should follow the following structure:
+
+<AccordionGroup>
+  <Accordion title="Actions" icon="file">
+    Actions are defined in separate files and all are exported in the `index.ts` file.
+  </Accordion>
+  <Accordion title="Definitions" icon="database">
+    The definitions folder is where the static data and functions are declared, see [Definitions](/configuration/action/effects#workflow-definitions) for more information.
+    <ParamField path="data/repositories.ts">
+      The workflow's data are declared in this file, they then can be used in the actions' effects.
+    </ParamField>
+    <ParamField path="functions/index.ts">
+      The workflow's functions are declared in this file, they then can be used in the actions' effects.
+    </ParamField>
+  </Accordion>
+  <Accordion title="Types" icon="brackets-curly">
+    <ParamField path="state.types.ts">
+      This file is used to declare the type of the workflow's [state data](/configuration/trace#state).
+    </ParamField>
+    <ParamField path="business.types.ts">
+      This file is used to declare types unrelated to the configuration itself of the workflow. For example a status enum, a list of business programs, etc.
+    </ParamField>
+    <ParamField path="dsl.types.ts">
+      This file is where the workflow's dsl context is instantiated.
+    </ParamField>
+    <ParamField path="paths.types.ts">
+      This file is where the types which will be used to validate the paths used in the [UI widgets](/configuration/ui/widgets) are declared.
+    </ParamField>
+  </Accordion>
+</AccordionGroup>
+
+### Shared folder
+
+The `shared/` follows the same structure as the `workflows/` folder, 
+but is used to declare shared constants, state and functions which will be automagically added to all workflows.
+
+<RequestExample>
+```txt Project structure
+restaurantProcess/
+├── .env
+├── .env.<envName>
+├── tests/
+├── dumps/
+└── src/
+    ├── account/
+    │   ├── index.ts
+    │   ├── files/
+    │   ├── teams.ts
+    │   └── org.ts
+    ├── env/
+    └── workflows/
+        ├── index.ts
+        ├── managerWorkflow/
+        ├── restaurantWorkflow/
+        │   ├── index.ts
+        │   ├── actions/
+        │   │   ├── index.ts
+        │   │   ├── cancelOrder.ts
+        │   │   ├── createOrder.ts
+        │   │   └── comment.ts
+        │   ├── definitions/
+        │   │   ├── index.ts
+        │   │   ├── data/
+        │   │   │   └── repositories.ts
+        │   │   └── functions/
+        │   │       ├── mySuperFunction.ts
+        │   │       └── index.ts
+        │   ├── types/
+        │   │   ├── business.types.ts
+        │   │   ├── dsl.types.ts
+        │   │   ├── paths.types.ts
+        │   │   └── state.types.ts
+        │   ├── ui/
+        │   │   ├── overview/
+        │   │   │   ├── overview.filters.ts
+        │   │   │   └── overview.ts
+        │   │   └── infos.ts
+        │   ├── constants.ts
+        │   └── migration.ts
+        ├── shared/
+        │   ├── definitions/
+        │   ├── constants.shared.ts
+        │   ├── state.shared.ts
+        │   ├── types.shared.ts
+        │   └── utils.type.shared.ts
+        ├── constants.global.ts
+        ├── repository.ts
+        ├── script.ts
+        └── types.ts
+```
+</RequestExample>
