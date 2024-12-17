@@ -5,6 +5,67 @@ description: ''
 icon: '1'
 ---
 
+The goal of this first step is to familiarize yourself with implementing [actions](/configuration/action/definition) and [effects](/configuration/action/effects) from scratch.
+
+The specifications of the workflow are available bellow.
 
 <Card title="Orders management - Specifications" icon="book-open" iconType="duotone" horizontal href="https://siapartners1.sharepoint.com/:x:/s/Stratumn/ESBqrWg2pUNEoJQ9KPCNI2EBSPbsyYq4RVy2u-NU-WgCEA" />
+
+<Tip>If you are not familiar with the specifications, you can refer to the [specification documentation](/configuration/getting-started/specification).</Tip>
+
+## Starting the development
+
+### Requirements
+
+To generate a [workflow](), you'll need to have the following tools installed:
+
+- [Node.js](https://nodejs.org/en/download/)
+- [npm](https://www.npmjs.com/get-npm)
+- [Git](https://git-scm.com/downloads)
+
+Install yarn if you don't have it already:
+
+```bash
+npm install --global yarn
+```
+
+### Setup the project
+
+Clone the repository and open it in ~~Vim~~ your favorite IDE.
+
 <Card title="Orders management - Repository" icon="gitlab" iconType="duotone" horizontal href="https://git.sia-partners.com/stratumn/configuration/onboarding/exercise-1" />
+
+Create a new branch for your changes:
+
+```bash
+git checkout -b feature/<your-name>-step-1
+```
+
+Now, you'll need to install the dependencies:
+
+```bash
+yarn install
+```
+
+
+### Generating the workflow
+
+While developing, you'll be generating in the [staging](https://trace.staging.stratumn.com/) environment.
+
+To generate the workflow, you'll need to export the `SU_PASSWORD` environment variable in your terminal (or directly in your `.<bash | zsh>rc file`).
+
+```bash
+export SU_PASSWORD=<provided-password>
+```
+
+Update the `YOUR_NAME` variable in the `.env.local-to-staging` file with your name.
+
+To generate the workflow, run the following command:
+
+```bash
+yarn generate:local-to-staging
+```
+
+<Info>When generating for the first time a workflow, you'll need to generate it a second time for it to be fully functional.</Info>
+
+<Check>That's it! You've generated your first workflow 🚀</Check>
