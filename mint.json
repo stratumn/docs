@@ -76,6 +76,18 @@
       "group": "Workflow configuration",
       "pages": [
         "configuration/introduction",
+        {
+          "group": "Getting started",
+          "icon": "rocket",
+          "iconType": "duotone",
+          "pages": [
+            "configuration/getting-started/introduction",
+            "configuration/getting-started/step-1",
+            "configuration/getting-started/step-2",
+            "configuration/getting-started/specification"
+          ]
+        },
+        "configuration/accounts",
         "configuration/trace",
         {
           "group": "Action",
