@@ -1,0 +1,281 @@
+---
+title: 'Specification file'
+sidebarTitle: 'Specification file'
+description: 'This section provides an overview of the different parts of a specification file.'
+icon: 'file-excel'
+iconType: 'duotone'
+---
+
+A specification file is an Excel document that outlines the client's requirements for the workflow. 
+It serves as a guide for developers, detailing what the workflow should accomplish.
+
+The file is composed of the following sheets:
+
+<AccordionGroup>
+  <Accordion title="Workflow" icon="rocket" defaultOpen>
+    The _workflow_ sheet defines the workflow's name, as well as the [organization](/configuration/accounts#organization)'s name.\
+    A screenshot of the [BPMN](https://camunda.com/bpmn/reference/) diagram of the workflow is also provided.
+  </Accordion>
+  <Accordion title="Groups" icon="user-group">
+    The _groups_ sheet defines the [groups](/configuration/accounts#groups) that will be available in the workflow.
+     <Tabs>
+      <Tab title="Sheet example">
+        | Group id 	| Group name 	| Is it a system? 	|
+        |----------	|------------	|-----------------	|
+        | client   	| Client     	| no              	|
+        | cook     	| Cook       	| no              	|
+      </Tab>
+      <Tab title="Documentation">
+        <ParamField path="Group id" type="string">
+          This ID corresponds to the [group's label](/configuration/accounts#group).
+          <Info>Usually, this field is not considered since we use a camelized version of the group's name.</Info>
+        </ParamField>
+        <ParamField path="Group name" type="string" required>
+          The id of the action which corresponds to the [action](/configuration/action/definition)'s key.
+        </ParamField>
+        <ParamField path="Is it a system? " type="boolean">
+          Whether the group is the controlled by an API or not.
+        </ParamField>
+      </Tab>
+    </Tabs>
+    <Note>This sheet is not exhaustive and might be empty if groups are provided by an external source (Studio data repository or Excel).</Note>
+  </Accordion>
+  <Accordion title="Actions" icon="pen-to-square">
+    The _actions_ sheet defines the [actions](/configuration/action/definition) that will be available in the workflow.
+    <Tabs>
+      <Tab title="Sheet example">
+        | Action name   | Action id    | Action type | Generic action | Is a starting point? |
+        | :------------ | :----------- | :---------- | :------------- | :------------------- |
+        | Place order   | placeOrder   | form        | no             | yes                  |
+        | Receive order | receiveOrder | form        | no             | no                   |
+        | Comment       | comment      | form        | yes            | no                   |
+      </Tab>
+      <Tab title="Documentation">
+        <ParamField path="Action name" required>
+          The readable name of the action.
+        </ParamField>
+        <ParamField path="Action id" required>
+          The id of the action which corresponds to the [action](/configuration/action/definition)'s key.
+        </ParamField>
+        <ParamField path="Action type" required>
+          The type of the action, can be [form](/configuration/action/form), [table importer](/configuration/action/table-importer), [table editor](/configuration/action/table-editor) or no form.
+        </ParamField>
+        <ParamField path="Generic action" type="boolean" required>
+          Whether the action can be done at any step of the workflow.
+        </ParamField>
+        <ParamField path="Is a starting point?" type="boolean" required>
+          Whether the action is the _first_ action of the workflow.
+        </ParamField>
+      </Tab>
+    </Tabs>
+  </Accordion>
+  <Accordion title="Forms" icon="file-pen">
+    The _forms_ sheet defines the forms that will be available in the workflow.
+    <Tabs>
+      <Tab title="Sheet example">
+        | Group  	| Action   	      | Field                      	      | Type               	| Mandatory | Conditional | Source       | Order         	| Pre-fill 	|
+        |:--------|:---------------	|:---------------------------------	|:--------------------|:----------|:----------- |:-------------|:-------------- |:--------- |
+        | Client 	| Eat     	      | Rating          	                | short text          | yes       | no          | N/A          | 1             	| no       	|
+        | Client 	| Eat     	      | Comment          	                | long text           | yes       | no          | N/A          | 2             	| no       	|
+        | Client 	| Place order   	| Select a meal                   	| dropdown  	        | yes       | no          | Pizza, Pasta | 1             	| no       	|
+        | Client 	| Place order   	| Type                            	| dropdown            | yes       | yes         | ...          | 2             	| no       	|
+        | Client 	| Place order   	| Comment                         	| text                | no        | no          | N/A          | 3             	| no       	|
+        | Cook   	| Receive order 	| Review                           	| checkboxes          | yes       | no          | N/A          | 1             	| no       	|
+        | Cook   	| Receive order 	| Comment                         	| text                | no        | no          | N/A          | 2             	| no       	|
+      </Tab>
+      <Tab title="Documentation">
+        <ParamField path="Group" required>
+          The name of the lane that will do the action.
+        </ParamField>
+        <ParamField path="Action" required>
+          The name of the action that will be done.
+        </ParamField>
+        <ParamField path="Field" required>
+          The name of the [form](/configuration/action/form) field.
+        </ParamField>
+        <ParamField path="Type" required>
+          The type of the field, for example `short text`, `long text`, `dropdown`, `checkboxes`, `comment`.
+        </ParamField>
+        <ParamField path="Mandatory" type="boolean" required>
+          Whether the field is required when the form is submitted.
+        </ParamField>
+        <ParamField path="Conditional" type="boolean" required>
+          Whether the field is conditional to the value of another field.
+        </ParamField>
+        <ParamField path="Source" required>
+          The list of possible values of the form field, mostly used for checkboxes and dropdowns.
+        </ParamField>
+        <ParamField path="Order" required>
+          The order of the field in the form.
+        </ParamField>
+        <ParamField path="Pre-fill" type="boolean" required>
+          Whether the form field is [pre-filled](/configuration/action/form#prefill-fields) with a value from the state.
+        </ParamField>
+      </Tab>
+    </Tabs>
+
+  </Accordion>
+  <Accordion title="Trace state" icon="brackets-curly">
+    The _trace state_ sheet outlines the structure of the data stored in the [state](/configuration/trace#state)
+    and serves as a guide for defining the type of the workflow's state data in the [state.type.ts](/configuration/project-structure#types) file.
+    <Tabs>
+      <Tab title="Sheet example">
+        | Field           	| Is a custom variable? 	| Type    	| Objectives                       	|
+        |:-----------------	|:-----------------------	|:---------	|:---------------------------------	|
+        | clientName      	| yes                   	| string  	| Recorded during the first action 	|
+        | status.value    	| yes                   	| string  	|                                  	|
+        | status.progress 	| yes                   	| number  	|                                  	|
+        | selectedMeal    	| no                    	| string  	|                                  	|
+        | mealType        	| no                    	| string  	|                                  	|
+        | comments        	| yes                   	| list    	|                                  	|
+        | isAccepted      	| yes                   	| boolean 	|                                  	|
+        | isClosed        	| yes                   	| boolean 	|                                  	|
+        | rating          	| no                    	| number  	|                                  	|
+      </Tab>
+      <Tab title="Documentation">
+        <ParamField path="Field" required>
+          The name of the field, or path where the value will be stored in the [state data](/configuration/trace#data).
+
+          Example with `clientName`, `status.progress` and `status.value`:
+          ```ts
+          type StateData = {
+            clientName: string;
+            status: {
+              progress: number;
+              value: string;
+            }
+          }
+          ```
+        </ParamField>
+        <ParamField path="Is a custom variable?" type="boolean" required>
+          Whether the field's value is provided by the users through the submission of actions, or if it's calculated by the [effects](/configuration/action/effects).
+        </ParamField>
+        <ParamField path="Type" required>
+          The type of the field, for example `string`, `number`, `boolean`, `list`, `object`.
+          <Info>Specifications are not created by developers, the types might not be accurate.</Info>
+        </ParamField>
+        <ParamField path="Objectives" type="boolean" required>
+          Additional information about the field.
+        </ParamField>
+      </Tab>
+    </Tabs>
+    <Note>
+      The state sheet is not exhaustive, additional fields can be added if necessary.
+    </Note>
+  </Accordion>
+  <Accordion title="Trace state update" icon="arrows-turn-to-dots">
+    The _trace state update_ sheet outlines the minimal [state data](/configuration/trace#data) modifications 
+    required during the execution of an action's [effects](/configuration/action/effects).
+
+    <Tabs>
+      <Tab title="Sheet example">
+        | Action name   	| Condition         	| Updated value           	| Update effect 	| Trace state variable 	|
+        |:---------------	|:-------------------	|:-------------------------	|:---------------	|:----------------------|
+        | Receive order 	| accepted is false 	| 0,2                     	| replace       	| status.progress      	|
+        | Receive order 	| accepted is false 	| Order declined          	| replace       	| status.value         	|
+        | Receive order 	| accepted is true  	| 0,6                     	| replace       	| status.progress      	|
+        | Receive order 	| accepted is true  	| Ready to eat            	| replace       	| status.value         	|
+        | Receive order 	|                   	| [accepted]              	| replace       	| isAccepted           	|
+        | Place order   	|                   	| 0,2                     	| replace       	| status.progress      	|
+        | Place order   	|                   	| Waiting for acceptation 	| replace       	| status.value         	|
+        | Place order   	|                   	| [meal]                  	| replace       	| selectedMeal         	|
+        | Place order   	|                   	| [type]                  	| replace       	| mealType             	|
+        | Place order   	|                   	| false                   	| replace       	| isClosed             	|
+        | Place order   	|                   	| (get from meta)         	| replace       	| clientName           	|
+        | Eat order     	|                   	| [rating]                	| replace       	| rating               	|
+        | Eat order     	|                   	| 1                       	| replace       	| status.progress      	|
+        | Eat order     	|                   	| Done                    	| replace       	| status.value         	|
+        | Eat order     	|                   	| true                    	| replace       	| isClosed             	|
+      </Tab>
+      <Tab title="Documentation">
+        <ParamField path="Action name" required>
+          The name of the action that will be executed.
+        </ParamField>
+        <ParamField path="Condition">
+          The optional condition that must be satisfied for the state data variable to be updated.
+        </ParamField>
+        <ParamField path="Updated value" required>
+          The new value of the state data variable.
+        </ParamField>
+        <ParamField path="Update effect" required>
+          The kind of update to be performed on the state data variable.
+        </ParamField>
+        <ParamField path="Trace state variable" required>
+          The name or path of the state data variable that will be updated.
+        </ParamField>
+      </Tab>
+    </Tabs>
+  </Accordion>
+  <Accordion title="Trace notes" icon="paintbrush">
+    The _trace notes_ sheet defines the structure of the [trace infos](/configuration/ui/introduction#trace-infos) pannel.
+    <Tabs>
+      <Tab title="Sheet example">
+        | Category 	            | Field Name 	            | Data type      	| Trace state field 	| Order 	  |
+        |:----------------------|:------------------------|:----------------|:-------------------	|:----------|
+        | General Information  	| Status                 	| Status Widget  	| status            	| 1        	|
+        | General Information  	| Client name            	| string         	| clientName        	| 2        	|
+        | General Information  	| Rating                 	| number         	| rating            	| 3        	|
+        | Order informations   	| Selected meal          	| string         	| selectedMeal      	| 1        	|
+        | Order informations   	| Selected type          	| string         	| mealType          	| 2        	|
+        | Comments             	| Comments               	| Comment widget 	| comments          	| 1        	|
+      </Tab>
+      <Tab title="Documentation">
+        <ParamField path="Category" required>
+          The category corresponds to the [window](/configuration/ui/widgets#window-wrapper) widget in the trace infos view.
+        </ParamField>
+        <ParamField path="Field Name" type="boolean" required>
+          Whether the field's value is provided by the users through the submission of actions, or if it's calculated by the [effects](/configuration/action/effects).
+        </ParamField>
+        <ParamField path="Data type" required>
+          The type of widget that should be used to display the field.\
+          It might note match exactly a widget's type, for example a `string` type will be displayed with a [text widget](/configuration/ui/widgets#text).
+          <Note>Each field's widget should be wrapped with a [key-value widget](configuration/ui/widgets#key-value).</Note>
+        </ParamField>
+        <ParamField path="Trace state field" required>
+          The name or path of the field in the [state data](/configuration/trace#state) used to retrieve the value displayed by the widget.
+        </ParamField>
+        <ParamField path="Order" required>
+          The order of the field relative to it's window/category.
+        </ParamField>
+      </Tab>
+    </Tabs>
+
+  </Accordion>
+  <Accordion title="Overview" icon="table">
+    The _overview_ sheet outlines the structure of the workflow's [overview table](/configuration/ui/introduction#workflow-overview).
+     <Tabs>
+      <Tab title="Sheet example">
+        | Order 	| Column table  	| Trace state field 	| Formatting system 	|
+        |:-------	|:---------------	|:-------------------	|:-------------------	|
+        | 1     	| Name          	| trace name        	| link wrapper      	|
+        | 2     	| Status        	| status            	| status            	|
+        | 3     	| Client name   	| clientName        	|                   	|
+        | 4     	| Selected Meal 	| selectedMeal      	|                   	|
+        | 5     	| Selected type 	| mealType          	|                   	|
+      </Tab>
+      <Tab title="Documentation">
+        <ParamField path="Order" type="number" required>
+          The order of the column in the overview table.
+        </ParamField>
+        <ParamField path="Column table" type="string" required>
+          The name of the column.
+        </ParamField>
+        <ParamField path="Trace state field" type="string" required>
+          The name or path of the field in the [state data](/configuration/trace#data) used to retrieve the value displayed by the widget.
+        </ParamField>
+        <ParamField path="Formatting system" type="string" required>
+          The type of widget that should be used to display the field.\
+          It might note match exactly a widget's type, for example a `string` type will be displayed with a [text widget](/configuration/ui/widgets#text).
+        </ParamField>    
+      </Tab>
+    </Tabs>
+
+  </Accordion>
+  <Accordion title="Notifications" icon="bell">
+    The _notifications_ sheet defines the notifications that will be available in the workflow.
+  </Accordion>
+</AccordionGroup>
+
+<Note>
+  Workflow specifications are not set in stone. You are free to make adjustments to suit the workflow's needs, provided its behavior remains aligned with the specifications.
+</Note>

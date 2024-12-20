@@ -72,7 +72,7 @@ The definitions can be of any shape, but by convention, it's shape is the follow
 
 ### External functions
 
-Some functions are declared directly in Trace API, and can be accessed direcly in the effects under `dsl.$modules`.
+Some functions are declared directly in Trace API, and can be accessed direcly in the effects using `dsl.$modules`.
 
 <AccordionGroup>
   <Accordion title="createLink" icon="link">
@@ -253,6 +253,33 @@ Some functions are declared directly in Trace API, and can be accessed direcly i
         ```
       </Tab>
     </Tabs>
+  </Accordion>
+  <Accordion title="moment" icon="clock">
+    Exposes the `moment` function from the moment library [_(v2.29.1)_](https://www.npmjs.com/package/moment/v/2.29.1).\
+    See the [moment documentation](https://momentjs.com/docs/#/use-it/) for more information.
+    ```typescript Example
+    const { moment } = dsl.$modules;
+    const now = moment();
+    const tomorrow = moment().add(1, 'day');
+    const yesterday = moment().subtract(1, 'day');
+    ```
+  </Accordion>
+  <Accordion title="zod" icon="shield-check">
+    Exposes `z` from the zod library [_(v3.24.0)_](https://www.npmjs.com/package/zod/v/3.24.0).\
+    See the [zod documentation](https://zod.dev/) for more information.
+    ```typescript Example
+    const { z } = dsl.$modules;
+
+    const isAdultSchema = z.object({
+      name: z.string().min(2),
+      age: z.number().min(18),
+    }).strict();
+
+    const myData = mySchema.parse({
+      name: 'John',
+      age: 30,
+    });
+    ```
   </Accordion>
 </AccordionGroup>
 

@@ -1,0 +1,308 @@
+---
+title: 'Accounts'
+icon: 'user-group'
+---
+
+## Organization
+
+<Tabs>
+  <Tab title="Documentation">
+    In Stratumn, an organization represents the top level of the account hierarchy.
+    It encompasses users, teams, and its own workflows.
+  </Tab>
+  <Tab title="API">
+    <ParamField path="name" type="string" required>
+      The name of the organization, acts as an identifier to not regenerate the organization if it already exists.
+    </ParamField>
+    <ParamField path="description" type="string" required>
+      The description of the organization.
+    </ParamField>
+    <ParamField path="domainName" type="string">
+      The domain name of the organization.
+    </ParamField>
+    <ParamField path="avatar" type="string or Promise<{default: string}>">
+      The URL of the organization's avatar, or a promise that resolves to an object with a `default` property containing the URL.
+    </ParamField>
+    <ParamField path="includeSuperUser" type="boolean">
+      Whether to include the Stratumn admin user in the organization.
+    </ParamField>
+    <ParamField path="users" type="Record<string, IUserDef>" required>
+      A map of users which belongs to the organization, can an be empty if the organization's owners manage the users in Account UI.
+    </ParamField>
+    <ParamField path="teams" type="Record<string, ITeamDef>" required>
+      A map of teams which belongs to the organization, can an be empty if teams are added as members of a groups.
+    </ParamField>
+    <ParamField path="encryptionKey" type="IKeyDef">
+      The optional encryption key of the organization.
+    </ParamField>
+    <ParamField path="signingKey" type="IKeyDef">
+      The optional signing key of the organization.
+    </ParamField>
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+    type IOrganizationDef = {
+      /* Manage organization's metadata */
+      name: string;
+      description: string;
+      domainName?: string;
+      avatar?: string | Promise<{default: string;}>;
+      /* Manage organization's users */
+      includeSuperUser?: boolean;
+      users: Record<string, IUserDef>; // IUserDef is defined in the User section
+      /* Manage organization's teams */
+      teams: Record<string, ITeamDef>; // ITeamDef is defined in the Team section
+      /* Manage organization's keys */
+      encryptionKey?: IKeyDef;
+      signingKey?: IKeyDef;
+    }
+    
+    /** A key pair definition */
+    type IKeyDef = {
+        publicKey: string;
+        privateKey: string;
+    }
+    ```
+  </Tab>
+  <Tab title="Example">
+    ```ts Usage
+    export const pastaLaVistaOrganization = {
+      name: 'Pasta La Vista',
+      description: 'A super cool Italian restaurant',
+      teams: {},
+      users: {},
+      avatar: `${__dirname}/files/logo.png`
+    } as const satisfies IOrganizationDef;
+    ```
+  </Tab>
+</Tabs>
+
+## User
+
+<Tabs>
+  <Tab title="Documentation">
+    A user is an individual with a Stratumn account.
+    Users can be members or collaborators and may belong to multiple teams.\
+    They are managed in Account UI by the organization's owners.
+  </Tab>
+  <Tab title="API">
+    <ParamField path="email" type="string" required>
+      The email of the user, acts as an identifier to not regenerate the user if it already exists.
+    </ParamField>
+    <ParamField path="password" type="string" required>
+      The password of the user.
+    </ParamField>
+    <ParamField path="name" type="string">
+      The name of the user.
+    </ParamField>
+    <ParamField path="firstName" type="string">
+      The first name of the user.
+    </ParamField>
+    <ParamField path="lastName" type="string">
+      The last name of the user.
+    </ParamField>
+    <ParamField path="avatar" type="string or Promise<{default: string}>">
+      The URL of the user's avatar, or a promise that resolves to an object with a `default` property containing the URL.
+    </ParamField>
+    <ParamField path="phone" type="string">
+      The phone number of the user.
+    </ParamField>
+    <ParamField path="encryptionKey" type="IKeyDef">
+      The optional encryption key of the user.
+    </ParamField>
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+    type IUserDef = {
+      /* Manage user's metadata */
+      email: string;
+      password: string;
+      name?: string;
+      firstName?: string;
+      lastName?: string;
+      avatar?: string | Promise<{default: string;}>;
+      phone?: string;
+      encryptionKey?: IKeyDef;
+      signingKey?: IKeyDef;
+    }
+
+    /** A key pair definition */
+    type IKeyDef = {
+        publicKey: string;
+        privateKey: string;
+    }
+    ```
+  </Tab>
+  <Tab title="Example">
+    ```ts Usage
+    export const johnDoeUser = {
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'john.doe@example.com',
+      password: 'myNotSoSecretPassword'
+    } as const satisfies IUserDef;
+    ```
+
+    <Warning>Users are typically not generated but are instead invited by the organization's owners through the Account UI.\
+     Users created within the configuration project are for demonstration purposes only.</Warning>  
+  </Tab>
+</Tabs>
+
+
+### Member
+A member is an user who is part of the organization. Members have access to and can interact with the organization's workflows.
+Additionally, members can hold the role of organization owner.\
+They are managed in Account UI by the organization's owners.
+
+### Collaborator
+A collaborator is an user who is not a part of the organization but can still interact with its workflows.\
+They are managed in Account UI by the organization's owners.
+
+## Team
+<Tabs>
+  <Tab title="Documentation">
+    A team is a group of users (members and collaborators), managed by the organization's owners in Account UI.
+  </Tab>
+  <Tab title="API">
+    <ParamField path="organizationName" type="string" required>
+      The name of the organization the team belongs to.
+    </ParamField>
+    <ParamField path="organizationId" type="string">
+      The ID of the organization the team belongs to.
+    </ParamField>
+    <ParamField path="name" type="string" required>
+      The name of the team, acts as an identifier to not regenerate the team if it already exists.
+    </ParamField>
+    <ParamField path="description" type="string" required>
+      The description of the team.
+    </ParamField>
+    <ParamField path="avatar" type="string or Promise<{default: string}>">
+      The URL of the team's avatar, or a promise that resolves to an object with a `default` property containing the URL.
+    </ParamField>
+    <ParamField path="email" type="string">
+      The email of the team.
+    </ParamField>
+    <ParamField path="includeSuperUser" type="boolean">
+      Whether to include the Stratumn admin user in the team.
+    </ParamField>
+    <ParamField path="users" type="Record<string, IUserDef>">
+      A map of users which belongs to the team, can an be empty if the organization's owners manage the users in Account UI.
+    </ParamField>
+    <ParamField path="encryptionKey" type="IKeyDef">
+      The optional encryption key of the team.
+    </ParamField>
+    <ParamField path="signingKey" type="IKeyDef">
+      The optional signing key of the team.
+    </ParamField>
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+      type ITeamDef = {
+        /* Manage team's metadata */
+        organizationName: string;
+        organizationId?: string;
+        name: string;
+        description: string;
+        avatar?: string | Promise<{default: string;}>;
+        email?: string;
+
+        /* Manage team's users */
+        users: Record<string, IUserDef>;
+        includeSuperUser?: boolean;
+
+        /* Manage team's keys */
+        encryptionKey?: IKeyDef;
+        signingKey?: IKeyDef;
+      }
+
+      /** A key pair definition */
+      type IKeyDef = {
+          publicKey: string;
+          privateKey: string;
+      }
+    ```
+  </Tab>
+  <Tab title="Example">
+    ```ts Usage
+      import { johnDoeUser } from './users';
+
+      export const cooksTeam = {
+        name: 'Cooks',
+        description: 'The team of cooks',
+        organizationName: "Pasta la Vista",
+        users: {
+          johnDoe: johnDoeUser
+        },
+        avatar: `${__dirname}/files/cooks-avatar.png`
+      } as const satisfies ITeamDef;
+    ```
+  </Tab>
+</Tabs>
+
+
+## Group
+<Tabs>
+  <Tab title="Documentation">
+    A group is defined at the **workflow level** and consists of teams or individual users. 
+    It determines who can act on a workflow and specifies the actions they are allowed to perform.
+    Typically, a group has a one-to-one relationship with a team.
+
+    Groups are managed either within the configuration project itself or by Stratumn administrators in Trace UI.
+  </Tab>
+  <Tab title="API">
+    <ParamField path="label" type="string" required>
+      The label of the group, acts as unique identifier to not regenerate the group if it already exists.
+    </ParamField>
+    <ParamField path="name" type="string" required>
+      The readable name of the group, acts as an identifier to not regenerate the group if it already exists.
+    </ParamField>
+    <ParamField path="avatar" type="string or Promise<{default: string}>">
+      The URL of the group's avatar, or a promise that resolves to an object with a `default` property containing the URL.
+    </ParamField>
+    <ParamField path="members" type="MemberDef[]">
+      The members of the group, can be teams, users or organizations.
+    </ParamField>
+    <ParamField path="actions" type="string[]">
+      The actions that can be performed by the group.
+    </ParamField>
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+    export type IGroupDef = {
+      label: string;
+      name: string;
+      avatar?: string | Promise<{default: string;}>;
+      members?: MemberDef[];
+      actions?: string[];
+    }
+
+    export type MemberDef = {
+        account: IAccount;
+        role: Role;
+    }
+    ```
+  </Tab>
+  <Tab title="Example">
+    ```ts Usage
+    import { cooksTeam } from './teams';
+
+    const cooksGroup = {
+      label: 'cooks',
+      name: 'Cooks',
+      avatar: `${__dirname}/files/cooks-avatar.png`,
+      members: [
+        {
+          account: cooksTeam,
+          role: 'READER'
+        }
+      ],
+      actions: [
+        'prepareOrder',
+        'comment'
+      ]
+    } as const satisfies IGroupDef;
+    ```
+  </Tab>
+</Tabs>
+
+<Note>Each account type can be created directly within the configuration project in the [account folder](/configuration/project-structure#accounts).</Note>
