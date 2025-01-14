@@ -103,7 +103,8 @@
           "icon": "sparkles",
           "pages": [
             "configuration/ui/introduction",
-            "configuration/ui/widgets"
+            "configuration/ui/widgets",
+            "configuration/ui/overview"
           ]
         },
         "configuration/project-structure"
