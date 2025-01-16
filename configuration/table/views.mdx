@@ -1,0 +1,139 @@
+---
+title: 'View'
+sidebarTitle: 'View'
+description: ''
+icon: 'eye'
+---
+
+A _View_ is a keyword we use to define an atomic display of a piece of data. Trace-UI provides core views which are fundamental to displaying correctly various natures of data.
+
+## Common Properties
+
+- **type**: Defines the type of view to display.
+
+All views are configured using a certain number of ‘paths’-inputs which enable to localise in the data object the information we want to display, or the conditions we want to check to decide on the actual shape of the display. We use **JMESPath** to fetch the data given a path, which means in particular that deep paths into objects using ‘dot’-notation are allowed, as well as fancy indexing and filtering.
+Paths defined as `“”` will be pointing at the data (traces state) root (stringified for text-type views).
+
+All `text` views, when falling on a data to display that is actually still an object, will **stringify** it in a classical json-friendly way.Paths pointing at nothing will usually result in empty views.
+
+So far the available view types are: `text`, `html`, `prose`, `list`, `labels`, `code`, `icon`, `date`, `activity`, `number`, `progress`.
+
+All views is a widget, you can know more about it [here](/configuration/ui/widgets)
+
+---
+
+# Editors
+
+When view is use inside a data editor table, cells can be configured with various **editor options** to determine how their content can be edited. Below is a detailed breakdown of the available editor types and their configurations.
+
+---
+
+## Text Widget
+
+The **Text** widget offers multiple editor types for handling textual input:
+
+<Tabs>
+  <Tab title="Editor">
+    <ParamField path="type" type="input">
+        A simple text input field.
+    </ParamField>
+    <ParamField path="type" type="number">
+         A simple number input field.
+    </ParamField>
+    <ParamField path="type" type="select">
+        A dropdown input allowing users to choose one value from a predefined list.
+    </ParamField>
+    <ParamField path="type" type="comment">
+        A multi-line text field designed for entering long text content. For comments, notes, or other extended text input.
+    </ParamField>
+  </Tab>
+  <Tab title="Example">
+    ```json Simple usage
+    "view": {
+        "editor": {
+            "type": "comment"
+        },
+        "path": "document",
+        "type": "text"
+    }
+    ```
+  </Tab>
+    <Tab title="Screenshot">
+    <Frame>
+      <img src="/images/configuration/ui/widgets/text.png" />
+    </Frame>
+  </Tab>
+</Tabs>
+
+## File Compact
+
+The **File Compact** widget allows you to manage file uploads directly from a table cell using the `uploadFile` editor.  
+
+<Tabs>
+  <Tab title="Editor">
+    <ParamField path="type" type="uploadFile">
+        Opens the file explorer to upload a file. Only one file can be uploaded per cell.
+    </ParamField>
+  </Tab>
+  <Tab title="Example">
+    ```json Simple usage
+    "view": {
+        "editor": {
+            "type": "uploadFile"
+        },
+        "path": "document",
+        "type": "fileCompact"
+    }
+    ```
+    <Note>
+      After a file is uploaded, the available actions are:
+      - **Replace**: Select a new file to replace the existing one.
+      - **Download**: Download the uploaded file.
+      - **Delete**: Remove the uploaded file.
+
+      Once the upload is confirmed, only the **download** action will remain available for the user.
+    </Note>
+  </Tab>
+    <Tab title="Screenshot">
+    <Frame>
+      <img src="/images/configuration/table/fileCompact-empty.png" />
+    </Frame>
+    <Frame>
+      <img src="/images/configuration/table/fileCompact-edit.png" />
+    </Frame>
+    <Frame>
+      <img src="/images/configuration/table/fileCompact-dl.png" />
+    </Frame>
+  </Tab>
+</Tabs>
+
+## CommentFeed
+
+The **CommentFeed** widget allows users to add, edit, and remove comments within a table cell.
+
+<Tabs>
+  <Tab title="Editor">
+    <ParamField path="type" type="comment">
+        A rich text editor for managing comments.
+    </ParamField>
+  </Tab>
+  <Tab title="Example">
+    ```json Simple usage
+    "view": {
+        "editor": {
+            "type": "comment"
+        },
+        "path": "document",
+        "type": "text"
+    }
+    ```
+  </Tab>
+    <Tab title="Screenshot">
+      <Frame>
+      <img src="/images/configuration/table/commentFeed-empty.png" />
+    </Frame>
+    <Frame>
+      <img src="/images/configuration/table/commentFeed-edit.png" />
+    </Frame>
+  </Tab>
+</Tabs>
