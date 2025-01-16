@@ -6,7 +6,7 @@ icon: 'file-excel'
 iconType: 'duotone'
 ---
 
-A specification file is an Excel document that outlines the client's requirements for the workflow. 
+A specification file is an Excel document that outlines the client's requirements for the workflow.
 It serves as a guide for developers, detailing what the workflow should accomplish.
 
 The file is composed of the following sheets:
@@ -162,6 +162,7 @@ The file is composed of the following sheets:
     <Note>
       The state sheet is not exhaustive, additional fields can be added if necessary.
     </Note>
+
   </Accordion>
   <Accordion title="Trace state update" icon="arrows-turn-to-dots">
     The _trace state update_ sheet outlines the minimal [state data](/configuration/trace#data) modifications 
@@ -205,6 +206,7 @@ The file is composed of the following sheets:
         </ParamField>
       </Tab>
     </Tabs>
+
   </Accordion>
   <Accordion title="Trace notes" icon="paintbrush">
     The _trace notes_ sheet defines the structure of the [trace infos](/configuration/ui/introduction#trace-infos) pannel.
@@ -272,10 +274,12 @@ The file is composed of the following sheets:
 
   </Accordion>
   <Accordion title="Notifications" icon="bell">
-    The _notifications_ sheet defines the notifications that will be available in the workflow.
+    The _notifications_ sheet defines the [notifications](/configuration/action/notifications) that will be available in the workflow.
   </Accordion>
 </AccordionGroup>
 
 <Note>
-  Workflow specifications are not set in stone. You are free to make adjustments to suit the workflow's needs, provided its behavior remains aligned with the specifications.
+  Workflow specifications are not set in stone. You are free to make adjustments
+  to suit the workflow's needs, provided its behavior remains aligned with the
+  specifications.
 </Note>

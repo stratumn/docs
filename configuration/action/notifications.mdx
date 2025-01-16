@@ -1,0 +1,619 @@
+---
+title: 'Notifications'
+icon: 'bell'
+description: 'Notification sent as emails'
+---
+
+Notifications are a way to communicate updates, alerts, or information to users or groups.
+The notifications, usually in email format, are sent by Notification-API.
+
+## Overview
+
+Notifications in this system serve multiple purposes, including:
+
+- Alerting users about changes in workflows.
+- Sending important updates or reminders via email.
+- Inviting new users to join Stratumn...
+
+## How it works in configuration
+
+The notifications are not directly sent through configuration or dsl package. They are stored under `state.notifications` an an array. Only when doing an action at runtime, Trace API will look into this `newState.notifications` and loop on each object, then build the notification and call the correct template on Notification API.
+
+The action needs to provide the correct data to the `state.notifications`, typed as `NotificationOptions` :
+
+### Properties
+
+<Tabs>
+  <Tab title="Documentation">
+    <ParamField path="title" type="string">
+      The title of the notification.
+    </ParamField>
+    <ParamField path="receiver?" type="NotificationReceiver">
+      Identifies the user, account, or email to notify.
+    </ParamField>
+    <ParamField path="groupLabel?" type="string">
+      If filled, it will notify a group. Corresponds to the trace `group.label`, which is a camelCase string (e.g., `traceBot`, `agreTa`).
+    </ParamField>
+    <ParamField path="channel?" type="NotificationChannel">
+      The notification channel. Defaults to `EMAIL`.
+    </ParamField>
+    <ParamField path="template?" type="Template">
+      The template used for the notification layout.
+
+      ```typescript
+      type Template = {
+        type?: "HTML";
+        version?: string; // By default, is 1.0.0
+        name: TemplateName;
+        config: TemplateConfigMap[TemplateName]; // based on TemplateName, can be SchemaFullConfig, SchemaLessConfig, NotifyForAction.
+      };
+      ```
+
+      Possible values for `TemplateName`:
+       ```typescript
+      enum TemplateName = {
+        SCHEMA_FULL: "schema-full";
+        SCHEMA_MINIMAL: "schema-minimal";
+        SIGNUP: "signup";
+        MENTION: "mention";
+        EMPTY: "empty";
+        NOTIFY_FOR_ACTION: "notify-for-action";
+        OFFLINE: "offline";
+      };
+      ```
+
+
+    `TemplateConfigMap` contains the core of your template. Please see [below](/configuration/action/notifications#email-templates) to check all available templates.
+    </ParamField>
+    <ParamField path="sender?" type="NotificationSender">
+    Information about the sender. Defaults to:
+    - `name`: `Stratumn`
+    - `issuer`: Name of the microservice (e.g., `TRACE`, `OFFLINE`).
+    - `traceId`: ID of the current trace.
+    - `workflowId`: ID of the current workflow.
+    </ParamField>
+    <ParamField path="resourceId?" type="string">
+    Usually the trace ID. Defaults to `-9999`.
+    </ParamField>
+    <ParamField path="resourceType?" type="string">
+    The resource type. Defaults to `TRACE`.
+    </ParamField>
+    <ParamField path="avatar?" type="string">
+    Optional avatar URL for the notification.
+    </ParamField>
+    <ParamField path="icon?" type="string">
+    Optional icon URL for the notification.
+    </ParamField>
+    <ParamField path="message?" type="string">
+    The notification message. Can be empty if `template` is used.
+    </ParamField>
+    <ParamField path="data?" type="NotificationData">
+    Custom data associated with the notification, related to attachments.
+    </ParamField>
+    <ParamField path="messageType?" type="string">
+    The format of the message content. Defaults to `MARKDOWN`.
+    </ParamField>
+    <ParamField path="priority?" type="number">
+    Priority flag for ordering notifications in batch emails.
+    </ParamField>
+    <ParamField path="sendEmailImmediately?" type="boolean">
+    If `false`, no email will be sent alongside the notification.
+    </ParamField>
+    <ParamField path="templateConfig?" type="NotificationTemplateConfig">
+    Configuration specific to the selected template.
+    </ParamField>
+
+  </Tab>
+
+  <Tab title="Example">
+  ```typescript
+  const notificationOptions = {
+    title: "Notification Example",
+    receiver: {
+      email: "user@example.com",
+      userId: "12345",
+    },
+    groupLabel: "finance",
+    channel: "EMAIL",
+    template: {
+      name: "schema-full",
+      type: "HTML",
+      version: "1.0.0",
+      config: {
+        traceName: "Example Trace",
+        traceId: "trace-1234",
+        workflowName: "Payment Proposal",
+        additionalInfo: [
+          { title: "Trace creation date", value: "01/01/2023" },
+          { title: "Status", value: "Pending" },
+        ],
+      },
+    },
+    sender: {
+      name: "Stratumn",
+      issuer: "TRACE",
+      traceId: "trace-1234",
+      workflowId: "wf-5678",
+    },
+    resourceType: "TRACE",
+};
+```
+
+</Tab>
+
+<Tab title="Usage">
+```typescript Send an email when doing the action "markPaymentReceivedEffect" with the template 'schema-full'
+
+// src/trace/workflow/definitions/functions
+import {
+NotificationChannel,
+NotificationOptions,
+TemplateName,
+TemplateType,
+LinkMetaData,
+} from "@stratumn/dsl";
+
+export function createNotification(
+meta: Readonly<LinkMetaData<GroupLabel, PaymentProposalActionLabel>>,
+groupLabel: string,
+data: PaymentProposalData
+): NotificationOptions {
+const channel = "EMAIL" as NotificationChannel.EMAIL;
+const type = "HTML" as TemplateType.HTML;
+const name = "schema-full" as TemplateName.SCHEMA_FULL;
+
+    const payloadNotification: NotificationOptions = {
+      title: `Payment proposal`,
+      groupLabel,
+      channel,
+      template: {
+        type,
+        version: "1.0.0",
+        name,
+        config: {
+          traceName: meta.traceName,
+          traceId: meta.traceId,
+          workflowName: "Payment Proposal",
+          progress: data.status.progress * 100,
+          lastAction: {
+            actionName: meta.action.title,
+            groupName: meta.group.name,
+          },
+          nextAction: {
+            actionName: "test",
+            groupName: data.entity,
+          },
+          additionalInfo: [
+            { title: "Trace creation date", value: "01/01/2025" },
+            { title: "Payment Currency", value: data.paymentCurrency },
+            { title: "Total Amount", value: data.totalAmount },
+          ],
+        },
+      },
+    };
+    return payloadNotification;
+
+}
+
+// src/trace/workflow/actions/markPaymentReceived.ts
+
+async function markPaymentReceivedEffect(dsl: PaymentProposalContext<FormData>) {
+const { state, formData, meta } = dsl.$variables;
+    const { data } = state;
+    const { createNotification } = dsl.$functions;
+
+    const notification = createNotification(
+      state.meta,
+      state.data.entityLabel,
+      state.data
+    );
+    state.notifications.push(notification);
+    // Will push inside state.notifications the template, then it will be handled by Trace API
+
+}
+
+````
+
+
+</Tab>
+</Tabs>
+
+
+## Email Templates
+
+### Schema Full
+
+The `schema-full` template has a rich HTML structure including metadata, workflow context, trace context, last and next actions from the trace and any additional information provided.
+
+<Tabs>
+<Tab title="Screenshot">
+<Frame>
+  <img src="/images/configuration/actions/notifications/schema_full_template.png" />
+</Frame>
+</Tab>
+<Tab title="API">
+<ParamField path="traceName" type="string">
+  The name of the trace associated with the notification.
+</ParamField>
+<ParamField path="traceId" type="string">
+  ID of the current trace.
+</ParamField>
+  <ParamField path="workflowName" type="string" required>
+  The workflow name.
+</ParamField>
+  <ParamField path="progress" type="number">
+  Progress status of the trace. Should be a number between 0 and 100, representing the percentage completion.
+</ParamField>
+  <ParamField path="lastAction" type="object">
+  Represents the most recent action performed by the group associated with the previous step in the trace.
+  Useful for providing context about what was done prior to the current state.
+  - `actionName` : The name of the last action performed (e.g., 'Approve', 'Submit', 'Reject'). The value is derived from the `action.title` field in the metadata.
+  - `groupName` : The name of the group associated with the previous action, derived from the `group.name` field in the metadata.
+
+</ParamField>
+<ParamField path="nextAction" type="object">
+  Represents the next actions available to the recipient of the notification.
+  - `actionName` : It can be a single action name, typically one of the values in `ActionLabel` (e.g., 'Create proposal', 'Validate scope'). It can also be a concatenated string of multiple action names, separated by commas (e.g., 'Create proposal, Validate scope').If custom strings are needed, they must adhere to the format used in the application.
+  - `groupName` : The name of the group associated with the next action (e.g., 'agre TA').
+</ParamField>
+<ParamField path="additionalInfo" type="array">
+  Represents additional contextual information about the workflow or action.
+  Each entry consists of a `title` and a corresponding `value`:
+  - `title`: type `string`, A descriptive label for the information (e.g., 'Trace creation date', 'Status').
+  - `value`: type `string` or `number`. The associated value, which can be a string or a number (e.g., 'Pending', 1000).
+</ParamField>
+<ParamField path="comment" type="array">
+  Additionnal comments for the notification, in Rich Text. Will be processed as HTML String. Its type is `CommentPart[]`.
+
+  ```ts
+  export interface CommentPart {
+    type: CommentPartType;
+    children: CommentContent[];
+    isEmpty?: boolean;
+  }
+
+  export interface CommentContent {
+    text?: string;
+    type?: ContentType;
+    user?: UserInfos;
+    children?: CommentContent[];
+    isEmpty?: boolean;
+    italic?: boolean;
+    bold?: boolean;
+    underline?: boolean;
+    url?: string;
+  }
+
+  export enum CommentPartType {
+    SUBJECT = 'subject',
+    PARAGRAPH = 'paragraph',
+    H1 = 'heading-one',
+    UNORDERED_LIST = 'unordered-list',
+    TABLE = 'table'
+  }
+
+  export enum ContentType {
+    TEXT = 'text',
+    MENTION = 'mention',
+    LINK = 'link',
+    TABLE_ROW = 'table-row',
+    TABLE_CELL = 'table-cell'
+  }
+````
+
+</ParamField>
+</Tab>
+<Tab title="Type">
+```ts Typescript
+  type SchemaFullConfig = {
+    traceName?: LinkMetaData<'traceName'>['traceName'];
+    traceId?: LinkMetaData<'traceId'>['traceId'];
+    workflowName: string;
+    /* Should be a number between 0 and 100, representing the percentage completion.*/
+    progress?: number;
+    /* Represents the most recent action performed by the group associated with */
+    /* the previous step in the workflow. */
+    lastAction?: {
+        actionName: LinkMetaData<'action'>['action']['title'];
+        groupName: LinkMetaData<'group'>['group']['name'];
+    };
+    nextAction?: {
+        actionName: string;
+        groupName: string;
+    };
+    additionalInfo?: Array<{ title: string; value: string | number }>;
+    comment?: CommentPart[];
+  };
+```
+
+</Tab>
+<Tab title="Example">
+  ```ts Send an email when doing the action "markPaymentReceivedEffect" with the template 'schema-full'
+
+    // src/trace/workflow/definitions/functions
+    import {
+    NotificationChannel,
+    NotificationOptions,
+    TemplateName,
+    TemplateType,
+    LinkMetaData,
+    } from "@stratumn/dsl";
+
+    export function createNotification(
+    meta: Readonly<LinkMetaData<GroupLabel, PaymentProposalActionLabel>>,
+    groupLabel: string,
+    data: PaymentProposalData
+    ): NotificationOptions {
+    const channel = "EMAIL" as NotificationChannel.EMAIL;
+    const type = "HTML" as TemplateType.HTML;
+    const name = "schema-full" as TemplateName.SCHEMA_FULL;
+
+    const payloadNotification: NotificationOptions = {
+      title: `Payment proposal`,
+      groupLabel,
+      channel,
+      template: {
+        type,
+        version: "1.0.0",
+        name,
+        config: {
+          traceName: meta.traceName,
+          traceId: meta.traceId,
+          workflowName: "Payment Proposal",
+          progress: data.status.progress * 100,
+          lastAction: {
+            actionName: meta.action.title,
+            groupName: meta.group.name,
+          },
+          nextAction: {
+            actionName: "test",
+            groupName: data.entity,
+          },
+          additionalInfo: [
+            { title: "Trace creation date", value: "01/01/2025" },
+            { title: "Payment Currency", value: data.paymentCurrency },
+            { title: "Total Amount", value: data.totalAmount },
+          ],
+        },
+      },
+    };
+    return payloadNotification;
+
+}
+
+// src/trace/workflow/actions/markPaymentReceived.ts
+
+async function markPaymentReceivedEffect(dsl: PaymentProposalContext<FormData>) {
+const { state, formData, meta } = dsl.$variables;
+      const { data } = state;
+      const { createNotification } = dsl.$functions;
+
+      const notification = createNotification(
+        state.meta,
+        state.data.entityLabel,
+        state.data
+      );
+      state.notifications.push(notification);
+      // Will push inside state.notifications the template, then it will be handled by Trace API
+
+}
+
+````
+
+</Tab>
+</Tabs>
+
+
+### Schema Minimal
+
+The `schema-minimal` template is a more simple content html structure.
+
+<Tabs>
+<Tab title="Screenshot">
+<Frame>
+  <img src="/images/configuration/actions/notifications/schema_minimal_template.png" />
+</Frame>
+</Tab>
+<Tab title="API">
+<ParamField path="traceName" type="string">
+  The name of the trace associated with the notification.
+</ParamField>
+<ParamField path="traceId" type="string">
+  ID of the current trace.
+</ParamField>
+  <ParamField path="workflowName" type="string" required>
+  The workflow name.
+</ParamField>
+<ParamField path="content" type="string">
+  Free field, will be the body of the email.
+</ParamField>
+ </Tab>
+<Tab title="Type">
+    ```ts Typescript
+      type SchemaMinimalConfig = {
+        traceName?: LinkMetaData<'traceName'>['traceName'];
+        traceId?: LinkMetaData<'traceId'>['traceId'];
+        workflowName: string;
+        additionalInfo?: Array<{ title: string; value: string | number }>;
+        content?: string;
+      };
+    ```
+</Tab>
+<Tab title="Example">
+  ```typescript Send an email when doing the action "markPaymentReceivedEffect" with the template 'schema-minimal'
+
+// src/trace/workflow/definitions/functions
+import {
+NotificationChannel,
+NotificationOptions,
+TemplateName,
+TemplateType,
+LinkMetaData,
+} from "@stratumn/dsl";
+
+export function createNotification(
+meta: Readonly<LinkMetaData<GroupLabel, PaymentProposalActionLabel>>,
+groupLabel: string,
+data: PaymentProposalData
+): NotificationOptions {
+const channel = "EMAIL" as NotificationChannel.EMAIL;
+const type = "HTML" as TemplateType.HTML;
+const name = "schema-minimal" as TemplateName.SCHEMA_MINIMAL;
+
+    const payloadNotification: NotificationOptions = {
+      title: `Payment proposal`,
+      groupLabel,
+      channel,
+      template: {
+        type,
+        version: "1.0.0",
+        name,
+        config: {
+          traceName: meta.traceName,
+          traceId: meta.traceId,
+          workflowName: "Payment Proposal",
+          content: "This is the content of the email"
+        },
+      },
+    };
+    return payloadNotification;
+
+}
+
+// src/trace/workflow/actions/markPaymentReceived.ts
+
+async function markPaymentReceivedEffect(dsl: PaymentProposalContext<FormData>) {
+const { state, formData, meta } = dsl.$variables;
+    const { data } = state;
+    const { createNotification } = dsl.$functions;
+
+    const notification = createNotification(
+      state.meta,
+      state.data.entityLabel,
+      state.data
+    );
+    state.notifications.push(notification);
+    // Will push inside state.notifications the template, then it will be handled by Trace API
+
+}
+
+```
+
+</Tab>
+</Tabs>
+
+### Notify For Action
+
+The `notify-for-action` template is a notification prompting the user to take an action.
+
+<Tabs>
+<Tab title="Screenshot">
+<Frame>
+  <img src="/images/configuration/actions/notifications/notify_for_action_template.png" />
+</Frame>
+</Tab>
+<Tab title="API">
+<ParamField path="traceName" type="string">
+  The name of the trace associated with the notification.
+</ParamField>
+<ParamField path="traceLink" type="string">
+  URL link of the trace
+</ParamField>
+  <ParamField path="workflowName" type="string" required>
+  The workflow name.
+</ParamField>
+<ParamField path="lastActionName" type="string">
+  Name of the last action on the trace.
+</ParamField>
+<ParamField path="lastActionDate" type="string">
+  Date of the last action on the trace.
+</ParamField>
+<ParamField path="lastUserName" type="string">
+Name of the user that made the last action on the trace.
+</ParamField>
+<ParamField path="lastUserGroup" type="string">
+Name of the group that made the last action on the trace.
+</ParamField>
+<ParamField path="deadlineDate" type="string">
+Deadline date, prompting the user to take the next action.
+</ParamField>
+ </Tab>
+<Tab title="Type">
+    ```ts Typescript
+      type NotifyForAction = {
+        workflowName: string;
+        lastActionName: string;
+        lastActionDate: string;
+        lastUserName: string;
+        lastUserGroup: string;
+        deadlineDate?: string;
+        traceName: string;
+        traceLink: string;
+      };
+    ```
+</Tab>
+<Tab title="Example">
+  ```typescript Send an email when doing the action "markPaymentReceivedEffect" with the template 'notify-for-action'
+
+// src/trace/workflow/definitions/functions
+import {
+NotificationChannel,
+NotificationOptions,
+TemplateName,
+TemplateType,
+LinkMetaData,
+} from "@stratumn/dsl";
+
+export function createNotification(
+meta: Readonly<LinkMetaData<GroupLabel, PaymentProposalActionLabel>>,
+groupLabel: string,
+data: PaymentProposalData
+): NotificationOptions {
+const channel = "EMAIL" as NotificationChannel.EMAIL;
+const type = "HTML" as TemplateType.HTML;
+const name = "notify-for-action" as TemplateName.NOTIFY_FOR_ACTION;
+
+    const payloadNotification: NotificationOptions = {
+      title: `Payment proposal`,
+      groupLabel,
+      channel,
+      template: {
+        type,
+        version: "1.0.0",
+        name,
+        config: {
+          traceName: meta.traceName,
+          traceId: meta.traceId,
+          workflowName: "Payment Proposal",
+          lastActionName: data.lastAction.name;
+          lastActionDate: data.last;
+          lastUserName: "USER A";
+          lastUserGroup: "GROUP A";
+          deadlineDate?: "01/01/2026";
+          traceLink: "https://api.com/pay_199";
+        },
+      },
+    };
+    return payloadNotification;
+}
+
+// src/trace/workflow/actions/markPaymentReceived.ts
+
+async function markPaymentReceivedEffect(dsl: PaymentProposalContext<FormData>) {
+const { state, formData, meta } = dsl.$variables;
+    const { data } = state;
+    const { createNotification } = dsl.$functions;
+
+    const notification = createNotification(
+      state.meta,
+      state.data.entityLabel,
+      state.data
+    );
+    state.notifications.push(notification);
+    // Will push inside state.notifications the template, then it will be handled by Trace API
+}
+```
+
+</Tab>
+</Tabs>
+````
