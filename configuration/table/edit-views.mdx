@@ -1,28 +1,8 @@
 ---
-title: 'View'
-sidebarTitle: 'View'
-description: ''
-icon: 'eye'
+title: 'Edit view'
+sidebarTitle: 'Edit view'
+icon: 'pen'
 ---
-
-A _View_ is a keyword we use to define an atomic display of a piece of data. Trace-UI provides core views which are fundamental to displaying correctly various natures of data.
-
-## Common Properties
-
-- **type**: Defines the type of view to display.
-
-All views are configured using a certain number of ‘paths’-inputs which enable to localise in the data object the information we want to display, or the conditions we want to check to decide on the actual shape of the display. We use **JMESPath** to fetch the data given a path, which means in particular that deep paths into objects using ‘dot’-notation are allowed, as well as fancy indexing and filtering.
-Paths defined as `“”` will be pointing at the data (traces state) root (stringified for text-type views).
-
-All `text` views, when falling on a data to display that is actually still an object, will **stringify** it in a classical json-friendly way.Paths pointing at nothing will usually result in empty views.
-
-So far the available view types are: `text`, `html`, `prose`, `list`, `labels`, `code`, `icon`, `date`, `activity`, `number`, `progress`.
-
-All views is a widget, you can know more about it [here](/configuration/ui/widgets)
-
----
-
-# Editors
 
 When view is use inside a data editor table, cells can be configured with various **editor options** to determine how their content can be edited. Below is a detailed breakdown of the available editor types and their configurations.
 

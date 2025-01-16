@@ -1,0 +1,82 @@
+---
+title: 'Configuration'
+icon: 'gear'
+---
+
+Table is configured through a JSON document. Below is an example structure:
+
+```json
+{
+  "fixedColumns": [...],
+  "columns": [...],
+  "defaultDisplay": {...},
+  "templates": [...],
+  "aggregation": {...},
+  "tableWidthBuffer": 15,
+  "selectBoxWidth": 34,
+  "minColumnsWidth": "small",
+  "minRowsHeight": 30,
+  "dataSelectorPath": "rowId",
+  "overscanRowCount": 1
+}
+```
+
+<Note>
+To optimize client-side rendering and reactivity, we use a library called React-Window which implements virtualization, meaning that only the rows that are visible (plus a configurable buffer) are effectively rendered. The rest is rendered dynamically when scrolling through the table.
+</Note>
+
+### Key Configuration Sections
+
+**Core Definition**
+
+  - `fixedColumns`: Defines non-scrollable columns.
+  - `columns`: Defines scrollable columns.
+
+**Display Options**
+
+  - `defaultDisplay`: Specifies default visual configurations.
+  - `templates`: Enables templating for specific display requirements.
+  - `aggregation`: Configures data aggregation.
+
+**Static Parameters**
+  - `tableWidthBuffer`: Buffer for scroll bar (default: `15px`).
+  - `selectBoxWidth`: Width for selection box column (default: `34px`).
+  - `minColumnsWidth`: Minimum column width (default: `small`).
+  - `minRowsHeight`: Minimum row height (default: `30px`).
+  - `dataSelectorPath`: Primary key for rows (default: `rowId`).
+  - `overscanRowCount` (**React-Window parameter**): Number of rows pre-rendered beyond visible area (default: `1`).
+
+<Warning>
+  Note that over-scanning too much can negatively impact performance. Default:
+  1.
+</Warning>
+
+### Column Width Keywords
+
+| **Keyword** | **Width** |
+| ----------- | --------- |
+| `xsmall`    | 50px      |
+| `small`     | 100px     |
+| `medium`    | 200px     |
+| `large`     | 300px     |
+| `xlarge`    | 500px     |
+
+---
+
+## Column Definitions
+
+Columns are configured using the `fixedColumns` and `columns` fields, with each column specified as follows:
+
+```json
+{
+  "key": "traceName",
+  "header": "Name",
+  "width": "medium",
+  "cell": {...},
+  "sort": {...},
+  "filter": {...},
+  "aggregation": {...}
+}
+```
+
+---

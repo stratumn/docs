@@ -111,7 +111,9 @@
           "group": "Table",
           "icon": "table-cells-large",
           "pages": [
-            "configuration/table/views",
+            "configuration/table/configuration",
+            "configuration/table/read-views",
+            "configuration/table/edit-views",
             "configuration/table/wrappers"
           ]
         },
