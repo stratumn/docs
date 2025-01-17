@@ -67,10 +67,7 @@
   "navigation": [
     {
       "group": "API Documentation",
-      "pages": [
-        "api-reference/introduction",
-        "api-reference/create-a-trace"
-      ]
+      "pages": ["api-reference/introduction", "api-reference/create-a-trace"]
     },
     {
       "group": "Workflow configuration",
@@ -95,7 +92,8 @@
           "pages": [
             "configuration/action/definition",
             "configuration/action/form",
-            "configuration/action/effects"
+            "configuration/action/effects",
+            "configuration/action/notifications"
           ]
         },
         {
@@ -121,10 +119,7 @@
       ]
     }
   ],
-  "versions": [
-    "v2",
-    "v1"
-  ],
+  "versions": ["v2", "v1"],
   "theme": "venus",
   "footerSocials": {
     "github": "https://github.com/stratumn",
