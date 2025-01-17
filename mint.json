@@ -107,6 +107,16 @@
             "configuration/ui/overview"
           ]
         },
+        {
+          "group": "Table",
+          "icon": "table-cells-large",
+          "pages": [
+            "configuration/table/configuration",
+            "configuration/table/read-views",
+            "configuration/table/edit-views",
+            "configuration/table/wrappers"
+          ]
+        },
         "configuration/project-structure"
       ]
     }

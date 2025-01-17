@@ -1,0 +1,119 @@
+---
+title: 'Edit view'
+sidebarTitle: 'Edit view'
+icon: 'pen'
+---
+
+When view is use inside a data editor table, cells can be configured with various **editor options** to determine how their content can be edited. Below is a detailed breakdown of the available editor types and their configurations.
+
+---
+
+## Text Widget
+
+The **Text** widget offers multiple editor types for handling textual input:
+
+<Tabs>
+  <Tab title="Editor">
+    <ParamField path="type" type="input">
+        A simple text input field.
+    </ParamField>
+    <ParamField path="type" type="number">
+         A simple number input field.
+    </ParamField>
+    <ParamField path="type" type="select">
+        A dropdown input allowing users to choose one value from a predefined list.
+    </ParamField>
+    <ParamField path="type" type="comment">
+        A multi-line text field designed for entering long text content. For comments, notes, or other extended text input.
+    </ParamField>
+  </Tab>
+  <Tab title="Example">
+    ```json Simple usage
+    "view": {
+        "editor": {
+            "type": "comment"
+        },
+        "path": "document",
+        "type": "text"
+    }
+    ```
+  </Tab>
+    <Tab title="Screenshot">
+    <Frame>
+      <img src="/images/configuration/ui/widgets/text.png" />
+    </Frame>
+  </Tab>
+</Tabs>
+
+## File Compact
+
+The **File Compact** widget allows you to manage file uploads directly from a table cell using the `uploadFile` editor.  
+
+<Tabs>
+  <Tab title="Editor">
+    <ParamField path="type" type="uploadFile">
+        Opens the file explorer to upload a file. Only one file can be uploaded per cell.
+    </ParamField>
+  </Tab>
+  <Tab title="Example">
+    ```json Simple usage
+    "view": {
+        "editor": {
+            "type": "uploadFile"
+        },
+        "path": "document",
+        "type": "fileCompact"
+    }
+    ```
+    <Note>
+      After a file is uploaded, the available actions are:
+      - **Replace**: Select a new file to replace the existing one.
+      - **Download**: Download the uploaded file.
+      - **Delete**: Remove the uploaded file.
+
+      Once the upload is confirmed, only the **download** action will remain available for the user.
+    </Note>
+  </Tab>
+    <Tab title="Screenshot">
+    <Frame>
+      <img src="/images/configuration/table/fileCompact-empty.png" />
+    </Frame>
+    <Frame>
+      <img src="/images/configuration/table/fileCompact-edit.png" />
+    </Frame>
+    <Frame>
+      <img src="/images/configuration/table/fileCompact-dl.png" />
+    </Frame>
+  </Tab>
+</Tabs>
+
+## CommentFeed
+
+The **CommentFeed** widget allows users to add, edit, and remove comments within a table cell.
+
+<Tabs>
+  <Tab title="Editor">
+    <ParamField path="type" type="comment">
+        A rich text editor for managing comments.
+    </ParamField>
+  </Tab>
+  <Tab title="Example">
+    ```json Simple usage
+    "view": {
+        "editor": {
+            "type": "comment"
+        },
+        "path": "document",
+        "type": "text"
+    }
+    ```
+  </Tab>
+    <Tab title="Screenshot">
+      <Frame>
+      <img src="/images/configuration/table/commentFeed-empty.png" />
+    </Frame>
+    <Frame>
+      <img src="/images/configuration/table/commentFeed-edit.png" />
+    </Frame>
+  </Tab>
+</Tabs>
