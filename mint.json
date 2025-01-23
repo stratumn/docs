@@ -59,6 +59,11 @@
       "version": "v2"
     },
     {
+      "name": "Studio",
+      "icon": "brush",
+      "url": "studio"
+    },
+    {
       "name": "Configuration",
       "icon": "rocket",
       "url": "configuration"
@@ -116,6 +121,23 @@
           ]
         },
         "configuration/project-structure"
+      ]
+    },
+    {
+      "group": "Studio",
+      "pages": [
+        "studio/introduction",
+        {
+          "group": "BPMN",
+          "pages": [
+            "studio/bpmn/introduction",
+            "studio/bpmn/resume",
+            "studio/bpmn/participants",
+            "studio/bpmn/task",
+            "studio/bpmn/gateway",
+            "studio/bpmn/event"
+          ]
+        }
       ]
     }
   ],
