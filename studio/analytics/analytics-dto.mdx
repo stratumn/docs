@@ -1,0 +1,142 @@
+---
+title: 'Analytics Object'
+sidebarTitle: 'What is an Analytics ETL in Stratumn'
+iconType: 'duotone'
+---
+
+## ETL and workflows
+
+One workflow has usually its own ETL, because a workflow has its own set of data, account, traces, etc.
+
+An ETL is linked to a workflow through the `workflow_id`.
+
+For example, on a workflow "Renewal", we have an ETL called `agre-renewal`, which has its own data with filters, its own database name in metabase, and so on.
+
+## ETL is a Job
+
+Below is a representation of an ETL
+
+```typescript
+const etlJob: Job = {
+  id: '643e8c66-003c-4b10-ab93-75341c7ad3fb',
+  name: 'agre-renewal',
+  description: 'TEST',
+  data: {
+    rs_database: 'agre_v2',
+    schema: 'renewal',
+    wf_ids: [1148],
+    filters: ['listBuid'],
+    column_filter: []
+  },
+  created_by: 'ADMIN',
+  starts_at: '2024-10-31 00:33:28.778',
+  ends_at: null,
+  image:
+    'git.sia-partners.com:5656/stratumn/platform/backend/jobs/analytics-etl:no-null-stratumn-com',
+  metadata: {
+    store_execution_logs: true
+  }
+};
+```
+
+An ETL is a Job as represented in Launcher-API.
+This JOB has a type `ETL` and `data` typed `EtlJobData`
+
+```typescript
+interface EtlJobData {
+  rs_database: string;
+  wf_ids: string[];
+  filters: string[];
+  column_filter: string[];
+}
+```
+
+An ETL launches on a Kubernetes cluster as a job.
+When a job is launched, a pod is created.
+
+Pods are instances of job (contains Job data) and lives also in Launcher database.
+
+```typescript
+const etlPod: Pod = {
+  job_id: '643e8c66-003c-4b10-ab93-75341c7ad3fb',
+  status: 'SUCCESS',
+  logs: 'logs from the kubernetes job',
+  metrics: {},
+  triggered_at: '2024-08-12 14:30:00.037'
+};
+```
+
+## DTO
+
+<ParamField path="name" type="literal">
+  Name of the etl
+</ParamField>
+<ParamField path="cron_expression" type="literal">
+  The frequency of the etl job. Must match cron expression literal. See (see
+  [cron expression](/studio/analytics/analytics-page#cron-expression) )
+</ParamField>
+<ParamField path="description" type="literal">
+  Description of the etl
+</ParamField>
+<ParamField path="starts_at" type="Date">
+  Starting date of the ETL, if scheduled, it will start at this time.
+</ParamField>
+<ParamField path="ends_at" type="Date">
+  Ending date of the ETL, if scheduled, it will end at this time.
+</ParamField>
+<ParamField path="image" type="literal">
+  Docker image name used for this ETL. One ETL can have its own docker image
+  (for example, financial flow has its own set of calculation and has its own
+  docker image)
+</ParamField>
+<ParamField path="sentry_monitor" type="string" optional>
+  Sentry monitor slug name, available in Sentry when you create a [cron
+  monitor](https://docs.sentry.io/product/crons/). Slug enables Sentry to
+  identify the monitor within your app. Whenever a job is running with this
+  slug, Sentry can link it to the monitor and display its results (status,
+  triggering date, etc).
+</ParamField>
+<ParamField path="sentry_dsn" type="string">
+  Sentry DSN (Data Source Name), available in Sentry when you create a [sentry
+  project DSN](https://docs.sentry.io/concepts/key-terms/dsn-explainer/). A DSN
+  tells a Sentry where to send events so the events are associated with the
+  correct project.
+</ParamField>
+<ParamField path="metadata" type="object">
+  Metadata is an object that takes a property `store_execution_logs`, which is a
+  boolean. By default, this property is set to `false`, which means Launcher-API
+  won't store the logs of the pods. This has been decided for storage purpose,
+  as a log can take lot of memory. To enable logs written in database, you would
+  need to put the `store_execution_logs` to `true`.
+</ParamField>
+<ParamField path="data" type="object">
+  Data details of an ETL. Check [EtlData DTO](#etldata-dto)
+</ParamField>
+
+## EtlData DTO
+
+      <ParamField path="schema" type="literal">
+        Schema name from the metabase database. It's in snake_case
+        <Warning>
+          Changing this field might result in data loss. The name of the schema
+          should match the one in metabase, otherwise the data won't be updated
+          correctly.
+        </Warning>
+      </ParamField>
+      <ParamField path="rs_database" type="literal">
+        Database name from metabase. It is also in snake_case.
+        <Warning>
+          Changing this field might result in data loss. The name of the
+          database should match the one in metabase, otherwise the data won't be
+          updated correctly.
+        </Warning>
+      </ParamField>
+      <ParamField path="wf_ids" type="array">
+        IDs of the workflow. Typically one ID per workflow. Array of number
+      </ParamField>
+      <ParamField path="filters" type="array">
+        Filters to remove tables from the ETL. Array of strings
+      </ParamField>
+      <ParamField path="column_filters" type="array">
+        Filters to remove columns from table. Array of string.
+      </ParamField>

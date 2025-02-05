@@ -137,6 +137,15 @@
             "studio/bpmn/gateway",
             "studio/bpmn/event"
           ]
+        },
+        {
+          "group": "Analytics",
+          "icon": "chart-simple",
+          "pages": [
+            "studio/analytics/introduction",
+            "studio/analytics/analytics-dto",
+            "studio/analytics/analytics-page"
+          ]
         }
       ]
     }
