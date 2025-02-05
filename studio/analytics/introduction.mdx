@@ -1,0 +1,28 @@
+---
+title: 'ETL'
+sidebarTitle: 'Introduction'
+description: ''
+iconType: 'duotone'
+---
+
+The Analytics ETL system is a service designed to extract data from various sources, transform it according to business logic, and load it into the Analytics platform.
+
+Analytics-ETL represents a pipeline involving several Stratumn microservices : Launcher-API for creating/updating/scheduling ETLs, Metabase for creating and managing dashboard, and Analytics-API for displaying the dashboard on Analytics-UI.
+
+## 1. Extract
+
+Data is fetched from PostgreSQL databases (account, trace).
+
+## 2. Transform
+
+Transformation steps can include:
+
+- Filtering: Apply conditions to exclude unnecessary data.
+
+- Data Enrichment: Add derived fields or perform lookups.
+
+- Aggregation: Summarize data for analytics use.
+
+## 3. Load
+
+Transformed data is stored in a dedicated database (Analytics Database) on the kubernetes cluster.
