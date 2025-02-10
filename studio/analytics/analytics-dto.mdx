@@ -21,6 +21,7 @@ const etlJob: Job = {
   id: '643e8c66-003c-4b10-ab93-75341c7ad3fb',
   name: 'agre-renewal',
   description: 'TEST',
+  cron_expression: '10 * * * *',
   data: {
     rs_database: 'agre_v2',
     schema: 'renewal',
@@ -31,6 +32,7 @@ const etlJob: Job = {
   created_by: 'ADMIN',
   starts_at: '2024-10-31 00:33:28.778',
   ends_at: null,
+  type: 'ETL',
   image:
     'git.sia-partners.com:5656/stratumn/platform/backend/jobs/analytics-etl:no-null-stratumn-com',
   metadata: {
