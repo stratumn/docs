@@ -137,6 +137,29 @@
             "studio/bpmn/gateway",
             "studio/bpmn/event"
           ]
+        },
+        {
+          "group": "Databases",
+          "pages": [
+            "studio/database/introduction",
+            "studio/database/sheet",
+            "studio/database/grid",
+            {
+              "group": "Data management",
+              "pages": [
+                "studio/database/interactions/create",
+                "studio/database/interactions/delete",
+                "studio/database/interactions/modify"
+              ]
+            }
+          ]
+        },
+        {
+          "group": "Generations",
+          "pages": [
+            "studio/generation/introduction",
+            "studio/generation/details"
+          ]
         }
       ]
     }
