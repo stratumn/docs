@@ -4,4 +4,48 @@ sidebarTitle: 'Step 2'
 description: ''
 icon: '2'
 ---
-<Note>TODO</Note>
+
+The client has requested to update the workflow Order Management.
+
+He wants to add a new group to the workflow, the `Waiter` group, and new actions to the `Client` group. He also updated the previous actions (`Prepare order` is now attributed to the `Cook` group, and the `Waiter` group has a `Receive Order` action).
+
+Please find the specifications for a new version of the workflow in the following Excel file :
+
+<Card
+  title="Orders management - Specifications"
+  icon="book-open"
+  iconType="duotone"
+  horizontal
+  href="https://siapartners1.sharepoint.com/:x:/r/sites/Stratumn/Documents%20partages/Onboarding/Order_Management_Spec_V1_1_090125.xlsx?d=w0806d34e1b7b46c38de0f7391696d012&csf=1&web=1&e=IiYwPF&nav=MTVfezAwMDAwMDAwLTAwMDEtMDAwMC0xMDAwLTAwMDAwMDAwMDAwMH0"
+/>
+
+Please pay attention to the following changes:
+
+- New BPMN diagram with actions
+  and groups updated
+- Updated actions : Prepare Order
+- New action : Receive Order, Cancel Order.
+
+<Note>
+  Please pay attention to update well the next actions for each group, and the
+  trace_state updates (status, etc).
+</Note>
+
+## Upgrading the workflow version
+
+A new version of a workflow means its tag will be updated.
+In the git repository, we create a new release for each version of a workflow.
+
+Please create a new branch for the step 2, based on the step 1 branch :
+
+```bash
+git checkout -b feature/<your-name>-step-2
+```
+
+You don't need to update the workflow ID in the .env as you only need to upgrade the previous one.
+
+Make your changes and generate it again running the following command:
+
+```bash
+yarn generate:local-to-staging
+```
