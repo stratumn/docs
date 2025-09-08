@@ -1,0 +1,62 @@
+---
+title: Trace errors documentation
+---
+
+This page contains the documentation for the trace errors.  
+There are 2 types of trace errors:
+
+- 400 errors : client error : the request is invalid.
+- 500 errors : engine error : an unexpected error occurred.
+
+## Classified errors
+
+### 001
+
+This error is returned when creating a link and the data has exceeded the maximum size (5MB).
+
+### 006
+
+This error is returned when the user is not authorized to perform the action.
+The action is not in the list of the next actions available from the group selected.
+
+### 016
+
+This error is returned when the workflowId does not exist, or automation is not allowed on this target workflow.
+
+### 033
+
+Error occured during the creation of a scheduler : the input might be invalid.
+For example: the cron expression or timestamp is invalid, or the scheduler already exists.
+
+## Non classified error
+
+### 000
+
+An error occurred while creating a link, that has not been classified in another error, but is not an engine error (probably wrong input)
+
+### EXEC-JS
+
+This error is returned when the execution of the action failed.
+This is occuring when the execJS failed.
+This could be because :
+
+- of a throw occurring in the effects.
+- of an external function failing.
+- of a Javascript error inside the effects.
+
+### DSL-ERROR
+
+An error caused by a Throw Statement, when a throw occurred in the effects.
+
+### ERR-500
+
+An unexpected system error occurred that could not be classified into a specific error category. This typically indicates an internal server issue or an unhandled exception.
+
+When it occurs:
+
+- Unhandled exceptions in the system
+- Database connection failures
+- Unexpected errors that don't match any specific error patterns
+- System-level failures that require investigation
+
+Resolution: Contact support if the issue persists.
