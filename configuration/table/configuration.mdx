@@ -3,6 +3,159 @@ title: 'Configuration'
 icon: 'gear'
 ---
 
+import { Size } from '/snippets/size.mdx';
+
+# Table
+
+The table is one of the core components of Stratumn, it powers the [Overview](/configuration/ui/overview), 
+the [Data Importer](/configuration/table/data-importer), the [Data Editor](/configuration/table/data-editor), 
+the [data editor in form](/configuration/table/data-editor-in-form) and the [Table widget](/configuration/ui/widgets/table).
+
+
+## Table features
+
+
+
+## Table configuration
+The component is fully customizable via a TypeScript object provided by the configuration project using the following fields:
+
+<Tabs>
+  <Tab title="API">
+    <ParamField path="columns" type="Column[]" required>
+      An array of column definitions that will define the content of the table. See more information about the column definition [here](/configuration/table/column).
+    </ParamField>
+    <ParamField path="fixedColumns" type="Column[]">
+      An array of column definitions that are always rendered, even when the table is horizontally scrolled.
+      This is useful for displaying key information that must remain visible at all times, such as the row ID (or the Trace ID in the overview table).
+
+      See more information about the column definition [here](/configuration/table/column).
+    </ParamField>
+    <ParamField path="dataSelectorPath" type="JMESPath" required>
+      A [JMESPath](https://jmespath.org/specification.html) expression that resolves to an unique identifier for each row, used to identify rows when sorting, filtering or updating.
+      Usually, you'll provide a path to the row identifier, like `myRowId` 
+      ```ts
+      dataSelectorPath: 'myRowId'
+      ```
+      
+      In some cases where there's no unique identifier, you can use a combination of fields using [JMESPath `join` function](https://jmespath.org/proposals/functions.html#join) :
+      ```ts
+      dataSelectorPath: "join('~', [field1, field2])"
+      ```
+
+      <Note>
+        The data selector defaults to `rowId` in the data editor or `meta.traceId` in the overview table.
+      </Note>
+    </ParamField>
+    <ParamField path="defaultDisplay" type="string[]" required>
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // TODO: Update the defaultDisplay property to use the columns definition
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      An array of column keys that will be displayed by default when the table is first rendered.
+      <Expandable title="Examples" defaultOpen>
+        If we have three columns with the keys: `traceName`, `traceId` and `traceType`, and we want to display `traceName` and `traceId` by default:
+        ```ts
+        defaultDisplay: ['traceName', 'traceId']
+        ```
+      </Expandable>
+    </ParamField>
+    <ParamField path="templates" type="todo">
+      Todo
+    </ParamField>
+    <ParamField path="aggregation" type="todo">
+      todo
+    </ParamField>
+    <ParamField path="applyFilters" type="boolean" default="false">
+      Whether to activate filtering by default to the table. 
+      Setting this property to `true` will display the filter panel but won't have any effect if no [`filters`](#param-filters) are provided.
+     </ParamField>
+    <ParamField path="filters" type="Record<string, FilterDefinition>">
+      <Warning>
+        We usually don't use this property directly, but instead directly define the filters in the [columns definition](#columns-definition).
+      </Warning>
+      The default filters to apply to the table, only used if [`applyFilters`](#param-apply-filters) is set to `true`.
+      <CodeGroup>
+          ```ts Type
+          type Filters = {
+            [columnKey: string]: FilterDefinition
+          }
+          ```
+          ```jsonc Example
+          {
+            // ...
+            "filters": {
+              "someColumnKey": {
+                "type": "text",
+                "path": "data.someColumnKey"
+              },
+              "someOtherColumnKey": {
+                "type": "number",
+                "path": "data.someOtherColumnKey"
+              }
+            },
+            // ...
+          }
+          ```
+      </CodeGroup>
+      See more information about the filter definition [here](#filters-definition).
+    </ParamField>
+    <ParamField path="groupBy" type="GroupDefinition" deprecated>
+      Using this property will active by default a grouped view of the table, using the [group definition](#group-definition) provided.
+    </ParamField>
+    <ParamField path="groups" type="GroupDefinition[]" deprecated>
+      An array of [group definitions](#group-definition) that the user can choose from to group the table by.
+    </ParamField>
+    <ParamField path="sortSetup" type="SortSetup">
+      TODO
+    </ParamField>
+    <ParamField path="tableWidthBuffer" type="Size">
+      scanning
+    </ParamField>
+    <ParamField path="selectBoxWidth" type="Size" default="xsmall">
+      The <Size name="width" /> of the columns that contains the checkbox used to select a row.
+    </ParamField>
+    <ParamField path="columnsWidth" type="Size" default="medium">
+      The default <Size name="width" /> of the columns.
+    </ParamField>
+    <ParamField path="minColumnsWidth" type="Size" default="xsmall">
+      The minimum <Size name="width" /> of the columns when resized.
+    </ParamField>
+    <ParamField path="minRowsHeight" type="Size" default={30}>
+      scanning
+    </ParamField>
+    <ParamField path="rowsHeight" type="Size" default={42}>
+      The default <Size name="height" /> of the rows.
+    </ParamField>
+    <ParamField path="overscanRowCount" type="number" default={10}>
+      The number of rows to render outside of the visible area. This property can be important for two reasons:
+      - Overscanning by one row or column allows the tab key to focus on the next (not yet visible) item.
+      - Overscanning slightly can reduce or prevent a flash of empty space when a user first starts scrolling.
+      <Warning>
+        Note that overscanning too much can negatively impact performance.
+      </Warning>
+    </ParamField>
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+    type Table = {
+      
+    }
+    ```
+  </Tab>
+  <Tab title="Example">
+    ```json Simple usage
+    {
+      "type": "text",
+      "path": "data.order.name"
+    }
+    ```
+    <Note>
+      The [JMESPath](https://jmespath.org/specification.html) syntax is very powerful and can be used to build complex expressions.
+      For example, the path `"['Hello ',userName,', how are you?'].join('',@)"` will produce `"Hello ${userName}, how are you?"`.
+    </Note>
+  </Tab>
+</Tabs>
+
+
 Table is configured through a JSON document. Below is an example structure:
 
 ```json
@@ -51,18 +204,111 @@ To optimize client-side rendering and reactivity, we use a library called React-
   1.
 </Warning>
 
-### Column Width Keywords
+### Columns definition
 
-| **Keyword** | **Width** |
-| ----------- | --------- |
-| `xsmall`    | 50px      |
-| `small`     | 100px     |
-| `medium`    | 200px     |
-| `large`     | 300px     |
-| `xlarge`    | 500px     |
+### Filters definition
+
+Each column displays a widget and each widget provides it's own filter setup, 
+but you can optionally override the default filter setup for a specific column by using a custom filter.
+
+<AccordionGroup>
+  <Accordion title="Text filter" defaultOpen={true}>
+    You can put other components inside Accordions.
+
+    ```java HelloWorld.java
+    class HelloWorld {
+        public static void main(String[] args) {
+            System.out.println("Hello, World!");
+        }
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Advanced features" icon="alien-8bit">
+    Add icons to make accordions more visually distinct and scannable.
+  </Accordion>
+
+  <Accordion title="Troubleshooting">
+    Keep related content organized into groups.
+  </Accordion>
+</AccordionGroup>
+
 
 ---
 
+### Sort setup definition
+
+
+### Group definition
+You can predefine group definitions that will be use to group the table's rows by a specific value.
+
+<Tabs>
+  <Tab title="API">
+    <ParamField path="path" type="JMESPath" required>
+      The path to the value that will be used to group the rows.
+    </ParamField>
+    <ParamField path="label" type="string" required>
+      The label of the group, shown to the user.
+    </ParamField>
+    <ParamField path="column" type="string" required>
+      The key of the column that will contains the value to group by.
+    </ParamField>
+  </Tab>
+  <Tab title="Screenshot">
+    <Frame>
+      <img src="/images/configuration/table/definition/group.png" />
+    </Frame>
+  </Tab>
+  <Tab title="Type">
+  ```ts
+    type GroupDefinition = {
+      path: string;
+      label: string;
+      column: string;
+    };
+  ```
+  </Tab>
+  <Tab title="Example">
+  ```ts
+    {
+      path: 'data.year',
+      label: 'Year',
+      column: 'year'
+    }
+  ```
+  </Tab>
+</Tabs>
+
+<Danger>
+  The group feature is no longer supported.
+</Danger>
+
+### Size
+Any table size (width or height) can be defined by either providing an arbitrary number of pixels 
+or one of the following keywords that are mapped to a fixed size.
+
+<Tabs>
+  <Tab title="Keywords">
+    | **Keyword** | **Size** |
+    | ----------- | --------- |
+    | `xsmall`    | `50px`    |
+    | `small`     | `100px`   |
+    | `medium`    | `200px`   |
+    | `large`     | `300px`   |
+    | `xlarge`    | `500px`   |
+  </Tab>
+  <Tab title="Type">
+  ```ts
+    type Size = 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge' | number;
+  ```
+  </Tab>
+  <Tab title="Example">
+  ```ts
+    width: "medium"
+  ```
+  </Tab>
+</Tabs>
+---
 ## Column Definitions
 
 Columns are configured using the `fixedColumns` and `columns` fields, with each column specified as follows:
