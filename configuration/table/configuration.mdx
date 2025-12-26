@@ -110,7 +110,7 @@ The component is fully customizable via a TypeScript object provided by the conf
             </ParamField>
           </Expandable>
         </ParamField>
-        <ParamField path="groupBy" type="GroupDefinition" deprecated>
+        <ParamField path="groupBy" type="GroupDefinition">
           Using this property will activate by default a grouped view of the table, using the [group definition](#group-definition) provided.
         </ParamField>
       </Expandable>
@@ -325,7 +325,7 @@ The component is fully customizable via a TypeScript object provided by the conf
         The aggregation feature is only available if the table has no pagination (not the [overview table](/configuration/ui/overview)) and is not [grouped](#group-definition).
       </Note>
     </ParamField>
-    <ParamField path="groups" type="GroupDefinition[]" deprecated>
+    <ParamField path="groups" type="GroupDefinition[]">
       An array of [group definitions](#group-definition) that the user can choose from to group the table by.
     </ParamField>
     <ParamField path="tableWidthBuffer" type="number" deprecated>
@@ -341,7 +341,9 @@ The component is fully customizable via a TypeScript object provided by the conf
       defaultDisplay: {
         columns: string[];
         applyFilters?: boolean;
-        filters?: Record<string, FilterDefinition>;
+        filters?: {
+          [columnKey: string]: FilterDefinition;
+        }
         sortSetup?: {
           key: string;
           direction?: 'ASC' | 'DESC';
@@ -365,7 +367,6 @@ The component is fully customizable via a TypeScript object provided by the conf
         filename?: string;
       };
       overscanRowCount?: number;
-      /** @deprecated */
       groups?: GroupDefinition[];
       /** @deprecated  */
       tableWidthBuffer?: number;
