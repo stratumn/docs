@@ -60,7 +60,7 @@ The component is fully customizable via a TypeScript object provided by the conf
             ```
           </Expandable>
         </ParamField>
-        <ParamField path="applyFilters" type="boolean" default="false">
+        <ParamField path="applyFilters" type="boolean" default={false}>
           Whether to activate filtering by default to the table. 
           Setting this property to `true` will display the filter panel but won't have any effect if no [`filters`](#param-filters) are provided.
         </ParamField>
@@ -115,9 +115,12 @@ The component is fully customizable via a TypeScript object provided by the conf
         </ParamField>
       </Expandable>
     </ParamField>
-    <ParamField path="dataHook" type="string" default="data">
+    <ParamField path="dataHook" type="`${(data: Row[]) => Row[]}`">
       A stringified function that will receives the table's data, transforms it and returns it.
-      <Expandable title="Example" defaultOpen={false}>
+      <Note>
+        Since the data hook is a stringified function, you can't use any external constants or functions.
+      </Note>
+      <Expandable defaultOpen={false}>
         <Tabs>
           <Tab title="Usage">
           <AccordionGroup>
@@ -153,6 +156,142 @@ The component is fully customizable via a TypeScript object provided by the conf
             }
             ```
             </Accordion>
+
+            <Accordion title="Applying a tax rate" icon="percent">
+
+            Let's say that you have a table with rows defined as follow:
+
+            ```ts Row type
+            type Product = {
+              price: number;
+              taxRate: number; // e.g. 0.2 for 20%
+              priceWithTax: number;
+            }
+            ```
+
+            You can compute the price with tax applied by using the following data hook:
+
+            ```ts twoslash Implementation using the dataHook
+            {
+              ...
+              dataHook: ((data: Product[]): Product[] => {
+                // for each row, apply the tax rate to the price
+                return data.map(product => {
+                  const priceWithTax = product.price * (1 + product.taxRate);
+                  return {
+                    ...product, // keep the row original data
+                    priceWithTax: Math.round(priceWithTax * 100) / 100 // round to 2 decimals
+                  }
+                })
+              })
+              .toString(), // stringify the function
+              ...
+            }
+            ```
+            </Accordion>
+
+            <Accordion title="Computing a full name" icon="user">
+
+            Let's say that you have a table with rows defined as follow:
+
+            ```ts Row type
+            type Person = {
+              firstName: string;
+              lastName: string;
+              fullName: string;
+            }
+            ```
+
+            You can compute the full name by concatenating first and last name:
+
+            ```ts twoslash Implementation using the dataHook
+            {
+              ...
+              dataHook: ((data: Person[]): Person[] => {
+                // for each row, compute the full name
+                return data.map(person => ({
+                  ...person, // keep the row original data
+                  fullName: `${person.firstName} ${person.lastName}`.trim()
+                }))
+              })
+              .toString(), // stringify the function
+              ...
+            }
+            ```
+            </Accordion>
+
+            <Accordion title="Formatting a date" icon="calendar">
+
+            Let's say that you have a table with rows containing dates:
+
+            ```ts Row type
+            type Event = {
+              date: string; // ISO date string, e.g. "2025-12-26T14:30:00Z"
+              formattedDate: string;
+            }
+            ```
+
+            You can format the date for display using the following data hook:
+
+            ```ts twoslash Implementation using the dataHook
+            {
+              ...
+              dataHook: ((data: Event[]): Event[] => {
+                return data.map(event => {
+                  const date = new Date(event.date);
+                  const formattedDate = date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  });
+                  return {
+                    ...event,
+                    formattedDate // e.g. "December 26, 2025"
+                  }
+                })
+              })
+              .toString(), // stringify the function
+              ...
+            }
+            ```
+            </Accordion>
+
+            <Accordion title="Computing a status" icon="circle-check">
+
+            Let's say that you have a table with tasks and want to display a computed status:
+
+            ```ts Row type
+            type Task = {
+              dueDate: string;
+              completedAt?: string;
+              status: 'completed' | 'overdue' | 'pending';
+            }
+            ```
+
+            You can compute the status based on dates:
+
+            ```ts twoslash Implementation using the dataHook
+            {
+              ...
+              dataHook: ((data: Task[]): Task[] => {
+                const now = new Date();
+                return data.map(task => {
+                  let status: 'completed' | 'overdue' | 'pending';
+                  if (task.completedAt) {
+                    status = 'completed';
+                  } else if (new Date(task.dueDate) < now) {
+                    status = 'overdue';
+                  } else {
+                    status = 'pending';
+                  }
+                  return { ...task, status }
+                })
+              })
+              .toString(), // stringify the function
+              ...
+            }
+            ```
+            </Accordion>
           </AccordionGroup>
           </Tab>
           <Tab title="Type">
@@ -166,19 +305,19 @@ The component is fully customizable via a TypeScript object provided by the conf
         </Tabs>
       </Expandable>
     </ParamField>
-    <ParamField path="showEmptyTable" type="boolean" default="true">
+    <ParamField path="showEmptyTable" type="boolean" default={true}>
       Whether to show empty lines when the table has no data.
     </ParamField>
-    <ParamField path="selectBoxWidth" type="Size" default="xsmall">
+    <ParamField path="selectBoxWidth" type="Size" default="'xsmall'">
       The <Size name="width" /> of the columns that contains the checkbox used to select a row.
     </ParamField>
-    <ParamField path="allowColumnsSelection" type="boolean" default="true">
+    <ParamField path="allowColumnsSelection" type="boolean" default={true}>
       Whether to allow the user to change the columns that are displayed by default or not.
     </ParamField>
-    <ParamField path="columnsWidth" type="Size" default="medium">
+    <ParamField path="columnsWidth" type="Size" default="'medium''">
       The default <Size name="width" /> of the columns.
     </ParamField>
-    <ParamField path="minColumnsWidth" type="Size" default="xsmall">
+    <ParamField path="minColumnsWidth" type="Size" default="'xsmall'">
       The minimum <Size name="width" /> of the columns when resized horizontally.
     </ParamField>
     <ParamField path="minRowsHeight" type="Size" default={30}>
@@ -193,10 +332,10 @@ The component is fully customizable via a TypeScript object provided by the conf
     >
       Configuration for the table export to CSV/Excel feature. 
       <Expandable title="Properties" defaultOpen>
-        <ParamField path="delimiter" type="string" default=";">
+        <ParamField path="delimiter" type="string" default="';'">
           The delimiter to use for the CSV file, exclusivly used for the CSV file.
         </ParamField>
-        <ParamField path="filename" type="string" default="table_export">
+        <ParamField path="filename" type="string" default="'table_export'">
           The base of the exported file's name. This value is also used for the Excel file.
           The final name will be `<YYYY-MM-DD>-<filename>.<extension>`.
         </ParamField>
