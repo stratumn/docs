@@ -116,183 +116,148 @@ The component is fully customizable via a TypeScript object provided by the conf
       </Expandable>
     </ParamField>
     <ParamField path="dataHook" type="`${(data: Row[]) => Row[]}`">
-      A stringified function that will receives the table's data, transforms it and returns it.
-      <Note>
-        Since the data hook is a stringified function, you can't use any external constants or functions.
-      </Note>
-      <Expandable defaultOpen={false}>
+      A **stringified function** that will receives the table's data, transforms it and returns it.
+      <Expandable title="informations" defaultOpen={false}>
+        <Note>
+          Since the data hook is a stringified function, you can't use any external constants or functions.
+        </Note>
         <Tabs>
           <Tab title="Usage">
-          <AccordionGroup>
-            <Accordion title="Applying a discount" defaultOpen icon="dollar-sign">
+            Some basic examples of how to use the `dataHook` to transform the table data:
+            <AccordionGroup>
+              <Accordion title="Applying a discount" icon="dollar-sign">
 
-            Let's say that you have a table with rows defined as follow:
+              Let's say that you have a table with rows defined as follow:
 
-            ```ts Row type
-            type Item = {
-              amount: number;
-              reduceAmount?: number;
-              finalAmount: number;
-            }
-            ```
+              ```ts Row type
+              type Item = {
+                amount: number;
+                reduceAmount?: number;
+                finalAmount: number;
+              }
+              ```
 
-            You can apply a discount to the amounts by using the following data hook:
+              You can apply a discount to the amounts by using the following data hook:
 
-            ```ts twoslash Implementation using the dataHook
-            {
-              ...
-              dataHook: ((data: Item[]): Item[] => {
-                // for each row, apply the amount reduction
-                return data.map(item => {
-                  const finalAmount = item.amount - (item.reduceAmount || 0);
-                  return {
-                    ...item, // keep the row original data
-                    finalAmount // apply the reduction amount
-                  }
+              ```ts twoslash Implementation using the dataHook
+              {
+                ...
+                dataHook: ((data: Item[]): Item[] => {
+                  // for each row, apply the amount reduction
+                  return data.map(item => {
+                    const finalAmount = item.amount - (item.reduceAmount || 0);
+                    return {
+                      ...item, // keep the row original data
+                      finalAmount // apply the reduction amount
+                    }
+                  })
                 })
-              })
-              .toString(), // stringify the function
-              ...
-            }
-            ```
-            </Accordion>
+                .toString(), // stringify the function
+                ...
+              }
+              ```
+              </Accordion>
 
-            <Accordion title="Applying a tax rate" icon="percent">
+              <Accordion title="Applying a tax rate" icon="percent">
 
-            Let's say that you have a table with rows defined as follow:
+              Let's say that you have a table with rows defined as follow:
 
-            ```ts Row type
-            type Product = {
-              price: number;
-              taxRate: number; // e.g. 0.2 for 20%
-              priceWithTax: number;
-            }
-            ```
+              ```ts Row type
+              type Product = {
+                price: number;
+                taxRate: number; // e.g. 0.2 for 20%
+                priceWithTax: number;
+              }
+              ```
 
-            You can compute the price with tax applied by using the following data hook:
+              You can compute the price with tax applied by using the following data hook:
 
-            ```ts twoslash Implementation using the dataHook
-            {
-              ...
-              dataHook: ((data: Product[]): Product[] => {
-                // for each row, apply the tax rate to the price
-                return data.map(product => {
-                  const priceWithTax = product.price * (1 + product.taxRate);
-                  return {
-                    ...product, // keep the row original data
-                    priceWithTax: Math.round(priceWithTax * 100) / 100 // round to 2 decimals
-                  }
+              ```ts twoslash Implementation using the dataHook
+              {
+                ...
+                dataHook: ((data: Product[]): Product[] => {
+                  // for each row, apply the tax rate to the price
+                  return data.map(product => {
+                    const priceWithTax = product.price * (1 + product.taxRate);
+                    return {
+                      ...product, // keep the row original data
+                      priceWithTax: Math.round(priceWithTax * 100) / 100 // round to 2 decimals
+                    }
+                  })
                 })
-              })
-              .toString(), // stringify the function
-              ...
-            }
-            ```
-            </Accordion>
+                .toString(), // stringify the function
+                ...
+              }
+              ```
+              </Accordion>
 
-            <Accordion title="Computing a full name" icon="user">
+              <Accordion title="Computing a full name" icon="user">
 
-            Let's say that you have a table with rows defined as follow:
+              Let's say that you have a table with rows defined as follow:
 
-            ```ts Row type
-            type Person = {
-              firstName: string;
-              lastName: string;
-              fullName: string;
-            }
-            ```
+              ```ts Row type
+              type Person = {
+                firstName: string;
+                lastName: string;
+                fullName: string;
+              }
+              ```
 
-            You can compute the full name by concatenating first and last name:
+              You can compute the full name by concatenating first and last name:
 
-            ```ts twoslash Implementation using the dataHook
-            {
-              ...
-              dataHook: ((data: Person[]): Person[] => {
-                // for each row, compute the full name
-                return data.map(person => ({
-                  ...person, // keep the row original data
-                  fullName: `${person.firstName} ${person.lastName}`.trim()
-                }))
-              })
-              .toString(), // stringify the function
-              ...
-            }
-            ```
-            </Accordion>
-
-            <Accordion title="Formatting a date" icon="calendar">
-
-            Let's say that you have a table with rows containing dates:
-
-            ```ts Row type
-            type Event = {
-              date: string; // ISO date string, e.g. "2025-12-26T14:30:00Z"
-              formattedDate: string;
-            }
-            ```
-
-            You can format the date for display using the following data hook:
-
-            ```ts twoslash Implementation using the dataHook
-            {
-              ...
-              dataHook: ((data: Event[]): Event[] => {
-                return data.map(event => {
-                  const date = new Date(event.date);
-                  const formattedDate = date.toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  });
-                  return {
-                    ...event,
-                    formattedDate // e.g. "December 26, 2025"
-                  }
+              ```ts twoslash Implementation using the dataHook
+              {
+                ...
+                dataHook: ((data: Person[]): Person[] => {
+                  // for each row, compute the full name
+                  return data.map(person => ({
+                    ...person, // keep the row original data
+                    fullName: `${person.firstName} ${person.lastName}`.trim()
+                  }))
                 })
-              })
-              .toString(), // stringify the function
-              ...
-            }
-            ```
-            </Accordion>
+                .toString(), // stringify the function
+                ...
+              }
+              ```
+              </Accordion>
 
-            <Accordion title="Computing a status" icon="circle-check">
+              <Accordion title="Computing a status" icon="circle-check">
 
-            Let's say that you have a table with tasks and want to display a computed status:
+              Let's say that you have a table with tasks and want to display a computed status:
 
-            ```ts Row type
-            type Task = {
-              dueDate: string;
-              completedAt?: string;
-              status: 'completed' | 'overdue' | 'pending';
-            }
-            ```
+              ```ts Row type
+              type Task = {
+                dueDate: string;
+                completedAt?: string;
+                status: 'completed' | 'overdue' | 'pending';
+              }
+              ```
 
-            You can compute the status based on dates:
+              You can compute the status based on dates:
 
-            ```ts twoslash Implementation using the dataHook
-            {
-              ...
-              dataHook: ((data: Task[]): Task[] => {
-                const now = new Date();
-                return data.map(task => {
-                  let status: 'completed' | 'overdue' | 'pending';
-                  if (task.completedAt) {
-                    status = 'completed';
-                  } else if (new Date(task.dueDate) < now) {
-                    status = 'overdue';
-                  } else {
-                    status = 'pending';
-                  }
-                  return { ...task, status }
+              ```ts twoslash Implementation using the dataHook
+              {
+                ...
+                dataHook: ((data: Task[]): Task[] => {
+                  const now = new Date();
+                  return data.map(task => {
+                    let status: 'completed' | 'overdue' | 'pending';
+                    if (task.completedAt) {
+                      status = 'completed';
+                    } else if (new Date(task.dueDate) < now) {
+                      status = 'overdue';
+                    } else {
+                      status = 'pending';
+                    }
+                    return { ...task, status }
+                  })
                 })
-              })
-              .toString(), // stringify the function
-              ...
-            }
-            ```
-            </Accordion>
-          </AccordionGroup>
+                .toString(), // stringify the function
+                ...
+              }
+              ```
+              </Accordion>
+            </AccordionGroup>
           </Tab>
           <Tab title="Type">
             ```ts
@@ -349,15 +314,16 @@ The component is fully customizable via a TypeScript object provided by the conf
         Note that overscanning too much can negatively impact performance.
       </Warning>
     </ParamField>
-    <ParamField path="aggregation" type="unknown" deprecated>
-      It looks like this property is handled in our codebase, but never used in real configuration projects, 
-      you're probably looking for the Table Importer aggregation definition.
-      See more information about the aggregation definition [here](/configuration/action/data-importer/aggregation).
-      <Expandable title="API" defaultOpen>
+    <ParamField path="aggregation" type="object">
+      Configuration for the table aggregation feature. Only used to define the aggregation label.
+      <Expandable title="Properties" defaultOpen>
         <ParamField path="label" type="string" default="'Show sub-totals'">
           The type of the aggregation.
         </ParamField>
       </Expandable>
+      <Note>
+        The aggregation feature is only available if the table has no pagination (not the [overview table](/configuration/ui/overview)) and is not [grouped](#group-definition).
+      </Note>
     </ParamField>
     <ParamField path="groups" type="GroupDefinition[]" deprecated>
       An array of [group definitions](#group-definition) that the user can choose from to group the table by.
@@ -367,18 +333,8 @@ The component is fully customizable via a TypeScript object provided by the conf
     </ParamField>
   </Tab>
   <Tab title="Type">
-  ```ts twoslash Twoslash example
-type Pet = "cat" | "dog" | "hamster";
-
-function adoptPet(name: string, type: Pet) {
-  return `${name} the ${type} is now adopted!`;
-}
-
-// Survolez pour voir les types inférés
-const message = adoptPet("Mintie", "cat");
-```
-    ```ts twoslash Table type icon="ts"
-    type Table = {
+    ```ts Table type definition
+    type TableDefinition = {
       columns: ColumnDefinition[];
       fixedColumns?: ColumnDefinition[];
       dataSelectorPath: string;
@@ -393,7 +349,11 @@ const message = adoptPet("Mintie", "cat");
         /** @deprecated */
         groupBy?: GroupDefinition;
       };
-      aggregation?: unknown;
+      dataHook?: `${(data: YourRowType[]) => YourRowType[]}`;
+      showEmptyTable?: boolean;
+      aggregation?: {
+        label?: string;
+      };
       selectBoxWidth?: Size;
       allowColumnsSelection?: boolean;
       columnsWidth?: Size;
@@ -403,17 +363,13 @@ const message = adoptPet("Mintie", "cat");
       exportCsv?: {
         delimiter?: string;
         filename?: string;
-      }
+      };
       overscanRowCount?: number;
       /** @deprecated */
       groups?: GroupDefinition[];
       /** @deprecated  */
       tableWidthBuffer?: number;
     };
-
-    const getTable = (): Table => {} as Table;
-
-    const table = getTable();
     ```
   </Tab>
   <Tab title="Example">
