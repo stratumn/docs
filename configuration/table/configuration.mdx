@@ -1,22 +1,18 @@
 ---
-title: 'Configuration'
+title: 'Table configuration'
 icon: 'gear'
+description: 'The table is one of the core components of Stratumn, it powers the [Overview](/configuration/ui/overview), the [Data Importer](/configuration/table/data-importer), the [Data Editor](/configuration/table/data-editor), the [data editor in form](/configuration/table/data-editor-in-form) and the [Table widget](/configuration/ui/widgets/table).'
 ---
 
 import { Size } from '/snippets/size.mdx';
 
-# Table
-
-The table is one of the core components of Stratumn, it powers the [Overview](/configuration/ui/overview), 
-the [Data Importer](/configuration/table/data-importer), the [Data Editor](/configuration/table/data-editor), 
-the [data editor in form](/configuration/table/data-editor-in-form) and the [Table widget](/configuration/ui/widgets/table).
 
 
-## Table features
+## Features
 
 
 
-## Table configuration
+## Configuration
 The component is fully customizable via a TypeScript object provided by the configuration project using the following fields:
 
 <Tabs>
@@ -99,21 +95,79 @@ The component is fully customizable via a TypeScript object provided by the conf
           See more information about the filter definition [here](#filters-definition).
         </ParamField>
         <ParamField path="sortSetup" type="SortSetup">
-          TODO
+          The default sort setup for the table.
+          <Expandable title="Properties" defaultOpen>
+            <ParamField path="key" type="string" required>
+              The key of the column to sort by.
+              <Note>
+                In the workflow overview table, the default path is `head.createdAt`.
+              </Note>
+            </ParamField>
+            <ParamField path="direction" type="'ASC' | 'DESC'" default="'ASC'">
+              The direction of the sort, casing does not matter.
+              - `'ASC'`: Sort ascending.
+              - `'DESC'`: Sort descending.
+            </ParamField>
+          </Expandable>
         </ParamField>
         <ParamField path="groupBy" type="GroupDefinition" deprecated>
-        Using this property will activate by default a grouped view of the table, using the [group definition](#group-definition) provided.
-      </ParamField>
+          Using this property will activate by default a grouped view of the table, using the [group definition](#group-definition) provided.
+        </ParamField>
       </Expandable>
     </ParamField>
-    {/* <ParamField path="templates" type="todo">
-      Todo
-    </ParamField> */}
-    <ParamField path="aggregation" type="todo">
-      todo
+    <ParamField path="dataHook" type="string" default="data">
+      A stringified function that will receives the table's data, transforms it and returns it.
+      <Expandable title="Example" defaultOpen={false}>
+        <Tabs>
+          <Tab title="Usage">
+          <AccordionGroup>
+            <Accordion title="Applying a discount" defaultOpen icon="dollar-sign">
+
+            Let's say that you have a table with rows defined as follow:
+
+            ```ts Row type
+            type Item = {
+              amount: number;
+              reduceAmount?: number;
+              finalAmount: number;
+            }
+            ```
+
+            You can apply a discount to the amounts by using the following data hook:
+
+            ```ts twoslash Implementation using the dataHook
+            {
+              ...
+              dataHook: ((data: Item[]): Item[] => {
+                // for each row, apply the amount reduction
+                return data.map(item => {
+                  const finalAmount = item.amount - (item.reduceAmount || 0);
+                  return {
+                    ...item, // keep the row original data
+                    finalAmount // apply the reduction amount
+                  }
+                })
+              })
+              .toString(), // stringify the function
+              ...
+            }
+            ```
+            </Accordion>
+          </AccordionGroup>
+          </Tab>
+          <Tab title="Type">
+            ```ts
+            type DataHook = `${(data: YourRowType[]) => YourRowType[]}`;
+            ```
+            <Note>
+              Notice the ``` `${...}` ``` wrapping the type of the function, it represent a function inside a string.
+            </Note>
+          </Tab>
+        </Tabs>
+      </Expandable>
     </ParamField>
-    <ParamField path="groups" type="GroupDefinition[]" deprecated>
-      An array of [group definitions](#group-definition) that the user can choose from to group the table by.
+    <ParamField path="showEmptyTable" type="boolean" default="true">
+      Whether to show empty lines when the table has no data.
     </ParamField>
     <ParamField path="selectBoxWidth" type="Size" default="xsmall">
       The <Size name="width" /> of the columns that contains the checkbox used to select a row.
@@ -156,12 +210,35 @@ The component is fully customizable via a TypeScript object provided by the conf
         Note that overscanning too much can negatively impact performance.
       </Warning>
     </ParamField>
+    <ParamField path="aggregation" type="unknown" deprecated>
+      It looks like this property is handled in our codebase, but never used in real configuration projects, 
+      you're probably looking for the Table Importer aggregation definition.
+      See more information about the aggregation definition [here](/configuration/action/data-importer/aggregation).
+      <Expandable title="API" defaultOpen>
+        <ParamField path="label" type="string" default="'Show sub-totals'">
+          The type of the aggregation.
+        </ParamField>
+      </Expandable>
+    </ParamField>
+    <ParamField path="groups" type="GroupDefinition[]" deprecated>
+      An array of [group definitions](#group-definition) that the user can choose from to group the table by.
+    </ParamField>
     <ParamField path="tableWidthBuffer" type="number" deprecated>
       The field has no effect, there's no use of it in our code.
     </ParamField>
   </Tab>
   <Tab title="Type">
-    ```ts Typescript 
+  ```ts twoslash Twoslash example
+type Pet = "cat" | "dog" | "hamster";
+
+function adoptPet(name: string, type: Pet) {
+  return `${name} the ${type} is now adopted!`;
+}
+
+// Survolez pour voir les types inférés
+const message = adoptPet("Mintie", "cat");
+```
+    ```ts twoslash Table type icon="ts"
     type Table = {
       columns: ColumnDefinition[];
       fixedColumns?: ColumnDefinition[];
@@ -170,13 +247,14 @@ The component is fully customizable via a TypeScript object provided by the conf
         columns: string[];
         applyFilters?: boolean;
         filters?: Record<string, FilterDefinition>;
-        sortSetup?: SortSetup;
+        sortSetup?: {
+          key: string;
+          direction?: 'ASC' | 'DESC';
+        };
         /** @deprecated */
         groupBy?: GroupDefinition;
       };
       aggregation?: unknown;
-      /** @deprecated */
-      groups?: GroupDefinition[];
       selectBoxWidth?: Size;
       allowColumnsSelection?: boolean;
       columnsWidth?: Size;
@@ -189,8 +267,14 @@ The component is fully customizable via a TypeScript object provided by the conf
       }
       overscanRowCount?: number;
       /** @deprecated */
+      groups?: GroupDefinition[];
+      /** @deprecated  */
       tableWidthBuffer?: number;
     };
+
+    const getTable = (): Table => {} as Table;
+
+    const table = getTable();
     ```
   </Tab>
   <Tab title="Example">
@@ -230,16 +314,10 @@ but you can optionally override the default filter setup for a specific column b
   </Accordion>
 </AccordionGroup>
 
-
----
-
-### Sort setup definition
-
-
 ### Group definition
 You can predefine group definitions that will be use to group the table's rows by a specific value.
 <Warning>
-  The group feature is no longer supported.
+  The group feature is currentlyfunctional but no longer supported.
 </Warning>
 <Tabs>
   <Tab title="API">
@@ -277,7 +355,6 @@ You can predefine group definitions that will be use to group the table's rows b
   ```
   </Tab>
 </Tabs>
-
 
 ### Size
 Any table size (width or height) can be defined by either providing an arbitrary number of pixels 
