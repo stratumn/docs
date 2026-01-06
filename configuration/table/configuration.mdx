@@ -413,7 +413,7 @@ but you can optionally override the default filter setup for a specific column b
 ### Group definition
 You can predefine group definitions that will be use to group the table's rows by a specific value.
 <Warning>
-  The group feature is currentlyfunctional but no longer supported.
+  The group feature is currently functional but no longer supported.
 </Warning>
 <Tabs>
   <Tab title="API">
@@ -477,21 +477,3 @@ or one of the following keywords that are mapped to a fixed size.
   ```
   </Tab>
 </Tabs>
----
-## Column Definitions
-
-Columns are configured using the `fixedColumns` and `columns` fields, with each column specified as follows:
-
-```json
-{
-  "key": "traceName",
-  "header": "Name",
-  "width": "medium",
-  "cell": {...},
-  "sort": {...},
-  "filter": {...},
-  "aggregation": {...}
-}
-```
-
----

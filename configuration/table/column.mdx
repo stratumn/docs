@@ -7,3 +7,150 @@ description: 'The column is the basic unit of a table, it is used to display a s
 import { Size } from '/snippets/size.mdx';
 
 # Table column
+
+
+<Tabs>
+  <Tab title="API">
+    <ParamField path="key" type="string" required>
+      The key of the column.
+    </ParamField>
+    <ParamField path="header" type="string" required>
+      The header of the column.
+    </ParamField>
+    <ParamField path="width" type="Size" default="'medium'">
+      The <Size name="width" /> of the column.
+    </ParamField>
+    <ParamField path="cell" type="Cell" required>
+      The definition of the the content of the cell, see more information about the cell definition [here](#cell-definition).
+    </ParamField>
+    <ParamField path="cellFn" type="`${(data: any) => Cell}`" required>
+      A stringified function calculated on the fly by the frontend that returns the cell definition.
+      <Expandable title="Example">
+        ```ts Example of a cellFn
+        {
+          ...
+          cellFn: ((data: any): Cell => {
+            return {
+              view: { type: 'text', path: 'data.name' }
+            }
+          }).toString(),
+          ...
+        }
+        ```
+      </Expandable>
+    </ParamField>
+    <ParamField path="sort" type="object">
+      The sort of the column.
+    </ParamField>
+    <ParamField path="filter" type="object">
+      The filter of the column.
+    </ParamField>
+    <ParamField path="aggregation" type="object">
+      <Note>
+        The aggregation feature is currently only effective for the widget type `number`.
+      </Note>
+      Configuration for the column aggregation feature.
+      <Tabs>
+        <Tab title="API">
+          <AccordionGroup>
+            <Accordion title="Using a predefined function">
+              Using this method will effectively compute the aggregation by creating under the hood the following JMESPath expression:
+                ```ts JMESPath expression
+                data[?${aggregationKey}=='${aggregationValue}'].${path} | ${
+                aggregationFunction || 'sum'
+              }(@)
+                ```
+              You can use it by providing the following properties:
+              <Expandable title="Properties" defaultOpen>
+                <ParamField path="aggregationKey" type="string" required>
+                  The key of the column to aggregate.
+                </ParamField>
+                <ParamField path="aggregationFunction" type="string" default="sum">
+                  The aggregation function of the column, one of: `sum`, `avg`, `min`, `max`, `count`. See more informations of JMESPath functions [here](https://jmespath.org/specification.html#built-in-functions).
+                </ParamField>
+              </Expandable>
+            </Accordion>
+            <Accordion title="Using a custom aggregation">
+              <ParamField path="path" type="JMESPath" required>
+                The path to the value to aggregate.
+                ```ts Example 
+                {
+                  aggregation: {
+                    path: 'data[].b | avg(@)'
+                  }
+                }
+                ```
+              </ParamField>
+            </Accordion>
+          </AccordionGroup>
+        </Tab>
+        <Tab title="Example">
+          <CodeGroup>
+            ```json Example of a column aggregation
+            {
+              aggregation: {
+                path: 'data[].b | avg(@)'
+              }
+            }
+            ```
+            ```json Example of a column aggregation using a custom aggregation
+            {
+              aggregation: {
+                path: 'data[].b | avg(@)'
+              }
+            }
+            ```
+          </CodeGroup>
+        </Tab>
+      </Tabs>
+    </ParamField>
+  </Tab>
+</Tabs>
+
+Columns are configured using the `fixedColumns` and `columns` fields, with each column specified as follows:
+
+```json
+{
+  "key": "traceName",
+  "header": "Name",
+  "width": "medium",
+  "cell": {...},
+  "sort": {...},
+  "filter": {...},
+  "aggregation": {...}
+}
+```
+
+## Cell definition
+
+The cell definition is an object that defines what will be displayed in the cell.
+
+<Tabs>
+  <Tab title="API">
+    <ParamField path="view" type="Widget" required>
+      The type of the cell.
+    </ParamField>
+    <ParamField path="path" type="string" required>
+      The path to the value in the row.
+    </ParamField>
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+    type Cell = {
+      view: Widget;
+      path: string;
+      // TODO: add other properties
+    }
+    ```
+  </Tab>
+  <Tab title="Example">
+    ```json Example of a cell definition
+    {
+      "view": {
+        "type": "text",
+        "path": "data.name"
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
