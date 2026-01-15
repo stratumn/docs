@@ -21,11 +21,11 @@ The action is not in the list of the next actions available from the group selec
 
 ### 016
 
-This error is returned when the workflowId does not exist, or automation is not allowed on this target workflow.
+This error is returned when the `workflowId` does not exist, or automation is not allowed on this target workflow.
 
 ### 033
 
-Error occured during the creation of a scheduler : the input might be invalid.
+Error occured during the creation of a [scheduler](/configuration/action/effects#external-functions) : the input might be invalid.
 For example: the cron expression or timestamp is invalid, or the scheduler already exists.
 
 ## Non classified error
@@ -37,11 +37,11 @@ An error occurred while creating a link, that has not been classified in another
 ### EXEC-JS
 
 This error is returned when the execution of the action failed.
-This is occuring when the execJS failed.
+This is occuring when the action's [effects](/configuration/action/effects) (backend business logic) fails.
 This could be because :
 
 - of a throw occurring in the effects.
-- of an external function failing.
+- of an [external function](/configuration/action/effects#external-functions) failing.
 - of a Javascript error inside the effects.
 
 ### DSL-ERROR
