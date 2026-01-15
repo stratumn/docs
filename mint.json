@@ -163,6 +163,15 @@
             "studio/generation/introduction",
             "studio/generation/details"
           ]
+        },
+        {
+          "group": "Analytics",
+          "icon": "chart-simple",
+          "pages": [
+            "studio/analytics/introduction",
+            "studio/analytics/analytics-dto",
+            "studio/analytics/analytics-page"
+          ]
         }
       ]
     }
