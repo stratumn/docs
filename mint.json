@@ -67,6 +67,11 @@
       "name": "Configuration",
       "icon": "rocket",
       "url": "configuration"
+    },
+    {
+      "name": "Errors",
+      "icon": "triangle-exclamation",
+      "url": "errors"
     }
   ],
   "navigation": [
@@ -174,6 +179,10 @@
           ]
         }
       ]
+    },
+    {
+      "group": "Errors",
+      "pages": ["errors/trace-errors"]
     }
   ],
   "versions": ["v2", "v1"],
