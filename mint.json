@@ -97,6 +97,8 @@
           "pages": [
             "configuration/action/definition",
             "configuration/action/form",
+            "configuration/action/data-importer",
+            "configuration/action/data-editor",
             "configuration/action/effects",
             "configuration/action/notifications"
           ]
@@ -115,6 +117,7 @@
           "icon": "table-cells-large",
           "pages": [
             "configuration/table/configuration",
+            "configuration/table/column",
             "configuration/table/read-views",
             "configuration/table/edit-views",
             "configuration/table/wrappers"

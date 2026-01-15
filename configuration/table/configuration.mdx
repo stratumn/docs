@@ -1,82 +1,479 @@
 ---
-title: 'Configuration'
+title: 'Table configuration'
 icon: 'gear'
+description: 'The table is one of the core components of Stratumn, it powers the [Overview](/configuration/ui/overview), the [Data Importer](/configuration/table/data-importer), the [Data Editor](/configuration/table/data-editor), the [data editor in form](/configuration/table/data-editor-in-form) and the [Table widget](/configuration/ui/widgets/table).'
 ---
 
-Table is configured through a JSON document. Below is an example structure:
+import { Size } from '/snippets/size.mdx';
 
-```json
-{
-  "fixedColumns": [...],
-  "columns": [...],
-  "defaultDisplay": {...},
-  "templates": [...],
-  "aggregation": {...},
-  "tableWidthBuffer": 15,
-  "selectBoxWidth": 34,
-  "minColumnsWidth": "small",
-  "minRowsHeight": 30,
-  "dataSelectorPath": "rowId",
-  "overscanRowCount": 1
-}
-```
 
-<Note>
-To optimize client-side rendering and reactivity, we use a library called React-Window which implements virtualization, meaning that only the rows that are visible (plus a configurable buffer) are effectively rendered. The rest is rendered dynamically when scrolling through the table.
-</Note>
 
-### Key Configuration Sections
+## Features
 
-**Core Definition**
 
-  - `fixedColumns`: Defines non-scrollable columns.
-  - `columns`: Defines scrollable columns.
 
-**Display Options**
+## Configuration
+The component is fully customizable via a TypeScript object provided by the configuration project using the following fields:
 
-  - `defaultDisplay`: Specifies default visual configurations.
-  - `templates`: Enables templating for specific display requirements.
-  - `aggregation`: Configures data aggregation.
+<Tabs>
+  <Tab title="API">
+    <ParamField path="columns" type="Column[]" required>
+      An array of column definitions that will define the content of the table. See more information about the column definition [here](/configuration/table/column).
+    </ParamField>
+    <ParamField path="fixedColumns" type="Column[]">
+      An array of column definitions that are always rendered, even when the table is horizontally scrolled.
+      This is useful for displaying key information that must remain visible at all times, such as the row ID (or the Trace ID in the overview table).
 
-**Static Parameters**
-  - `tableWidthBuffer`: Buffer for scroll bar (default: `15px`).
-  - `selectBoxWidth`: Width for selection box column (default: `34px`).
-  - `minColumnsWidth`: Minimum column width (default: `small`).
-  - `minRowsHeight`: Minimum row height (default: `30px`).
-  - `dataSelectorPath`: Primary key for rows (default: `rowId`).
-  - `overscanRowCount` (**React-Window parameter**): Number of rows pre-rendered beyond visible area (default: `1`).
+      See more information about the column definition [here](/configuration/table/column).
+    </ParamField>
+    <ParamField path="dataSelectorPath" type="JMESPath" required>
+      A [JMESPath](https://jmespath.org/specification.html) expression that resolves to an unique identifier for each row, used to identify rows when sorting, filtering or updating.
+      Usually, you'll provide a path to the row identifier, like `myRowId` 
+      ```ts
+      dataSelectorPath: 'myRowId'
+      ```
+      
+      In some cases where there's no unique identifier, you can use a combination of fields using [JMESPath `join` function](https://jmespath.org/proposals/functions.html#join) :
+      ```ts
+      dataSelectorPath: "join('~', [field1, field2])"
+      ```
 
+      <Note>
+        The data selector defaults to `rowId` in the data editor or `meta.traceId` in the overview table.
+      </Note>
+    </ParamField>
+    <ParamField path="defaultDisplay" type="object" required>
+      The `defaultDisplay` property defines the initial view presented to the user when the table is first rendered, 
+      in the absence of any custom settings.
+      <Expandable title="Properties" defaultOpen>
+        <Note>
+          Every other properties of the table can be set in the defaultDisplay, 
+          but only the following one can be defined only here. 
+        </Note>
+        <ParamField path="columns" type="string[]" required>
+          An array of column keys that will be displayed by default when the table is first rendered.
+          <Expandable title="Examples">
+            If we defined three columns with the keys: `traceName`, `traceId` and `traceType`, 
+            and we want the user to see *by default* `traceName` and `traceId`:
+            ```ts
+            columns: ['traceName', 'traceId']
+            ```
+          </Expandable>
+        </ParamField>
+        <ParamField path="applyFilters" type="boolean" default={false}>
+          Whether to activate filtering by default to the table. 
+          Setting this property to `true` will display the filter panel but won't have any effect if no [`filters`](#param-filters) are provided.
+        </ParamField>
+        <ParamField path="filters" type="Record<string, FilterDefinition>">
+          <Warning>
+            We usually don't use this property directly, but instead directly define the filters in the [columns definition](#columns-definition).
+          </Warning>
+          The default filters to apply to the table, only used if [`applyFilters`](#param-apply-filters) is set to `true`.
+          <CodeGroup>
+              ```ts Type
+              type Filters = {
+                [columnKey: string]: FilterDefinition
+              }
+              ```
+              ```jsonc Example
+              {
+                // ...
+                "filters": {
+                  "someColumnKey": {
+                    "type": "text",
+                    "path": "data.someColumnKey"
+                  },
+                  "someOtherColumnKey": {
+                    "type": "number",
+                    "path": "data.someOtherColumnKey"
+                  }
+                },
+                // ...
+              }
+              ```
+          </CodeGroup>
+          See more information about the filter definition [here](#filters-definition).
+        </ParamField>
+        <ParamField path="sortSetup" type="SortSetup">
+          The default sort setup for the table.
+          <Expandable title="Properties" defaultOpen>
+            <ParamField path="key" type="string" required>
+              The key of the column to sort by.
+              <Note>
+                In the workflow overview table, the default path is `head.createdAt`.
+              </Note>
+            </ParamField>
+            <ParamField path="direction" type="'ASC' | 'DESC'" default="'ASC'">
+              The direction of the sort, casing does not matter.
+              - `'ASC'`: Sort ascending.
+              - `'DESC'`: Sort descending.
+            </ParamField>
+          </Expandable>
+        </ParamField>
+        <ParamField path="groupBy" type="GroupDefinition">
+          Using this property will activate by default a grouped view of the table, using the [group definition](#group-definition) provided.
+        </ParamField>
+      </Expandable>
+    </ParamField>
+    <ParamField path="dataHook" type="`${(data: Row[]) => Row[]}`">
+      A **stringified function** that will receives the table's data, transforms it and returns it.
+      <Expandable title="informations" defaultOpen={false}>
+        <Note>
+          Since the data hook is a stringified function, you can't use any external constants or functions.
+        </Note>
+        <Tabs>
+          <Tab title="Usage">
+            Some basic examples of how to use the `dataHook` to transform the table data:
+            <AccordionGroup>
+              <Accordion title="Applying a discount" icon="dollar-sign">
+
+              Let's say that you have a table with rows defined as follow:
+
+              ```ts Row type
+              type Item = {
+                amount: number;
+                reduceAmount?: number;
+                finalAmount: number;
+              }
+              ```
+
+              You can apply a discount to the amounts by using the following data hook:
+
+              ```ts twoslash Implementation using the dataHook
+              {
+                ...
+                dataHook: ((data: Item[]): Item[] => {
+                  // for each row, apply the amount reduction
+                  return data.map(item => {
+                    const finalAmount = item.amount - (item.reduceAmount || 0);
+                    return {
+                      ...item, // keep the row original data
+                      finalAmount // apply the reduction amount
+                    }
+                  })
+                })
+                .toString(), // stringify the function
+                ...
+              }
+              ```
+              </Accordion>
+
+              <Accordion title="Applying a tax rate" icon="percent">
+
+              Let's say that you have a table with rows defined as follow:
+
+              ```ts Row type
+              type Product = {
+                price: number;
+                taxRate: number; // e.g. 0.2 for 20%
+                priceWithTax: number;
+              }
+              ```
+
+              You can compute the price with tax applied by using the following data hook:
+
+              ```ts twoslash Implementation using the dataHook
+              {
+                ...
+                dataHook: ((data: Product[]): Product[] => {
+                  // for each row, apply the tax rate to the price
+                  return data.map(product => {
+                    const priceWithTax = product.price * (1 + product.taxRate);
+                    return {
+                      ...product, // keep the row original data
+                      priceWithTax: Math.round(priceWithTax * 100) / 100 // round to 2 decimals
+                    }
+                  })
+                })
+                .toString(), // stringify the function
+                ...
+              }
+              ```
+              </Accordion>
+
+              <Accordion title="Computing a full name" icon="user">
+
+              Let's say that you have a table with rows defined as follow:
+
+              ```ts Row type
+              type Person = {
+                firstName: string;
+                lastName: string;
+                fullName: string;
+              }
+              ```
+
+              You can compute the full name by concatenating first and last name:
+
+              ```ts twoslash Implementation using the dataHook
+              {
+                ...
+                dataHook: ((data: Person[]): Person[] => {
+                  // for each row, compute the full name
+                  return data.map(person => ({
+                    ...person, // keep the row original data
+                    fullName: `${person.firstName} ${person.lastName}`.trim()
+                  }))
+                })
+                .toString(), // stringify the function
+                ...
+              }
+              ```
+              </Accordion>
+
+              <Accordion title="Computing a status" icon="circle-check">
+
+              Let's say that you have a table with tasks and want to display a computed status:
+
+              ```ts Row type
+              type Task = {
+                dueDate: string;
+                completedAt?: string;
+                status: 'completed' | 'overdue' | 'pending';
+              }
+              ```
+
+              You can compute the status based on dates:
+
+              ```ts twoslash Implementation using the dataHook
+              {
+                ...
+                dataHook: ((data: Task[]): Task[] => {
+                  const now = new Date();
+                  return data.map(task => {
+                    let status: 'completed' | 'overdue' | 'pending';
+                    if (task.completedAt) {
+                      status = 'completed';
+                    } else if (new Date(task.dueDate) < now) {
+                      status = 'overdue';
+                    } else {
+                      status = 'pending';
+                    }
+                    return { ...task, status }
+                  })
+                })
+                .toString(), // stringify the function
+                ...
+              }
+              ```
+              </Accordion>
+            </AccordionGroup>
+          </Tab>
+          <Tab title="Type">
+            ```ts
+            type DataHook = `${(data: YourRowType[]) => YourRowType[]}`;
+            ```
+            <Note>
+              Notice the ``` `${...}` ``` wrapping the type of the function, it represent a function inside a string.
+            </Note>
+          </Tab>
+        </Tabs>
+      </Expandable>
+    </ParamField>
+    <ParamField path="showEmptyTable" type="boolean" default={true}>
+      Whether to show empty lines when the table has no data.
+    </ParamField>
+    <ParamField path="selectBoxWidth" type="Size" default="'xsmall'">
+      The <Size name="width" /> of the columns that contains the checkbox used to select a row.
+    </ParamField>
+    <ParamField path="allowColumnsSelection" type="boolean" default={true}>
+      Whether to allow the user to change the columns that are displayed by default or not.
+    </ParamField>
+    <ParamField path="columnsWidth" type="Size" default="'medium''">
+      The default <Size name="width" /> of the columns.
+    </ParamField>
+    <ParamField path="minColumnsWidth" type="Size" default="'xsmall'">
+      The minimum <Size name="width" /> of the columns when resized horizontally.
+    </ParamField>
+    <ParamField path="minRowsHeight" type="Size" default={30}>
+      The minimum <Size name="height" /> of the rows when resized vertically.
+    </ParamField>
+    <ParamField path="rowsHeight" type="Size" default={42}>
+      The default <Size name="height" /> of the rows.
+    </ParamField>
+    <ParamField
+      path="exportCsv"
+      type="object"
+    >
+      Configuration for the table export to CSV/Excel feature. 
+      <Expandable title="Properties" defaultOpen>
+        <ParamField path="delimiter" type="string" default="';'">
+          The delimiter to use for the CSV file, exclusivly used for the CSV file.
+        </ParamField>
+        <ParamField path="filename" type="string" default="'table_export'">
+          The base of the exported file's name. This value is also used for the Excel file.
+          The final name will be `<YYYY-MM-DD>-<filename>.<extension>`.
+        </ParamField>
+      </Expandable>
+    </ParamField>
+    <ParamField path="overscanRowCount" type="number" default={10}>
+      The number of rows to render outside of the visible area. This property can be important for two reasons:
+      - Overscanning by one row or column allows the tab key to focus on the next (not yet visible) item.
+      - Overscanning slightly can reduce or prevent a flash of empty space when a user first starts scrolling.
+      <Warning>
+        Note that overscanning too much can negatively impact performance.
+      </Warning>
+    </ParamField>
+    <ParamField path="aggregation" type="object">
+      Configuration for the table aggregation feature. Only used to define the aggregation label.
+      <Expandable title="Properties" defaultOpen>
+        <ParamField path="label" type="string" default="'Show sub-totals'">
+          The type of the aggregation.
+        </ParamField>
+      </Expandable>
+      <Note>
+        The aggregation feature is only available if the table has no pagination (not the [overview table](/configuration/ui/overview)) and is not [grouped](#group-definition).
+      </Note>
+    </ParamField>
+    <ParamField path="groups" type="GroupDefinition[]">
+      An array of [group definitions](#group-definition) that the user can choose from to group the table by.
+    </ParamField>
+    <ParamField path="tableWidthBuffer" type="number" deprecated>
+      The field has no effect, there's no use of it in our code.
+    </ParamField>
+  </Tab>
+  <Tab title="Type">
+    ```ts Table type definition
+    type TableDefinition = {
+      columns: ColumnDefinition[];
+      fixedColumns?: ColumnDefinition[];
+      dataSelectorPath: string;
+      defaultDisplay: {
+        columns: string[];
+        applyFilters?: boolean;
+        filters?: {
+          [columnKey: string]: FilterDefinition;
+        }
+        sortSetup?: {
+          key: string;
+          direction?: 'ASC' | 'DESC';
+        };
+        /** @deprecated */
+        groupBy?: GroupDefinition;
+      };
+      dataHook?: `${(data: YourRowType[]) => YourRowType[]}`;
+      showEmptyTable?: boolean;
+      aggregation?: {
+        label?: string;
+      };
+      selectBoxWidth?: Size;
+      allowColumnsSelection?: boolean;
+      columnsWidth?: Size;
+      minColumnsWidth?: Size;
+      minRowsHeight?: Size;
+      rowsHeight?: Size;
+      exportCsv?: {
+        delimiter?: string;
+        filename?: string;
+      };
+      overscanRowCount?: number;
+      groups?: GroupDefinition[];
+      /** @deprecated  */
+      tableWidthBuffer?: number;
+    };
+    ```
+  </Tab>
+  <Tab title="Example">
+   <Warning>
+   // TODO
+   </Warning>
+  </Tab>
+</Tabs>
+
+
+### Columns definition
+
+### Filters definition
+
+Each column displays a widget and each widget provides it's own filter setup, 
+but you can optionally override the default filter setup for a specific column by using a custom filter.
+
+<AccordionGroup>
+  <Accordion title="Text filter" defaultOpen={true}>
+    You can put other components inside Accordions.
+
+    ```java HelloWorld.java
+    class HelloWorld {
+        public static void main(String[] args) {
+            System.out.println("Hello, World!");
+        }
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Advanced features" icon="alien-8bit">
+    Add icons to make accordions more visually distinct and scannable.
+  </Accordion>
+
+  <Accordion title="Troubleshooting">
+    Keep related content organized into groups.
+  </Accordion>
+</AccordionGroup>
+
+### Group definition
+You can predefine group definitions that will be use to group the table's rows by a specific value.
 <Warning>
-  Note that over-scanning too much can negatively impact performance. Default:
-  1.
+  The group feature is currently functional but no longer supported.
 </Warning>
+<Tabs>
+  <Tab title="API">
+    <ParamField path="path" type="JMESPath" required>
+      The path to the value that will be used to group the rows.
+    </ParamField>
+    <ParamField path="label" type="string" required>
+      The label of the group, shown to the user.
+    </ParamField>
+    <ParamField path="column" type="string" required>
+      The key of the column that will contains the value to group by.
+    </ParamField>
+  </Tab>
+  <Tab title="Screenshot">
+    <Frame>
+      <img src="/images/configuration/table/definition/group.png" />
+    </Frame>
+  </Tab>
+  <Tab title="Type">
+  ```ts
+    type GroupDefinition = {
+      path: string;
+      label: string;
+      column: string;
+    };
+  ```
+  </Tab>
+  <Tab title="Example">
+  ```ts
+    {
+      path: 'data.year',
+      label: 'Year',
+      column: 'year'
+    }
+  ```
+  </Tab>
+</Tabs>
 
-### Column Width Keywords
+### Size
+Any table size (width or height) can be defined by either providing an arbitrary number of pixels 
+or one of the following keywords that are mapped to a fixed size.
 
-| **Keyword** | **Width** |
-| ----------- | --------- |
-| `xsmall`    | 50px      |
-| `small`     | 100px     |
-| `medium`    | 200px     |
-| `large`     | 300px     |
-| `xlarge`    | 500px     |
-
----
-
-## Column Definitions
-
-Columns are configured using the `fixedColumns` and `columns` fields, with each column specified as follows:
-
-```json
-{
-  "key": "traceName",
-  "header": "Name",
-  "width": "medium",
-  "cell": {...},
-  "sort": {...},
-  "filter": {...},
-  "aggregation": {...}
-}
-```
-
----
+<Tabs>
+  <Tab title="Keywords">
+    | **Keyword** | **Size** |
+    | ----------- | --------- |
+    | `xsmall`    | `50px`    |
+    | `small`     | `100px`   |
+    | `medium`    | `200px`   |
+    | `large`     | `300px`   |
+    | `xlarge`    | `500px`   |
+  </Tab>
+  <Tab title="Type">
+  ```ts
+    type Size = 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge' | number;
+  ```
+  </Tab>
+  <Tab title="Example">
+  ```ts
+    width: "medium"
+  ```
+  </Tab>
+</Tabs>

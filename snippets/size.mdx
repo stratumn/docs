@@ -1,0 +1,12 @@
+
+export const Size = ({ name = 'size' }) => {
+  return (
+    <Tooltip
+      headline="Size"
+      tip="A size can be set to `xsmall`, `small`, `medium`, `large` or `xlarge`, or an arbitrary number of pixels."
+      cta="Learn more about size here"
+      href="/configuration/table/configuration#size">
+      <Badge variant="info">{name}</Badge>
+    </Tooltip>
+  );
+};

@@ -1,0 +1,157 @@
+---
+title: 'Column'
+icon: 'table-columns'
+description: 'The column is the basic unit of a table, it is used to display a single value in a row.'
+---
+
+import { Size } from '/snippets/size.mdx';
+
+## Column definition
+
+
+<Tabs>
+  <Tab title="API">
+    <ParamField path="key" type="string" required>
+      The key of the column.
+    </ParamField>
+    <ParamField path="header" type="string" required>
+      The header of the column.
+    </ParamField>
+    <ParamField path="width" type="Size" default="'medium'">
+      The <Size name="width" /> of the column.
+    </ParamField>
+    <ParamField path="cell" type="Cell" required>
+      The definition of the the content of the cell, see more information about the cell definition [here](#cell-definition).
+    </ParamField>
+    <ParamField path="cellFn" type="`${(data: any) => Cell}`" required>
+      A stringified function calculated on the fly by the frontend that returns the cell definition.
+      <Expandable title="Example">
+        ```ts Example of a cellFn
+        {
+          ...
+          cellFn: ((data: any): Cell => {
+            return {
+              view: { type: 'text', path: 'data.name' }
+            }
+          }).toString(),
+          ...
+        }
+        ```
+      </Expandable>
+    </ParamField>
+    <ParamField path="sort" type="object">
+      The sort of the column.
+    </ParamField>
+    <ParamField path="filter" type="object">
+      The filter of the column.
+    </ParamField>
+    </Tab>
+</Tabs>
+
+## Cell definition
+
+The cell definition is an object that defines what will be displayed in the cell.
+
+<Tabs>
+  <Tab title="API">
+    <ParamField path="view" type="WidgetDefinition" required>
+      The definition of the UI widget that will be displayed in the cell.
+    </ParamField>
+    <ParamField path='modal' type='ModalWrapperDefinition'>
+      A modal definition to display when the cell is clicked.
+    </ParamField>
+    <ParamField path='link' type='LinkWrapperDefinition'>
+      The definition of the link wrapper that will be used when the cell is clicked.
+    </ParamField>
+    <ParamField path="aggregation" type="AggregationDefinition">
+      <Note>
+        The aggregation feature is currently only effective for the widget type `number`.
+      </Note>
+      Configuration for the column aggregation feature.
+      <Expandable title="Informations" defaultOpen>
+        <Tabs>
+          <Tab title="API">
+            <AccordionGroup>
+              <Accordion title="Using a predefined function" defaultOpen={true}>
+                Using this method will effectively compute the aggregation by creating under the hood the following JMESPath expression:
+                  ```ts JMESPath expression
+                  data[?${aggregationKey}=='${aggregationValue}'].${path} | ${
+                  aggregationFunction || 'sum'
+                }(@)
+                  ```
+                You can use it by providing the following properties:
+                <Expandable title="Properties" defaultOpen>
+                  <ParamField path="aggregationKey" type="string" required>
+                    The key of the column to aggregate.
+                  </ParamField>
+                  <ParamField path="aggregationFunction" type="string" default="sum">
+                    The aggregation function of the column, one of the [JMESPath built-in functions](https://jmespath.org/specification.html#built-in-functions).
+                    <Note>
+                      Since we typically want to sum up the values of the column, so we usually use the `sum` function.
+                    </Note>
+                  </ParamField>
+                </Expandable>
+              </Accordion>
+              <Accordion title="Using a custom aggregation">
+                <ParamField path="path" type="JMESPath" required>
+                  A JMESPath expression that computes the aggregation of the column. See more informations about JMESPath [here](https://jmespath.org/specification.html).
+                </ParamField>
+              </Accordion>
+            </AccordionGroup>
+          </Tab>
+          <Tab title="Type">
+            ```ts Typescript
+            type AggregationDefinition = 
+            | {
+              aggregationKey?: string;
+              aggregationFunction?: string;
+            } 
+            | {
+              path: string;
+            }
+            ```
+          </Tab>
+          <Tab title="Examples">
+            <CodeGroup>
+              ```ts Using a predefined function
+              {
+                aggregation: {
+                  aggregationKey: 'amount',
+                  aggregationFunction: 'sum'
+                }
+              }
+              ```
+              ```ts Using a custom aggregation
+              {
+                aggregation: {
+                  path: 'data[].amount | sum(@)'
+                }
+              }
+              ```
+            </CodeGroup>
+          </Tab>
+        </Tabs>
+      </Expandable>
+    </ParamField>
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+    type Cell = {
+      view: WidgetDefintion;
+      modal?: ModalWrapperDefinition;
+      link?: LinkWrapperDefinition;
+      aggregation?: AggregationDefinition;
+    }
+    ```
+  </Tab>
+  <Tab title="Example">
+    ```json Simple text cell
+    {
+      "view": {
+        "type": "text",
+        "path": "data.name"
+      }
+    }
+    ```
+  </Tab>
+</Tabs>

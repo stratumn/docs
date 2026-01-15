@@ -36,7 +36,7 @@ This is the default view used if a view **type** is invalid.
     </Frame>
   </Tab>
   <Tab title="API">
-    <ParamField path="type" type="literal">
+    <ParamField path="type" type="'text'">
       The type of the view, must be equal to `text`, or undefined.
     </ParamField>
     <ParamField path="path" type="JMESPath" required>
@@ -73,16 +73,46 @@ This is the default view used if a view **type** is invalid.
   </Tab>
 </Tabs>
 
+## Id
+
+The `id` view displays an id as plain text. The user can copy the id to the clipboard by clicking on it.
+
+<Tabs>
+  <Tab title="Screenshot">
+    <Frame>
+      <img src="/images/configuration/ui/widgets/id.png" />
+    </Frame>
+  </Tab>
+  <Tab title="API">
+    <ParamField path="type" type="'id'" required>
+      The type of the view, must be equal to `id`.
+    </ParamField>
+    <ParamField path="path" type="JMESPath" required>
+      A JMESPath that resolves to an id.
+    </ParamField>
+  </Tab>
+  <Tab title="Type">
+    ```ts Typescript
+    type IdView = {
+      type: 'id';
+      path: string;
+    }
+    ```
+  </Tab>
+</Tabs>
+
 ## Number
 
 The `number` view displays a piece of data as formatted number.
 
 <Tabs>
   <Tab title="Screenshot">
-    ☝️ Welcome to the content that you can only see inside the first Tab.
+    <Frame>
+      <img src="/images/configuration/ui/widgets/number.png" />
+    </Frame>
   </Tab>
   <Tab title="API">
-    <ParamField path="type" type="literal" required>
+    <ParamField path="type" type="'number'" required>
       The type of the view, must be equal to `number`.
     </ParamField>
 
@@ -152,7 +182,7 @@ The `date` view displays a formatted date and supports a deadline warning featur
     </Frame>
   </Tab>
   <Tab title="API">
-    <ParamField path="type" type="literal" required>
+    <ParamField path="type" type="'date'" required>
       The type of the view, must be equal to `date`.
     </ParamField>
     <ParamField path="path" type="JMESPath" required>
@@ -225,7 +255,7 @@ which changes color based on predefined ranges of progress.
     </Frame>
   </Tab>
   <Tab title="API">
-    <ParamField path="type" type="literal" required>
+    <ParamField path="type" type="'progress'" required>
       The type of the view, must be equal to `progress`.
     </ParamField>
     <ParamField path="path" type="JMESPath" required>
@@ -268,7 +298,7 @@ The `labels` view displays a list of strings as a set of labels.
     </Frame>
   </Tab>
   <Tab title="API">
-    <ParamField path="type" type="literal" required>
+    <ParamField path="type" type="'labels'" required>
       The type of the view, must be equal to `progress`.
     </ParamField>
     <ParamField path="path" type="JMESPath" required>
@@ -299,10 +329,12 @@ The `status` displays a progress as well as the name of the status at the same t
 
 <Tabs>
   <Tab title="Screenshot">
-    ☝️ View an example of how the `date` view appears here.
+    <Frame>
+      <img src="/images/configuration/ui/widgets/status.png" />
+    </Frame>
   </Tab>
   <Tab title="API">
-    <ParamField path="type" type="literal" required>
+    <ParamField path="type" type="'status'" required>
       The type of the view, must be equal to `status`.
     </ParamField>
     <ParamField path="path" type="JMESPath" required>
@@ -355,7 +387,7 @@ This widget is usually used to display relevant data in the [trace infos](/confi
     ☝️ View an example of how the `keyValue` view appears here.
   </Tab>
   <Tab title="API">
-    <ParamField path="type" type="literal" required>
+    <ParamField path="type" type="'keyValue'" required>
       The type of the view, must be equal to `keyvalue`.
     </ParamField>
     <ParamField path="key" type="string" required>
@@ -400,10 +432,12 @@ A label can be displayed next to the icon.
 
 <Tabs>
   <Tab title="Screenshot">
-    ☝️ View an example of how the `icon` view appears here.
+    <Frame>
+      <img src="/images/configuration/ui/widgets/icon.png" />
+    </Frame>
   </Tab>
   <Tab title="API">
-    <ParamField path="type" type="literal" required>
+    <ParamField path="type" type="'icon'" required>
       The type of the view, must be equal to `icon`.
     </ParamField>
     <ParamField path="icon" type="string">
@@ -453,7 +487,7 @@ It is similar to the [icon view](/configuration/ui/widgets#icon) but with a simp
     ☝️ View an example of how the `boolean` view appears here.
   </Tab>
   <Tab title="API">
-    <ParamField path="type" type="literal" required>
+    <ParamField path="type" type="'boolean'" required>
       The type of the view, must be equal to `boolean`.
     </ParamField>
     <ParamField path="path" type="JMESPath" required>
@@ -487,7 +521,7 @@ The `link` view displays an HTML link. It has the same configuration as the [Lin
     ☝️ View an example of how the `link` view appears here.
   </Tab>
   <Tab title="API">
-    <ParamField path="type" type="literal" required>
+    <ParamField path="type" type="'link'" required>
       The type of the view, must be equal to `link`.
     </ParamField>
     <ParamField path="path" type="JMESPath" required>
