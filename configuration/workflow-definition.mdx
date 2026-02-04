@@ -1,0 +1,106 @@
+---
+title: 'Workflow Definition'
+description: 'How to define and configure a workflow.'
+icon: 'diagram-project'
+---
+
+In Stratumn, a workflow is defined as an object that groups together its name, the organization it belongs to, its members, and its core configuration.
+
+## Workflow Example
+
+Here is a high-level view of what a workflow definition looks like:
+
+```typescript
+export const myWorkflow: BetterWorkflowDef = {
+  name: '🗺️ My Process',
+  id: 'my-workflow-id',
+  description: 'A brief description of the process',
+  account: myOrganization,
+  config: {
+    // Core workflow logic
+    pdfTemplate: {
+      // PDF and document templates configuration
+    },
+    actions: {
+      // List of available actions
+    },
+    initState: {
+      // Initial data of the trace
+    },
+    initActions: {
+      // Actions available at the start for each group
+    },
+    // ... other configuration properties
+  },
+  groups: {
+    // User groups involved in the workflow
+  },
+  members: {
+    // Members associated with the workflow
+  }
+};
+```
+
+## PDF & Document Templates
+
+The `pdfTemplate` section in the `config` object is where you define templates used for generating documents like **PDF, DOCX, PPTX, or Excel** files.
+
+Each template is identified by a unique key and contains the following properties:
+
+<ParamField path="file" type="string" required>
+  The path to the template file (e.g., `src/assets/pdfTemplate/example.pdf`).
+</ParamField>
+
+<ParamField path="availableFields" type="object[]" required>
+  A list of fields that can be filled in the template.
+  <Expandable title="Field Properties">
+    <ParamField path="type" type="string" required>
+      The type of the field (e.g., `'text'`, `'checkbox'`, `'dropdown'`).
+    </ParamField>
+    <ParamField path="fieldName" type="string" required>
+      The exact name of the field as defined in the template file.
+    </ParamField>
+    <ParamField path="mandatory" type="boolean" required>
+      Whether this field must be filled for document generation.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+### Configuration Example
+
+```typescript
+config: {
+  pdfTemplate: {
+    // A simple PDF template example
+    invoiceTemplate: {
+      file: 'src/assets/pdfTemplate/invoice.pdf',
+      availableFields: [
+        {
+          type: 'text',
+          fieldName: 'Customer Name',
+          mandatory: true
+        },
+        {
+          type: 'text',
+          fieldName: 'Amount',
+          mandatory: true
+        }
+      ]
+    },
+    // A complex PPTX template for candidate presentations
+    candidatePresentation: {
+      file: 'src/assets/pdfTemplate/presentation_template.pptx',
+      availableFields: [
+        {
+          type: 'text',
+          fieldName: 'candidateName',
+          mandatory: true
+        }
+      ]
+    }
+  },
+  // ... rest of the config
+}
+```
+
+These templates can then be used in your [effects](/configuration/action/effects#generatepdf) using the `generatePdf` external function.

@@ -315,8 +315,69 @@ name: 'John',
 age: 30,
 });
 
-````
+```
 
+</Accordion>
+
+<Accordion title="generatePdf" icon="file-pdf">
+  An asynchronous function that generates a PDF or a DOCX, PPTX, Excel based on a template and provided data.
+  <Tabs>
+    <Tab title="Body">
+      <ParamField path="generatedFileName" type="string" required>
+        The name of the generated PDF file.
+      </ParamField>
+      <ParamField path="templateKey" type="string" required>
+        The key of the PDF template to use, as defined in the [workflow configuration](/configuration/introduction#workflow-configuration).
+      </ParamField>
+      <ParamField path="traceId" type="string" required>
+        The id of the trace where the PDF will be stored.
+      </ParamField>
+      <ParamField path="fillData" type="PdfFieldData[] | Record<string, unknown>" required>
+        The data to fill the PDF template with.
+      </ParamField>
+      <ParamField path="version" type="'pdf-lib' | 'docx-templater'" required>
+        The engine to use for PDF generation.
+      </ParamField>
+    </Tab>
+    <Tab title="Example (pdf-lib)">
+      ```typescript
+      const { generatePdf } = dsl.$modules;
+
+      const { generatedFileInfo } = await generatePdf({
+        generatedFileName: 'my-generated-pdf.pdf',
+        templateKey: 'simpleExampleTemplate',
+        traceId: dsl.$variables.meta.traceId,
+        fillData: {
+          name: 'Name',
+          value: 'Stratumn',
+          type: 'text',
+        },
+        version: 'pdf-lib',
+      });
+      ```
+    </Tab>
+    <Tab title="Example (docx-templater)">
+      ```typescript
+      const { generatePdf } = dsl.$modules;
+      const { meta } = dsl.$variables;
+
+      // fillData can be a Record<string, unknown> with docx-templater
+      const fillData = {
+        candidateName: 'John Doe',
+        experience: '5 years',
+        skills: ['TypeScript', 'React', 'Node.js'],
+      };
+
+      const { generatedFileInfo } = await dsl.$modules.generatePdf({
+        generatedFileName: `CV_John_Doe_SIA_en.pptx`,
+        templateKey: 'superSiaTemplatePptx',
+        traceId: meta.traceId,
+        fillData,
+        version: 'docx-templater'
+      });
+      ```
+    </Tab>
+  </Tabs>
 </Accordion>
 </AccordionGroup>
 
