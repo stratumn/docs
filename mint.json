@@ -77,7 +77,10 @@
   "navigation": [
     {
       "group": "API Documentation",
-      "pages": ["api-reference/introduction", "api-reference/create-a-trace"]
+      "pages": [
+        "api-reference/introduction",
+        "api-reference/create-a-trace"
+      ]
     },
     {
       "group": "Workflow configuration",
@@ -94,6 +97,7 @@
             "configuration/getting-started/specification"
           ]
         },
+        "configuration/workflow-definition",
         "configuration/accounts",
         "configuration/trace",
         {
@@ -182,10 +186,15 @@
     },
     {
       "group": "Errors",
-      "pages": ["errors/trace-errors"]
+      "pages": [
+        "errors/trace-errors"
+      ]
     }
   ],
-  "versions": ["v2", "v1"],
+  "versions": [
+    "v2",
+    "v1"
+  ],
   "theme": "venus",
   "footerSocials": {
     "github": "https://github.com/stratumn",
