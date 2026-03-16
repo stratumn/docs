@@ -105,6 +105,92 @@ state.notifications.push(notificationPayload);
 
 To see more details about it, go to the [notification](/configuration/action/notifications) page.
 
+### The `Stratumn` constant
+
+You can use the `Stratumn` constant to get access to `Sentry`, a Pino `logger` and the `StratumnError` class.
+
+Unlike other variables, this constant does not need to be created or imported, it is accessible globally in the effects.
+
+<AccordionGroup>
+  <Accordion title="Sentry" icon="eye">
+    The Sentry SDK, allowing you to [capture errors](https://docs.sentry.io/platforms/javascript/guides/node/usage/#capturing-errors), wrap functions with [spans](https://docs.sentry.io/platforms/javascript/guides/node/tracing/instrumentation/#starting-an-active-span-startspan), add [context](https://docs.sentry.io/platforms/javascript/guides/node/configuration/apis/#setContext), set [tags](https://docs.sentry.io/platforms/javascript/guides/node/enriching-events/tags/), add [metrics](https://docs.sentry.io/platforms/javascript/guides/node/metrics/#usage) etc. 
+    
+    This variable is the same as if you did `import * as Sentry from "@sentry/node";` in your code.
+    ```typescript Usage your effect function
+    const { Sentry } = Stratumn;
+
+    try {
+      aFunctionThatMightFail();
+    } catch (error: unknown) {
+      Sentry.captureException(error);
+    }
+    ```
+  </Accordion>
+  <Accordion title="Pino logger" icon="line-columns">
+    A [Pino logger instance](https://getpino.io/#/docs/api?id=logger-instance), allowing you to log messages with different levels.
+  
+    ```typescript Usage your effect function
+    const { logger } = Stratumn;
+
+    logger.info('Hello, world!');
+    logger.info({name: 'John Doe'}, 'Hello, John Doe!');
+
+    logger.warn('This is a warning');
+    logger.error({ error: error }, error instanceof Error ? error.message : 'Unknown error');
+    logger.fatal('This is a fatal error');
+    logger.debug('This is a debug message');
+    ```
+  </Accordion>
+  <Accordion title="Stratumn Error" icon="triangle-exclamation">
+    The Stratumn Error class, allowing you to create custom errors with a code and a message.
+    <Tabs>
+      <Tab title="Parameters">
+        <ParamField path="name" type="string" required>
+          The name of the error.
+        </ParamField>
+        <ParamField path="code" type="string" required>
+          The code of the error.
+        </ParamField>
+        <ParamField path="status" type="string literal" required>
+          The status of the error.
+          <Expandable title="Status values">
+            | Status | Code | Description |
+            | --- | --- | --- |
+            | BAD_REQUEST | 400 | Bad request. |
+            | UNAUTHORIZED | 401 | Unauthorized error. |
+            | FORBIDDEN | 403 | Forbidden error. |
+            | NOT_FOUND | 404 | Not found error. |
+            | NOT_IMPLEMENTED | 501 | Not implemented error. |
+            | INTERNAL_SERVER_ERROR | 500 | Internal server error. |
+          </Expandable> 
+        </ParamField>
+        <ParamField path="message" type="string" required>
+          The message of the error.
+        </ParamField>
+        <ParamField path="context" type="object" required>
+          The context of the error. It can be used to add additional data to the error.
+        </ParamField>
+      </Tab>
+      <Tab title="Example">
+        ```typescript Usage your effect function
+        const { StratumnError } = Stratumn;
+
+        throw new StratumnError(
+          'execJs/my-custom-error',
+          'fc6d0328', // <-- A random error code
+          'BAD_REQUEST',
+          'My custom error message',
+          {
+            // ... any additional data you want to add to the error
+          }
+        );
+        ```
+      </Tab>
+    </Tabs>
+  </Accordion>
+</AccordionGroup>
+
+
 ### External functions
 
 Some functions are declared directly in Trace API, and can be accessed direcly in the effects using `dsl.$modules`.
@@ -215,7 +301,7 @@ Some functions are declared directly in Trace API, and can be accessed direcly i
     </Tab>
     <Tab title="Example">
       ```typescript Get all traces where the meal is 'Pizza'
-     const res = await dsl.$modules.searchTraces({
+      const res = await dsl.$modules.searchTraces({
         workflowId: dsl.$definitions.wfIds.restaurant,
         filters: [
           {
@@ -305,15 +391,15 @@ Some functions are declared directly in Trace API, and can be accessed direcly i
   ```typescript Example
   const { z } = dsl.$modules;
 
-const isAdultSchema = z.object({
-name: z.string().min(2),
-age: z.number().min(18),
-}).strict();
+  const isAdultSchema = z.object({
+    name: z.string().min(2),
+    age: z.number().min(18),
+  }).strict();
 
-const myData = mySchema.parse({
-name: 'John',
-age: 30,
-});
+  const myData = mySchema.parse({
+    name: 'John',
+    age: 30,
+  });
 
 ```
 
@@ -398,23 +484,23 @@ The goal of the effect is to:
 ```ts orderMealEffect
 async function orderMealEffect(dsl: RestaurantWorkflowContext<FormData>) {
 // We destructure the DSL variables for readability
-const { state, formData } = dsl.$variables;
-const { data, nextActions } = state;
+  const { state, formData } = dsl.$variables;
+  const { data, nextActions } = state;
 
-// The chosen meal is retrieved from the form data and stored in the data
-data.meal = formData.meal;
+  // The chosen meal is retrieved from the form data and stored in the data
+  data.meal = formData.meal;
 
-data.status = {
-status: 'Order received',
-progress: 0.2
-};
+  data.status = {
+    status: 'Order received',
+    progress: 0.2
+  };
 
-// Now, we update the next actions
-nextActions = {
-cook: ['prepareOrder', 'comment'],
-client: ['comment']
-};
+  // Now, we update the next actions
+  nextActions = {
+    cook: ['prepareOrder', 'comment'],
+    client: ['comment']
+  };
 }
 
-const effects: Statement[] = [execJs(orderMealEffect)];
+const effects = [execJs(orderMealEffect)] satisfies Statement[];
 ````
