@@ -191,6 +191,107 @@ Unlike other variables, this constant does not need to be created or imported, i
 </AccordionGroup>
 
 
+### Batch context
+
+When a user applies the same action to many traces at once (a **batch action**), each trace still runs the action's effects on its own. The `dsl.$variables.batch` object lets an effect know that it is running as part of a batch, and where it sits in that batch.
+
+`dsl.$variables.batch` is **always present**. Outside a batch it holds the not-in-batch default, so you never have to guard against it being `undefined`.
+
+<Info>Requires `@stratumn/dsl` **1.24.0** or above.</Info>
+
+<Tabs>
+  <Tab title="Documentation">
+    <ParamField path="isBatchAction" type="boolean" required>
+      `true` when the action is executing as part of a batch action, `false` otherwise.\
+      This is the **discriminant**: the two fields below are only reachable once you have narrowed on it.
+    </ParamField>
+    <ParamField path="actionPositionInBatch" type="number">
+      The **1-based** position of the current trace within the batch (`1` to `totalActionInBatch`).\
+      Only available when `isBatchAction` is `true`.
+    </ParamField>
+    <ParamField path="totalActionInBatch" type="number">
+      The total number of traces the batch will act upon.\
+      Only available when `isBatchAction` is `true`.
+    </ParamField>
+  </Tab>
+  <Tab title="Example">
+    ```ts Inside a batch of 250 traces, on the 42nd trace
+    {
+      isBatchAction: true,
+      actionPositionInBatch: 42,
+      totalActionInBatch: 250
+    }
+    ```
+
+    ```ts Outside a batch (single action)
+    {
+      isBatchAction: false
+    }
+    ```
+
+    At runtime the not-in-batch default also carries `actionPositionInBatch: 0` and
+    `totalActionInBatch: 0`, so that is what you will see if you log the whole object.
+    The type deliberately hides them so that no logic can be built on those zeros —
+    treat `isBatchAction: false` as the only meaningful information on this branch.
+  </Tab>
+  <Tab title="Usage">
+    ```ts Usage in effects
+    const { batch } = dsl.$variables;
+
+    if (batch.isBatchAction) {
+      // ✅ Narrowed: position and total are available here
+      Stratumn.logger.info(
+        `Processing ${batch.actionPositionInBatch} of ${batch.totalActionInBatch}`
+      );
+    } else {
+      // Single action: only `isBatchAction` exists on this branch
+      Stratumn.logger.info('Processing a single action');
+    }
+    ```
+  </Tab>
+</Tabs>
+
+<Warning>
+  `batch` is a **discriminated union** on `isBatchAction`. You must narrow on the flag before reading `actionPositionInBatch` or `totalActionInBatch` — reading them directly is a compile error:
+
+```ts
+const { batch } = dsl.$variables;
+
+batch.actionPositionInBatch; // ✗ compile error — not narrowed
+if (batch.isBatchAction) {
+  batch.actionPositionInBatch; // ✅ number
+}
+```
+
+</Warning>
+
+Only actions executed by the batch engine receive a batch context. Every other execution path — a single action submitted from the UI, an automated action, a link created from another effect via `dsl.$modules.createLink`, or the public API — sees the not-in-batch default.
+
+#### Ordering is not guaranteed
+
+`actionPositionInBatch` identifies **which** trace you are on, not **when** it runs. The batch engine processes traces in parallel chunks, so positions do not complete in order: position `250` may well finish before position `3`.
+
+<Warning>
+  Do not use `actionPositionInBatch === totalActionInBatch` as an "end of the batch" hook to fire a summary email or a final computation. It only means "the numerically last trace", not "the last one to finish" — and if that trace fails, the effect never runs at all. The platform already sends a **single digest notification** once the whole batch settles, so per-trace effects don't need to reproduce it.
+</Warning>
+
+A safe use of the batch context is to make a per-trace effect *lighter* or better labelled when it runs at scale — for example, skipping a per-trace notification that would otherwise be sent hundreds of times:
+
+```ts Skip per-trace notifications when running in a batch
+function orderMealEffect(dsl: RestaurantWorkflowContext<FormData>) {
+  const { state, formData, batch } = dsl.$variables;
+  const { createNotification } = dsl.$functions;
+
+  state.data.meal = formData.meal;
+
+  // In a batch, one email per trace would flood the recipient: rely on the
+  // batch digest instead and only notify for single actions.
+  if (!batch.isBatchAction) {
+    state.notifications.push(createNotification(state.data, dsl.$variables.meta));
+  }
+}
+```
+
 ### External functions
 
 Some functions are declared directly in Trace API, and can be accessed direcly in the effects using `dsl.$modules`.
