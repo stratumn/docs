@@ -14,6 +14,7 @@ type State = {
   tasks: Record<string, TaskState>;
   nextActions: Record<string, NextActionState>;
   notifications: Record<string, Notification>;
+  automatedAction?: AutomatedActionRequest;
 };
 ```
 
@@ -36,3 +37,21 @@ state.nextActions = {
   [global.assignedOwner?.label]: ['comment'],
 }
 ```
+
+### Automated action
+
+`automatedAction` is an engine-reserved field. When an effect sets it, Trace API performs the
+described action in the background once the current link is saved, and grants that action to the
+target group in `nextActions` automatically.
+
+```ts
+state.automatedAction = {
+  actionKey: 'asyncAutomatedAction',
+  formData: { data: 'hello' },
+  groupLabel: meta.group.label
+};
+```
+
+It is set on the **state root**, not on `state.data`. See
+[Automated actions](/configuration/action/automated-actions) for the full payload and its
+constraints.

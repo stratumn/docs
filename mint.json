@@ -109,6 +109,7 @@
             "configuration/action/data-importer",
             "configuration/action/data-editor",
             "configuration/action/effects",
+            "configuration/action/automated-actions",
             "configuration/action/notifications"
           ]
         },

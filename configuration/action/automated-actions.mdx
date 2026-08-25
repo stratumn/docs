@@ -1,0 +1,277 @@
+---
+title: 'Automated actions'
+description: 'Schedule a follow-up link from an effect, executed in the background'
+icon: 'gears'
+---
+
+## What is an automated action?
+
+An **automated action** lets an [effect](/configuration/action/effects) schedule **another action** to
+be performed automatically, right after the current link is created. The user who submitted the
+current action is **not** blocked: the link is saved and returned immediately, and the follow-up link
+is created in the background.
+
+You declare one by setting the engine-reserved `automatedAction` field on the **state root**:
+
+```ts
+const { state, meta } = dsl.$variables;
+
+// `automatedAction` is an engine-reserved field consumed by the createLink mutation.
+state.automatedAction = {
+  actionKey: 'asyncAutomatedAction',
+  formData: { data: 'Hello from the automated action trigger' },
+  groupLabel: meta.group.label
+};
+```
+
+<Warning>
+  `automatedAction` must be set on `state`, not on `state.data`. A payload written to
+  `state.data.automatedAction` is treated as ordinary business data and is **never** executed.
+  Beware of the name collision: a workflow is free to declare its own `automatedAction` key inside
+  its state data, and that one is inert.
+</Warning>
+
+<Note>
+  `automatedAction` is part of the trace state type from **`@stratumn/dsl` 1.25.0** onwards.
+  `actionKey` and `groupLabel` are checked against your workflow's own action keys and group labels,
+  so a typo or an action that does not exist fails at compile time.
+</Note>
+
+### Compared to `createLink`
+
+Both create a link from an effect, but they solve different problems.
+
+| | `dsl.$modules.createLink` | Automated action |
+| --- | --- | --- |
+| Execution | Inside the effect, **blocking** | After the link is saved, **in the background** |
+| Failure | Can fail the current action | Never blocks the current link |
+| Target | Any workflow, any trace, or a new trace | Same trace and workflow by default |
+| Next actions | Must be granted by the configuration | Granted automatically for `groupLabel` |
+| Identity | Runs as the configured group (often `traceBot`) | Impersonates the user who triggered it |
+
+Use `createLink` to fan out to another workflow. Use an automated action to continue the current
+trace with a step the user should not wait for, such as a long-running computation or an external
+call.
+
+## How it works
+
+<Steps>
+  <Step title="An effect sets state.automatedAction">
+    During the `createLink` (or `createLinks`) mutation, the effects run and the resulting state may
+    carry an `automatedAction` descriptor.
+  </Step>
+  <Step title="The follow-up action is pre-authorized">
+    Before the next actions are normalized, Trace API adds `actionKey` to the trace's next actions
+    for `groupLabel`. See [Automatic next-action grant](#automatic-next-action-grant).
+  </Step>
+  <Step title="The link is saved and returned">
+    The current link and its state are committed. The user's request completes here.
+  </Step>
+  <Step title="Trace API starts a Temporal workflow">
+    Once the transaction is done, Trace API starts an `asyncAction` Temporal workflow named
+    `automated-action-<workflowId>-<random>`.
+  </Step>
+  <Step title="The follow-up link is created">
+    The workflow calls Stratumn API to create the link, impersonating `emailToImpersonate`. That
+    link runs its own effects, and may itself schedule another automated action.
+  </Step>
+</Steps>
+
+## The `automatedAction` payload
+
+<ParamField path="actionKey" type="ActionLabel" required>
+  The key of the action to perform in the background. Typed as one of your workflow's action keys.
+</ParamField>
+
+<ParamField path="groupLabel" type="GroupLabel" required>
+  The group on whose behalf the follow-up link is created, typed as one of your workflow's group
+  labels. The impersonated user **must** be a member of this group.
+</ParamField>
+
+<ParamField path="formData" type="object">
+  The form data passed to the follow-up action. It must satisfy that action's
+  [form schema](/configuration/action/form).
+</ParamField>
+
+<ParamField path="traceId" type="string">
+  Target trace. **Inferred** from the current link when omitted.
+</ParamField>
+
+<ParamField path="workflowId" type="string">
+  Target workflow. **Inferred** from the current link when omitted.
+</ParamField>
+
+<ParamField path="emailToImpersonate" type="string">
+  The user the follow-up link is created as. **Inferred** from the authenticated user of the current
+  request when omitted.
+</ParamField>
+
+<Info>
+  In practice you only set `actionKey`, `groupLabel` and `formData`. The three inferred fields exist
+  for the rare case where you want the follow-up link in another trace or under another identity.
+</Info>
+
+## Automatic next-action grant
+
+An action can only be performed if it is listed in the trace's next actions for the group. Trace API
+handles this for you: when a link carries an `automatedAction`, the `actionKey` is added to the next
+actions of `groupLabel` before they are stored.
+
+This means the configuration does **not** need to declare the follow-up action in `initActions`, in
+the workflow `transitions`, or in `state.nextActions`.
+
+The grant follows the shape already used by the workflow:
+
+- if the group already exists in the next actions, `actionKey` is added to it,
+- if the group is missing, it is created with just `actionKey`, using the array form for v1 next
+  actions and the object form for workflows that define `transitions`.
+
+<Note>
+  The grant applies only when **both** `actionKey` and `groupLabel` are set, and only when the
+  `automated-actions` feature flag is enabled for the workflow. Otherwise the next actions are left
+  untouched and the follow-up link is rejected unless your configuration authorizes it explicitly.
+</Note>
+
+## Chaining automated actions
+
+The follow-up link runs its own effects, so it can set `automatedAction` again. This lets you build a
+loop. Always include a termination condition: nothing in the engine stops a chain from running
+forever.
+
+```ts chainedAction.ts
+function chainedAutomatedActionEffect(dsl: DslContext<ChainedAutomatedActionData>) {
+  const { state, formData, meta } = dsl.$variables;
+
+  const chain = state.data.automatedActionChain ?? [];
+  chain.push(`${formData.note} (${formData.remainingSteps} steps left)`);
+  state.data.automatedActionChain = chain;
+
+  // Termination condition: stop scheduling once the counter is exhausted.
+  if (formData.remainingSteps > 0) {
+    state.automatedAction = {
+      actionKey: 'chainedAutomatedAction',
+      formData: {
+        note: formData.note,
+        remainingSteps: formData.remainingSteps - 1
+      },
+      groupLabel: meta.group.label
+    };
+  }
+}
+```
+
+## Requirements and constraints
+
+<AccordionGroup>
+  <Accordion title="DSL version" icon="box">
+    `state.automatedAction` is declared on the trace state type from **`@stratumn/dsl` 1.25.0**.
+    On earlier versions the field is not part of the type and assigning it does not compile.
+  </Accordion>
+  <Accordion title="Feature flag" icon="toggle-on">
+    Automated actions are gated by the **`automated-actions`** workflow feature flag. When it is
+    disabled for the workflow, `state.automatedAction` is ignored entirely: no next-action grant, no
+    follow-up link. Locally, `BYPASS_FF=true` enables all feature flags.
+  </Accordion>
+  <Accordion title="Group membership" icon="users">
+    The impersonated user must belong to `groupLabel`. If they do not, the follow-up link creation
+    fails in the background. The originating link stays valid.
+  </Accordion>
+  <Accordion title="Effects are serialized" icon="scissors">
+    Like every effect, the function is stringified by `execJs`. Build the `automatedAction` object
+    inline: imported helpers and external constants are not available at runtime. See
+    [Effects](/configuration/action/effects).
+  </Accordion>
+  <Accordion title="Batch actions" icon="layer-group">
+    Automated actions also work in batches. Each link of the batch is inspected, so a batch of
+    <i>n</i> links carrying an `automatedAction` schedules <i>n</i> follow-up links.
+  </Accordion>
+</AccordionGroup>
+
+## Error handling
+
+A broken automated action **never** rolls back the link that declared it.
+
+| Situation | Behaviour |
+| --- | --- |
+| `automatedAction` does not match the expected shape | Logged as a warning, reported to Sentry, skipped. The link is kept. |
+| `workflowId` or `emailToImpersonate` could not be resolved | The Temporal workflow is not started. Logged as a warning. The link is kept. |
+| The follow-up link creation fails | Retried by Temporal, then the workflow fails. The originating link is unaffected. |
+
+Retries are bounded: the `asyncAction` workflow allows **2 attempts**, and the underlying link
+creation activity allows **3 attempts** with a 5 minute timeout per attempt.
+
+<Warning>
+  Because failures are silent from the caller's point of view, a missing follow-up link is diagnosed
+  from the Temporal workflow history (`automated-action-<workflowId>-<random>`) and the Trace API
+  logs, not from the GraphQL response.
+</Warning>
+
+## Full examples
+
+<Tabs>
+  <Tab title="Static trigger">
+    A no-form action that always schedules the same follow-up action with a fixed payload.
+
+    ```ts trigger.ts
+    function automatedActionTriggerEffect(dsl: DslContext<AutomatedActionTriggerData>) {
+      const { state, meta } = dsl.$variables;
+
+      state.automatedAction = {
+        actionKey: 'asyncAutomatedAction',
+        formData: { data: 'Hello from the automated action trigger' },
+        groupLabel: meta.group.label
+      };
+    }
+
+    export const automatedActionTrigger = {
+      key: 'automatedActionTrigger',
+      title: 'Automated Action Trigger',
+      stageName: 'Automated Action Trigger',
+      icon: 'lucide_Zap',
+      form: { schema: {}, uiSchema: {} },
+      effects: [execJs(automatedActionTriggerEffect)]
+    } as const satisfies IActionDef;
+    ```
+  </Tab>
+  <Tab title="Form-driven trigger">
+    The payload and the target group come from the form, falling back to the submitter's group.
+
+    ```ts formTrigger.ts
+    function automatedActionFormTriggerEffect(
+      dsl: DslContext<AutomatedActionFormTriggerData>
+    ) {
+      const { state, formData, meta } = dsl.$variables;
+
+      state.automatedAction = {
+        actionKey: 'asyncAutomatedAction',
+        formData: { data: formData.message },
+        groupLabel: formData.targetGroup ?? meta.group.label
+      };
+    }
+    ```
+  </Tab>
+  <Tab title="Follow-up action">
+    The scheduled action is a **regular action definition**. Nothing marks it as automated: the same
+    action can be performed manually by a user.
+
+    ```ts asyncAction.ts
+    async function asyncActionEffect(dsl: DslContext<AsyncAutomatedActionData>) {
+      const { state, formData } = dsl.$variables;
+
+      // A long-running step the user should not wait for.
+      await new Promise(resolve => setTimeout(resolve, 2500));
+
+      state.data.automatedAction = formData;
+    }
+
+    export const asyncAutomatedAction = {
+      key: 'asyncAutomatedAction',
+      title: 'Async Automated Action',
+      stageName: 'Async Automated Action',
+      icon: 'lucide_LoaderCircle',
+      form,
+      effects: [execJs(asyncActionEffect)]
+    } as const satisfies IActionDef;
+    ```
+  </Tab>
+</Tabs>
