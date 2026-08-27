@@ -24,19 +24,6 @@ state.automatedAction = {
 };
 ```
 
-<Warning>
-  `automatedAction` must be set on `state`, not on `state.data`. A payload written to
-  `state.data.automatedAction` is treated as ordinary business data and is **never** executed.
-  Beware of the name collision: a workflow is free to declare its own `automatedAction` key inside
-  its state data, and that one is inert.
-</Warning>
-
-<Note>
-  `automatedAction` is part of the trace state type from **`@stratumn/dsl` 1.25.0** onwards.
-  `actionKey` and `groupLabel` are checked against your workflow's own action keys and group labels,
-  so a typo or an action that does not exist fails at compile time.
-</Note>
-
 ### Compared to `createLink`
 
 Both create a link from an effect, but they solve different problems.
@@ -53,29 +40,6 @@ Use `createLink` to fan out to another workflow. Use an automated action to cont
 trace with a step the user should not wait for, such as a long-running computation or an external
 call.
 
-## How it works
-
-<Steps>
-  <Step title="An effect sets state.automatedAction">
-    During the `createLink` (or `createLinks`) mutation, the effects run and the resulting state may
-    carry an `automatedAction` descriptor.
-  </Step>
-  <Step title="The follow-up action is pre-authorized">
-    Before the next actions are normalized, Trace API adds `actionKey` to the trace's next actions
-    for `groupLabel`. See [Automatic next-action grant](#automatic-next-action-grant).
-  </Step>
-  <Step title="The link is saved and returned">
-    The current link and its state are committed. The user's request completes here.
-  </Step>
-  <Step title="Trace API starts a Temporal workflow">
-    Once the transaction is done, Trace API starts an `asyncAction` Temporal workflow named
-    `automated-action-<workflowId>-<random>`.
-  </Step>
-  <Step title="The follow-up link is created">
-    The workflow calls Stratumn API to create the link, impersonating `emailToImpersonate`. That
-    link runs its own effects, and may itself schedule another automated action.
-  </Step>
-</Steps>
 
 ## The `automatedAction` payload
 
