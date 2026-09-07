@@ -156,24 +156,24 @@ against missing data in the filter.
 The effect body contains **only** the transformation. No bookkeeping.
 
 <Warning>
-  **`execJs` runs your function in a sandbox from its source text alone.** It cannot
-  see anything else in the file — not a constant, not an import, not another function.
+  **Always return early when there is nothing to change.** The filter and the effect
+  have to agree on what "already correct" means, and only the effect can be sure.
 
   ```ts
-  const LEGACY = /^\d{2}\//;              // ✗ undefined at runtime
-  function effect(dsl) { LEGACY.exec(…) }
-
-  function effect(dsl) {
-    const legacy = /^\d{2}\//;            // ✓ declared inside
+  const match = legacyDate.exec(state.data.creationDate ?? '');
+  if (!match) {
+    return; // already ISO, or no date at all — leave it alone
   }
   ```
 
-  A hoisted constant fails on *every* trace, and the error reads like bad data rather
-  than a configuration mistake.
-</Warning>
+  This is what keeps a migration safe when the filter selects more than you expected —
+  and a filter eventually will, because it cannot express everything the effect can
+  check. Without the guard, a trace the filter caught by accident is silently rewritten
+  and stamped as migrated, and there is nothing to tell you it happened.
 
-Make the effect a **no-op when there is nothing to do** (return early), so it stays
-safe if the filter ever selects more than you expected.
+  A no-op effect still writes a link and still stamps the trace. That is intended: it
+  records that the migration considered this trace and found nothing to do.
+</Warning>
 
 ## 2. Register it in `actions`
 
@@ -271,11 +271,38 @@ if (state.data.__migrationsApplied?.someOtherMigration) {
 }
 ```
 
-<Warning>
-  Because the stamp is what prevents re-processing, **changing a migration's `key`
-  makes it run again on every trace it already touched.** To fix a mistake, ship a new
-  migration with a new key rather than editing one that has already run.
-</Warning>
+## One migration, one file, one key
+
+**A migration that has run is finished. Never edit it.**
+
+Once a migration has run anywhere, treat its file as closed. Need a different
+transformation, a corrected filter, or a second pass over the same field? **Add a new
+migration**: a new file, a new `key`, a new entry in `actions`.
+
+```
+actions/migrations/
+├── migrateDateToIso.ts          ← ran in March. Never touched again.
+├── migrateStatusEnum.ts         ← ran in June. Never touched again.
+└── migrateDateToIsoTimezone.ts  ← the follow-up fix, as its own migration
+```
+
+This is a rule, not a preference, and there are two reasons for it.
+
+**The key is the stamp.** Traces already migrated carry that exact key, and that is the
+only thing stopping them being processed again. Rename the key and every one of those
+traces is selected on the next run. Keep the key but change the effect and the traces
+that already ran will *never* get the new behaviour — the two failure modes are
+opposites, and neither announces itself.
+
+**The links are the audit trail.** Each run leaves one signed link per trace saying
+what was applied. Editing a migration in place makes that record a lie: two traces show
+the same action key having done two different things, and nothing distinguishes them.
+
+<Note>
+  Keeping old migration files costs nothing. A migration that has already run selects
+  no traces, so leaving it in `actions` is free — and it is the record of what was done
+  to the data.
+</Note>
 
 ## How a migration appears to users
 
@@ -290,9 +317,9 @@ if (state.data.__migrationsApplied?.someOtherMigration) {
 
 Before asking for a migration to be run:
 
+- [ ] it is a **new file with a new `key`** — no migration that has already run was edited
 - [ ] `filters` selects only the traces you mean — check the count with a dry run
-- [ ] the effect declares everything it uses **inside** the function
-- [ ] the effect returns early when there is nothing to change
+- [ ] the effect **returns early** when there is nothing to change
 - [ ] the migration is registered in `actions`
 - [ ] a `traceBot` team exists, keyed `traceBot`, with `includeSuperUser: true`
 - [ ] the configuration has been deployed
