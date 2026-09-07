@@ -112,6 +112,7 @@
             "configuration/action/notifications"
           ]
         },
+        "configuration/migration",
         {
           "group": "UI configuration",
           "icon": "sparkles",
