@@ -13,8 +13,9 @@ the platform writes **one signed link per trace** — so every change is attribu
 visible in the trace history and impossible to confuse with a manual database edit.
 
 <Note>
-  A migration is just an action with two extra fields. Everything you already know
-  about [effects](/configuration/action/effects) applies unchanged.
+  A migration reuses everything you already know about
+  [effects](/configuration/action/effects). What differs is where you declare it: its
+  own `migrations` map, not `actions`.
 </Note>
 
 ## What you write, and what you don't
@@ -23,8 +24,8 @@ This is the whole contract on the configuration side:
 
 | You write | The platform does |
 | --- | --- |
-| the `defineMigration` call | flags the action so the engine can reach every trace |
-| one line in `actions` | keeps the migration out of `initActions` |
+| the migration object — `filters` and `effects` | turns it into an action the engine can run on every trace |
+| one line in `migrations` | keeps the migration out of `initActions` |
 | a `traceBot` team | marks the migration link as *transitive*, so the state machine does not move |
 | | stamps each trace so a re-run skips it |
 
@@ -37,7 +38,7 @@ those, something is wrong.
 <CodeGroup>
 ```ts migrateDateToIso.ts
 import { execJs } from '@stratumn/dsl';
-import { defineMigration } from '@stratumn/trace-generator';
+import type { IMigrationDef } from '@stratumn/trace-generator';
 import type { DslContext } from 'workflows/pastaLaVista/types/dsl.types';
 import type { PastaLaVistaStateData } from '../../types/state.types';
 
@@ -54,24 +55,19 @@ function migrateDateToIsoEffect(dsl: DslContext<Record<string, never>>) {
   state.data.creationDate = `${year}-${month}-${day}`;
 }
 
-export const migrateDateToIso = defineMigration<PastaLaVistaStateData>({
-  key: 'migrateDateToIso',
+export const migrateDateToIso: IMigrationDef<PastaLaVistaStateData> = {
   title: 'Normalize creationDate to ISO 8601',
   icon: 'lucide_CalendarSync',
   filters: [
     { type: 'string', field: 'creationDate', operator: 'contains', value: '/' }
   ],
   effects: [execJs(migrateDateToIsoEffect)]
-});
+};
 ```
 </CodeGroup>
 
 <Tabs>
   <Tab title="API">
-    <ParamField path="key" type="string" required>
-      Identifier of the migration. This is what an administrator types to run it, and
-      the key under which each migrated trace is stamped — so treat it as permanent.
-    </ParamField>
     <ParamField path="title" type="string" required>
       Human-readable label, shown in the run history and in the trace timeline.
     </ParamField>
@@ -89,30 +85,23 @@ export const migrateDateToIso = defineMigration<PastaLaVistaStateData>({
       Longer explanation of what the migration does.
     </ParamField>
     <ParamField path="stageName" type="string">
-      Defaults to `key`.
-    </ParamField>
-    <ParamField path="form" type="IFormDef">
-      Defaults to an empty form. A migration is never filled in by a human, so you
-      rarely need this.
+      Defaults to the key you register the migration under.
     </ParamField>
   </Tab>
   <Tab title="Type">
     ```ts Typescript
-    type DefineMigrationInput<TState> = {
-      key: string;
+    type IMigrationDef<TState> = {
       title: string;
       filters: NonEmptyArchiveCondition<TState>;
       effects: IEffectDef[];
       icon?: string;
       description?: string;
       stageName?: string;
-      form?: IFormDef;
     };
-
-    /** Emits a normal IActionDef, plus: */
-    // isMigration: true
-    // migrationFilters: filters
     ```
+
+    There is no `key`, no `form`, no `hidden` and no `isMigration`: the key is the one
+    you register it under, and the rest is filled in for you.
   </Tab>
 </Tabs>
 
@@ -175,24 +164,32 @@ The effect body contains **only** the transformation. No bookkeeping.
   records that the migration considered this trace and found nothing to do.
 </Warning>
 
-## 2. Register it in `actions`
+## 2. Register it in `migrations`
 
-Exactly like any other action:
+In the workflow's `config`, beside `actions` — **not inside it**:
 
-```ts actions/index.ts
+```ts pastaLaVista/index.ts
 import { migrateDateToIso } from './migrations/migrateDateToIso';
 
-export const pastaLaVistaActions = {
-  placeOrder,
-  serveOrder,
-  migrateDateToIso
-} as const satisfies IWorkflowConfigDef['actions'];
+export const pastaLaVista: BetterWorkflowDef<...> = {
+  config: {
+    actions: { ...pastaLaVistaActions },
+    migrations: { migrateDateToIso },
+    // ...
+  }
+};
 ```
 
+**The key you use here is the migration's identity.** It is what an administrator
+types to run it, and the key under which each migrated trace is stamped — so treat it
+as permanent.
+
 <Note>
-  If your project builds `initActions` by mapping over every action, you do **not**
-  need to filter migrations out — config assembly removes them for you. A migration is
-  never offered to a user because it is never in anyone's next actions.
+  Keeping migrations out of `actions` is deliberate. It means a grant built by mapping
+  over every action (`initActions: { kitchenTeam: allActions }`) cannot pick a
+  migration up. Config assembly strips them from `initActions` as well, so you have
+  nothing to remember either way: a migration is never offered to a user because it is
+  never in anyone's next actions.
 </Note>
 
 ## 3. Declare the `traceBot` team
@@ -243,12 +240,13 @@ nothing.
 
 ## Re-running a migration
 
-When a migration is applied to a trace, the platform stamps it:
+When a migration is applied to a trace, the platform stamps it — in its own field on
+the trace's state, beside `data`, never inside it:
 
 ```json
 {
-  "creationDate": "2026-04-07",
-  "__migrationsApplied": {
+  "data": { "creationDate": "2026-04-07" },
+  "migrationsApplied": {
     "migrateDateToIso": "2026-09-04T10:15:16.073Z"
   }
 }
@@ -261,12 +259,15 @@ free:
 - if some traces fail, **re-running retries only those**
 - each migration is stamped under its own key, so migrations never hide each other
 
-You do not write this stamp, and you cannot forget it.
+You do not write this stamp, and you cannot forget it. It is **read-only**: the
+platform recomputes it on every link, so assigning to it from an effect does nothing.
+Keeping it out of `data` is what makes it survive an action that replaces `data`
+wholesale.
 
-Should you ever need to branch on it, it is typed on `state.data`:
+Should you ever need to branch on it, it is typed on the state:
 
 ```ts
-if (state.data.__migrationsApplied?.someOtherMigration) {
+if (state.migrationsApplied?.someOtherMigration) {
   return;
 }
 ```
@@ -277,10 +278,10 @@ if (state.data.__migrationsApplied?.someOtherMigration) {
 
 Once a migration has run anywhere, treat its file as closed. Need a different
 transformation, a corrected filter, or a second pass over the same field? **Add a new
-migration**: a new file, a new `key`, a new entry in `actions`.
+migration**: a new file, a new key, a new entry in `migrations`.
 
 ```
-actions/migrations/
+migrations/
 ├── migrateDateToIso.ts          ← ran in March. Never touched again.
 ├── migrateStatusEnum.ts         ← ran in June. Never touched again.
 └── migrateDateToIsoTimezone.ts  ← the follow-up fix, as its own migration
@@ -300,8 +301,8 @@ the same action key having done two different things, and nothing distinguishes 
 
 <Note>
   Keeping old migration files costs nothing. A migration that has already run selects
-  no traces, so leaving it in `actions` is free — and it is the record of what was done
-  to the data.
+  no traces, so leaving it in `migrations` is free — and it is the record of what was
+  done to the data.
 </Note>
 
 ## How a migration appears to users
@@ -317,10 +318,10 @@ the same action key having done two different things, and nothing distinguishes 
 
 Before asking for a migration to be run:
 
-- [ ] it is a **new file with a new `key`** — no migration that has already run was edited
+- [ ] it is a **new file under a new key** — no migration that has already run was edited
 - [ ] `filters` selects only the traces you mean — check the count with a dry run
 - [ ] the effect **returns early** when there is nothing to change
-- [ ] the migration is registered in `actions`
+- [ ] the migration is registered in `config.migrations`
 - [ ] a `traceBot` team exists, keyed `traceBot`, with `includeSuperUser: true`
 - [ ] the configuration has been deployed
 
