@@ -40,12 +40,15 @@ those, something is wrong.
 import { execJs } from '@stratumn/dsl';
 import type { IMigrationDef } from '@stratumn/trace-generator';
 import type { DslContext } from 'workflows/pastaLaVista/types/dsl.types';
-import type { PastaLaVistaStateData } from '../../types/state.types';
+import type { PastaLaVistaStateData } from '../types/state.types';
 
 function migrateDateToIsoEffect(dsl: DslContext<Record<string, never>>) {
   const { state } = dsl.$variables;
 
+  // biome-ignore lint/performance/useTopLevelRegex: the effect runs in a sandbox, so
+  // hoisting this out of the function would make it undefined at runtime.
   const legacyDate = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+
   const match = legacyDate.exec(state.data.creationDate ?? '');
   if (!match) {
     return;
@@ -163,6 +166,21 @@ The effect body contains **only** the transformation. No bookkeeping.
   A no-op effect still writes a link and still stamps the trace. That is intended: it
   records that the migration considered this trace and found nothing to do.
 </Warning>
+
+<Note>
+  **If assigning to the field is a compile error**, the field is read-only because it
+  reaches your state type only through `initialStateData`, which is declared
+  `as const`. `typeof initialStateData` then types it as a readonly tuple of literals,
+  which no effect can assign to:
+
+  ```
+  Cannot assign to 'labels' because it is a read-only property.
+  ```
+
+  Migrate a field your state type declares explicitly instead, or widen the field in
+  the state type first. Do not reach for a cast — the error is telling you the type
+  says this data never changes, which is worth fixing rather than silencing.
+</Note>
 
 ## 2. Register it in `migrations`
 
