@@ -37,8 +37,39 @@ export const myWorkflow: BetterWorkflowDef = {
   },
   members: {
     // Members associated with the workflow
-  }
+  },
+  settings: {
+    // Optional workflow-level toggles, see Settings below
+  },
 };
+```
+
+## Settings
+
+The optional `settings` object holds workflow-level toggles that don't belong in `config`. All fields are optional; an absent field keeps the previous default behavior.
+
+<ParamField path="key" type="string">
+  Overrides the abbreviation used to prefix this workflow's log lines when `trace-generator` builds/pushes it (e.g. `ALL` instead of an abbreviation auto-derived from the workflow name). Build-time only — has no effect at runtime.
+</ParamField>
+
+<ParamField path="enableNotifications" type="boolean" default="false">
+  When `true`, sends a notification to a group when one of its members has a priority action left to do on a trace (a `todo` action with a non-zero `responsibility`).
+</ParamField>
+
+<ParamField path="disableSubscriptions" type="boolean" default="false">
+  When `true`, disables the "always notify" subscription mechanism for this workflow: users who subscribed to be notified on every action of a given type stop receiving those notifications.
+</ParamField>
+
+<ParamField path="disableStateHistory" type="boolean" default="false">
+  When `true`, disables trace state history for this workflow: new links stop writing a state snapshot, existing snapshots stop being served (both take effect immediately, no reprocessing needed), and the "Show data diff" button is hidden in Trace's UI. Useful for workflows that shouldn't keep this kind of history (e.g. for compliance reasons).
+</ParamField>
+
+### Settings Example
+
+```typescript
+settings: {
+  disableStateHistory: true
+}
 ```
 
 ## PDF & Document Templates
