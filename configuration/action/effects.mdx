@@ -338,6 +338,11 @@ Some functions are declared directly in Trace API, and can be accessed direcly i
       ```
     </Tab>
   </Tabs>
+  <Note>
+    `createLink` is **blocking**: the user waits for it, and a failure fails the current action.
+    To continue the current trace with a step the user should not wait for, use an
+    [automated action](/configuration/action/automated-actions) instead.
+  </Note>
 </Accordion>
 
 <Accordion title="searchTraces" icon="magnifying-glass">
