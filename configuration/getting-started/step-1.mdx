@@ -94,8 +94,8 @@ While developing, you'll be generating in the [staging](https://trace.staging.st
 
 You generate with your own account, thanks to the developer role you asked for above. No admin password needed.
 
-Remove the "REPLACE_ME_AFTER_FIRST_GENERATION" from the `WORKFLOWS` variable in the `.env.local-to-staging` file and put an empty string.
-Your workflow will be named after your git `user.name`, so you can find yours in staging. To use another name, set the `YOUR_NAME` variable in the same file.
+In the `.env.local-to-staging` file, replace `REPLACE_ME_AFTER_FIRST_GENERATION` in the `WORKFLOWS` variable with an empty string: `WORKFLOWS='{"ordersManagement":""}'`.
+Your workflow will be named `⚒️ Orders Management - <your git user.name>`, so you can find yours in staging (set it with `git config --global user.name "Your Name"` if you never have). To use another name, set `YOUR_NAME` in the same file.
 
 To generate the workflow, run the following command at the root of the project:
 
