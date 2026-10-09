@@ -94,8 +94,8 @@ While developing, you'll be generating in the [staging](https://trace.staging.st
 
 You generate with your own account, thanks to the developer role you asked for above. No admin password needed.
 
-Update the `YOUR_NAME` variable in the `.env.local-to-staging` file with your name.
-Also, remove the "REPLACE_ME_AFTER_FIRST_GENERATION" from the `WORKFLOWS` variable and put an empty string.
+Remove the "REPLACE_ME_AFTER_FIRST_GENERATION" from the `WORKFLOWS` variable in the `.env.local-to-staging` file and put an empty string.
+Your workflow will be named after your git `user.name`, so you can find yours in staging. To use another name, set the `YOUR_NAME` variable in the same file.
 
 To generate the workflow, run the following command at the root of the project:
 
