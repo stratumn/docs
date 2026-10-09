@@ -38,6 +38,29 @@ Install yarn if you don't have it already:
 npm install --global yarn
 ```
 
+You'll generate with the Stratumn CLI. It comes from our private npm registry, so
+first add a GitLab personal access token (scope `api`) to your `~/.npmrc`:
+
+```ini
+@stratumn:registry=https://git.sia.partners/api/v4/projects/237/packages/npm/
+//git.sia.partners/api/v4/projects/237/packages/npm/:_authToken=<your token>
+```
+
+Then install it and log in to staging:
+
+```bash
+npm install --global @stratumn/cli
+stratumn auth login --env staging
+```
+
+<Card
+  title="Stratumn CLI - Getting started"
+  icon="terminal"
+  iconType="duotone"
+  horizontal
+  href="https://git.sia.partners/stratumn/platform/stratumn/-/blob/master/published/cli/GUIDE.md"
+/>
+
 ### Setup the project
 
 Clone the repository and open it in ~~Vim~~ your favorite IDE.
@@ -66,28 +89,25 @@ yarn install
 
 While developing, you'll be generating in the [staging](https://trace.staging.stratumn.com/) environment.
 
-To generate the workflow, you'll need to export the `SU_PASSWORD` environment variable in your terminal (or directly in your `.<bash | zsh>rc file`).
-
-```bash
-export SU_PASSWORD=<provided-password>
-```
-
-You can ask the password of the staging environment to your colleagues.
+You generate with your own account, which needs the developer role on staging. Ask a superuser to turn it on for you: it's the "developer role" switch next to your name in your organization's members, on [account.staging.stratumn.com](https://account.staging.stratumn.com).
 
 Update the `YOUR_NAME` variable in the `.env.local-to-staging` file with your name.
 Also, remove the "REPLACE_ME_AFTER_FIRST_GENERATION" from the `WORKFLOWS` variable and put an empty string.
 
-To generate the workflow, run the following command:
+To generate the workflow, run the following command at the root of the project:
 
 ```bash
-yarn generate:local-to-staging
+stratumn generate --env staging
 ```
+
+It shows what it's about to run (the `generate:local-to-staging` script, as your account) and asks you to confirm. Add `--dry-run` to only see that. If it refuses, its message says what to fix; the [CLI guide](https://git.sia.partners/stratumn/platform/stratumn/-/blob/master/published/cli/GUIDE.md#when-it-refuses) lists the usual cases.
 
 <Info>
   When generating for the first time a workflow, you will create a new ID. This
-  ID will be displayed in the console. Copy this ID and use it to update the
-  `WORKFLOWS` variable in the `.env.local-to-staging` file. You'll need to run
-  the generation command again for it to be fully functional.
+  ID will be displayed in the console, after `#` in the "Built workflows"
+  summary. Copy this ID and use it to update the `WORKFLOWS` variable in the
+  `.env.local-to-staging` file. You'll need to run the generation command again
+  for it to be fully functional.
 </Info>
 
 <Check>
