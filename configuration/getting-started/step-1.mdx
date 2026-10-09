@@ -28,7 +28,7 @@ The specifications of the workflow are available bellow.
 
 To generate a [workflow](), you'll need to have the following tools installed:
 
-- [Node.js](https://nodejs.org/en/download/)
+- [Node.js](https://nodejs.org/en/download/) 20.15 or later
 - [npm](https://www.npmjs.com/get-npm)
 - [Git](https://git-scm.com/downloads)
 
@@ -37,6 +37,32 @@ Install yarn if you don't have it already:
 ```bash
 npm install --global yarn
 ```
+
+You'll generate with the Stratumn CLI. It comes from our private npm registry, like the `@stratumn` packages of the exercise, so npm needs a token first. Create a personal access token with the `api` scope on git.sia.partners, under *User settings → Access tokens*, and add it to your `~/.npmrc`:
+
+```ini
+@stratumn:registry=https://git.sia.partners/api/v4/projects/237/packages/npm/
+//git.sia.partners/api/v4/projects/237/packages/npm/:_authToken=<your token>
+```
+
+Then install it and log in to staging:
+
+```bash
+npm install --global @stratumn/cli
+stratumn auth login --env staging
+```
+
+You need version 1.2.1 or later: check with `stratumn --version`.
+
+Once you're logged in, ask your onboarding buddy (or anyone who is a superuser on staging) to give you the developer role. It's the "developer role" switch next to your name in your organization's members, on [account.staging.stratumn.com](https://account.staging.stratumn.com). You can't generate without it, so ask on day one.
+
+<Card
+  title="Stratumn CLI - Getting started"
+  icon="terminal"
+  iconType="duotone"
+  horizontal
+  href="https://git.sia.partners/stratumn/platform/stratumn/-/blob/master/published/cli/GUIDE.md"
+/>
 
 ### Setup the project
 
@@ -66,32 +92,33 @@ yarn install
 
 While developing, you'll be generating in the [staging](https://trace.staging.stratumn.com/) environment.
 
-To generate the workflow, you'll need to export the `SU_PASSWORD` environment variable in your terminal (or directly in your `.<bash | zsh>rc file`).
+You generate with your own account, thanks to the developer role you asked for above. No admin password needed.
+
+In the `.env.local-to-staging` file, replace `REPLACE_ME_AFTER_FIRST_GENERATION` in the `WORKFLOWS` variable with an empty string: `WORKFLOWS='{"ordersManagement":""}'`.
+Your workflow will be named `⚒️ Orders Management - <your git user.name>`, so you can find yours in staging. If git has no `user.name` yet, run `git config --global user.name "Your Name"`. To use another name, set `YOUR_NAME` in the same file.
+
+To generate the workflow, run the following command at the root of the project:
 
 ```bash
-export SU_PASSWORD=<provided-password>
+stratumn generate --env staging
 ```
 
-You can ask the password of the staging environment to your colleagues.
+It asks you to confirm the environment and the account, then runs the project's `generate:local-to-staging` script as you. Add `--dry-run` first to see the script and the `.env` file it will use, without generating.
 
-Update the `YOUR_NAME` variable in the `.env.local-to-staging` file with your name.
-Also, remove the "REPLACE_ME_AFTER_FIRST_GENERATION" from the `WORKFLOWS` variable and put an empty string.
-
-To generate the workflow, run the following command:
-
-```bash
-yarn generate:local-to-staging
-```
+If it refuses, its message says what to fix. The [CLI guide](https://git.sia.partners/stratumn/platform/stratumn/-/blob/master/published/cli/GUIDE.md#when-it-refuses) lists the usual cases.
 
 <Info>
   When generating for the first time a workflow, you will create a new ID. This
-  ID will be displayed in the console. Copy this ID and use it to update the
-  `WORKFLOWS` variable in the `.env.local-to-staging` file. You'll need to run
-  the generation command again for it to be fully functional.
+  ID will be displayed in the console, after `#` in the "Built workflows"
+  summary. Copy this ID and use it to update the `WORKFLOWS` variable in the
+  `.env.local-to-staging` file, for example
+  `WORKFLOWS='{"ordersManagement":"1838"}'`. You'll need to run the generation
+  command again for it to be fully functional. The summary prints no link for
+  this environment: use the URL below.
 </Info>
 
 <Check>
   That's it! You've generated your first workflow 🚀 Check it in the staging
   environment at
-  https://trace.staging.stratumn.com/workflowoverview/your_workflow_id
+  https://trace.staging.stratumn.com/workflow/your_workflow_id
 </Check>
