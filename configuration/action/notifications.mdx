@@ -68,6 +68,8 @@ The action needs to provide the correct data to the `state.notifications`, typed
 
     In configuration, usually 3 are being used: `SCHEMA_FULL`, `SCHEMA_MINIMAL` and `NOTIFY_FOR_ACTION`.
 
+    [Visitor access](/configuration/action/visitor-access) uses two more templates: `magic-link` and `visitor-code`.
+
     Please see [below](/configuration/action/notifications#email-templates) to check all available templates.
     </ParamField>
     <ParamField path="sender?" type="NotificationSender">
@@ -106,6 +108,9 @@ The action needs to provide the correct data to the `state.notifications`, typed
     </ParamField>
     <ParamField path="templateConfig?" type="NotificationTemplateConfig">
     Configuration specific to the selected template.
+    </ParamField>
+    <ParamField path="magicLink?" type="MagicLinkOptions">
+    Sends the receivers a link to perform one action on the trace without a Stratumn account. See [Visitor access](/configuration/action/visitor-access).
     </ParamField>
 
   </Tab>

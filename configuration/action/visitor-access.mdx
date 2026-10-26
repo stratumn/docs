@@ -1,0 +1,192 @@
+---
+title: 'Visitor access'
+description: 'Let a person without a Stratumn account perform one action on one trace, from a link sent by email'
+icon: 'link'
+---
+
+## What is visitor access?
+
+**Visitor access** sends a **magic link** to an external person: a supplier, a client, an auditor.
+They have no Stratumn account. They open the link in their browser and perform **one action on one
+trace**, before the link expires. Nothing else in Stratumn is visible to them.
+
+On the visitor page they see:
+
+- the trace's current `state.data` and `state.meta`,
+- the action's form, if the action has one,
+- the workflow's [info panel](/configuration/ui/widgets), with the trace's groups.
+
+They submit the form once. The link is then used up and cannot be reused.
+
+<Info>
+  Visitor access is available from Stratumn 11.0.
+</Info>
+
+## How to enable it
+
+Add a `magicLink` object to a [notification](/configuration/action/notifications) built in an
+action's [effects](/configuration/action/effects):
+
+```ts
+const { state, formData, meta } = dsl.$variables;
+
+// The visitor acts as the `externals` group: the action must be in its next actions.
+state.nextActions.externals = ['externalReview'];
+
+state.notifications = [
+  ...(state.notifications || []),
+  {
+    channel: 'EMAIL',
+    receiver: { type: 'EMAIL', id: formData.reviewerEmail },
+    title: `Your review is requested on ${meta.traceName}`,
+    sender: { name: 'Stratumn', issuer: 'TRACE', traceId: meta.traceId },
+    template: {
+      type: 'HTML',
+      name: 'magic-link',
+      version: '1.0.0',
+      config: {
+        workflowName: 'All in one',
+        traceName: meta.traceName,
+        content: formData.message
+      }
+    },
+    // @ts-expect-error - magicLink is not declared in the dsl NotificationOptions type yet
+    magicLink: {
+      action: 'externalReview',
+      group: 'externals',
+      expiresIn: 'PT24H',
+      requireOtp: true
+    }
+  }
+];
+```
+
+Trace API issues the links only once the link that requested them is saved. If the action fails or
+is rolled back, no email is sent.
+
+### The `magicLink` options
+
+<ParamField path="action" type="string" required>
+  The key of the action the visitor will perform. It must exist in the active configuration.
+</ParamField>
+
+<ParamField path="group" type="string" required>
+  The label of the group the visitor acts as. It must exist in the workflow, and `action` must be in
+  `state.nextActions[group]` when the visitor submits.
+</ParamField>
+
+<ParamField path="expiresIn" type="string" default="PT24H">
+  How long the link stays valid, as an ISO-8601 duration. Minimum `PT1M`, maximum `P7D`.
+</ParamField>
+
+<ParamField path="requireOtp" type="boolean" default="false">
+  Ask the visitor for a one-time code, emailed when they submit. See
+  [verification code](#verification-code).
+</ParamField>
+
+### Receivers
+
+Only `EMAIL` and `EMAILS` receivers are supported. Each address gets its own link.
+
+Inviting the same address again on the same trace and action **replaces** the previous link: only
+the newest one works.
+
+To restrict the action to the invited address, list it in `state.data.nextActionsConditions` under the
+action key. A link sent to another address is then refused at submission.
+
+```ts
+state.data.nextActionsConditions = {
+  ...state.data.nextActionsConditions,
+  externalReview: [formData.reviewerEmail]
+};
+```
+
+### The `magic-link` template
+
+The `magic-link` email template takes three variables in `template.config`:
+
+| Variable | Description |
+| --- | --- |
+| `workflowName` | Shown in the email header. |
+| `traceName` | Shown in the email header. |
+| `content` | The message to the visitor. HTML is allowed. |
+
+Trace API adds the link itself and its expiry date. The link is never stored by Notification API.
+
+## Verification code
+
+Without a code, whoever holds the link can submit. A forwarded email is enough.
+
+With `requireOtp: true`, the visitor must also prove they can read the invited mailbox:
+
+<Steps>
+  <Step title="The visitor fills the form and clicks Submit">
+    A 6-digit code is emailed to the invited address (template `visitor-code`).
+  </Step>
+  <Step title="The visitor types the code">
+    The submission only goes through with the right code.
+  </Step>
+</Steps>
+
+| Rule | Value |
+| --- | --- |
+| Code validity | 10 minutes |
+| Attempts per code | 5 |
+| Delay before asking for a new code | 30 seconds |
+| Codes per link | 5. After that, the visitor can still use the last code until it expires, then needs a new invitation. |
+
+Only a hash of the code is stored, and the code never appears in the logs. If the form is refused,
+the code stays valid: the visitor fixes the form and submits again without a new email.
+
+## Who performed the action?
+
+The visitor has no account and no signing key. Their link is **signed by the Trace Bot**, and
+carries who acted in its metadata:
+
+```ts
+meta.visitor = {
+  grantId: '…',
+  email: 'jane@supplier.com',
+  // Only with requireOtp
+  verification: { method: 'email-otp', verifiedAt: '2026-10-22T13:18:08.000Z' }
+};
+```
+
+The Trace Bot signature covers this metadata, and so does the link hash that is anchored on the
+blockchain. In the trace inspector, the link shows as
+`jane@supplier.com · via visitor link`, or `… · code verified` with a verification code.
+
+<Note>
+  This proves that the holder of the link sent to that address acted, at that time. With
+  `requireOtp`, it also proves that they could read that mailbox. It is not a qualified electronic
+  signature.
+</Note>
+
+## Rules and limits
+
+<AccordionGroup>
+  <Accordion title="What the visitor can read">
+    The trace's whole `state.data` and `state.meta` when they open the link. If the form uses
+    `enumGroupLabel`, member emails are visible.
+  </Accordion>
+  <Accordion title="Unsupported actions and effects">
+    Actions using `eSignature`, `dataImporter` or `dataEditor` are refused when the link is issued.
+    Effects that need the user's token, such as `createJob`, `createScheduler` or `stopScheduler`,
+    do not work for visitors.
+  </Accordion>
+  <Accordion title="File uploads">
+    Visitors can upload files of up to 100 MB in the form.
+  </Accordion>
+  <Accordion title="Expiry">
+    The expiry is fixed when the link is issued and cannot be extended. Send a new invitation instead.
+  </Accordion>
+  <Accordion title="When the trace moves on">
+    If the action is no longer in the group's next actions, or the trace is archived, the visitor sees
+    that the request is no longer needed.
+  </Accordion>
+</AccordionGroup>
+
+<Warning>
+  `magicLink` is not declared in the `dsl` package's `NotificationOptions` type yet. Keep the
+  `// @ts-expect-error` line above it until the type is updated.
+</Warning>
