@@ -50,7 +50,6 @@ state.notifications = [
         content: formData.message
       }
     },
-    // @ts-expect-error - magicLink is not declared in the dsl NotificationOptions type yet
     magicLink: {
       action: 'externalReview',
       group: 'externals',
@@ -186,7 +185,8 @@ blockchain. In the trace inspector, the link shows as
   </Accordion>
 </AccordionGroup>
 
-<Warning>
-  `magicLink` is not declared in the `dsl` package's `NotificationOptions` type yet. Keep the
-  `// @ts-expect-error` line above it until the type is updated.
-</Warning>
+<Note>
+  `magicLink` is typed from `@stratumn/dsl` 1.27.0: in `state.notifications`, `action` and `group` are
+  checked against your workflow's action keys and group labels. A helper that builds the notification
+  must be typed `NotificationOptions<GroupLabel, ActionLabel>` to set a `magicLink`.
+</Note>
