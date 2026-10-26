@@ -25,6 +25,14 @@ To send a notification, the data might contains variables derived from the `stat
 
 The action needs to provide the correct data to the `state.notifications`, typed as `NotificationOptions` inside the `dsl` package :
 
+<Note>
+  From `@stratumn/dsl` 1.27.0, `channel`, `receiver.type`, `sender.issuer`, `template.type` and
+  `template.name` also accept their plain string values (`'EMAIL'`, `'TRACE'`, `'HTML'`,
+  `'schema-full'`…). The `as NotificationChannel.EMAIL` casts in the examples below still work but are
+  no longer needed. If your configuration silenced these fields with `// @ts-expect-error`, remove those
+  lines when you upgrade: TypeScript reports them as unused.
+</Note>
+
 ### Notification Options
 
 <Tabs>
@@ -63,12 +71,13 @@ The action needs to provide the correct data to the `state.notifications`, typed
         EMPTY: "empty";
         NOTIFY_FOR_ACTION: "notify-for-action";
         OFFLINE: "offline";
+        MAGIC_LINK: "magic-link"; // from @stratumn/dsl 1.27.0
       };
       ```
 
     In configuration, usually 3 are being used: `SCHEMA_FULL`, `SCHEMA_MINIMAL` and `NOTIFY_FOR_ACTION`.
 
-    [Visitor access](/configuration/action/visitor-access) uses two more templates: `magic-link` and `visitor-code`.
+    [Visitor access](/configuration/action/visitor-access) uses `magic-link`, and Trace API sends the `visitor-code` template itself.
 
     Please see [below](/configuration/action/notifications#email-templates) to check all available templates.
     </ParamField>
@@ -109,8 +118,8 @@ The action needs to provide the correct data to the `state.notifications`, typed
     <ParamField path="templateConfig?" type="NotificationTemplateConfig">
     Configuration specific to the selected template.
     </ParamField>
-    <ParamField path="magicLink?" type="MagicLinkOptions">
-    Sends the receivers a link to perform one action on the trace without a Stratumn account. See [Visitor access](/configuration/action/visitor-access).
+    <ParamField path="magicLink?" type="MagicLinkOptions<GroupLabel, ActionLabel>">
+    Sends the receivers a link to perform one action on the trace without a Stratumn account. `action` and `group` are checked against your workflow's action keys and group labels. See [Visitor access](/configuration/action/visitor-access).
     </ParamField>
 
   </Tab>
